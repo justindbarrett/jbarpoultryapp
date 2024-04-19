@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">J-Bar Poultry</string>
+    <string name="title_activity_main">J-Bar Poultry</string>
+    <string name="package_name">io.jbarpoultry.app</string>
+    <string name="custom_url_scheme">io.jbarpoultry.app</string>
+</resources>
