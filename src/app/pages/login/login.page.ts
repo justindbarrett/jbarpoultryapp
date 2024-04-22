@@ -5,7 +5,7 @@ import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonCardContent,
 import { AuthenticationService } from 'src/app/authentication.service';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFireModule } from '@angular/fire/compat';
-import { NavController } from '@ionic/angular';
+import { NavController, AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-login',
@@ -22,7 +22,8 @@ export class LoginPage implements OnInit {
 
   constructor(
     private authService: AuthenticationService,
-    private navCtrl: NavController) { }
+    private navCtrl: NavController,
+    private alertCtrl: AlertController) { }
 
   ngOnInit() {
   }
@@ -31,8 +32,11 @@ export class LoginPage implements OnInit {
     console.log(`login`);
     console.log(`Email: ${this.email}`);
     console.log(`PW: ${this.password}`);
-    this.authService.logInUser(this.email, this.password);
-
+    this.authService.logInUser(this.email, this.password)
+    .then(auth => {
+         this.navCtrl.navigateForward("folder/inbox");
+    })
+    .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); })
   }
 
   gotoSignup() {
@@ -43,6 +47,16 @@ export class LoginPage implements OnInit {
   gotoForgotPassword() {
     console.log(`forgot password`);
     this.navCtrl.navigateForward('forgotpassword');
+  }
+
+  async presentAlert(message: string) {
+    const alert = await this.alertCtrl.create({
+      header: 'Failed Sign In Attempt',
+      message: message,
+      buttons: ['Try Again'],
+    });
+
+    await alert.present();
   }
 
 }

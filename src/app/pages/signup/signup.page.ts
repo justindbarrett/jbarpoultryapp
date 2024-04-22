@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem } from '@ionic/angular/standalone';
 import { AuthenticationService } from 'src/app/authentication.service';
-import { NavController } from '@ionic/angular';
+import { NavController, AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-signup',
@@ -20,7 +20,8 @@ export class SignupPage implements OnInit {
 
   constructor(
     private authService: AuthenticationService,
-    private navCtrl: NavController
+    private navCtrl: NavController,
+    private alertCtrl: AlertController
   ) { }
 
   ngOnInit() {
@@ -28,12 +29,26 @@ export class SignupPage implements OnInit {
 
   signUp() {
     console.log('Sign Up');
-    this.authService.registerUser(this.email, this.password);
+    this.authService.registerUser(this.email, this.password)
+    .then(auth => {
+         this.navCtrl.navigateForward("login");
+    })
+    .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); })
   }
 
   cancel() {
     console.log(`Nav Back`);
     this.navCtrl.navigateBack('login');
+  }
+
+  async presentAlert(message: string) {
+    const alert = await this.alertCtrl.create({
+      header: 'Failed Sign Up Attempt',
+      message: message,
+      buttons: ['Try Again'],
+    });
+
+    await alert.present();
   }
 
 }
