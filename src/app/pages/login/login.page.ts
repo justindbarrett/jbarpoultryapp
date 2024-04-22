@@ -25,4 +25,8 @@ export class LoginPage implements OnInit {
     console.log(`login`);
   }
 
+  gotoSignup() {
+    console.log(`signup`);
+  }
+
 }

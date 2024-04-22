@@ -17,7 +17,13 @@
             <ion-item lines="none" color="light" class="rowStyle">
               <ion-input type="password" placeholder="your password" required [(ngModel)]="password"></ion-input>
             </ion-item>
-            <ion-button (click)="login()" shape="round" color="primary"> Sign in </ion-button>
+            <ion-item lines="none" class="forgotPassword">
+              <a (click)="gotoSignup()">forgot password?</a>
+            </ion-item>
+            <ion-button (click)="login()" shape="round" color="primary" class="signInButton"> Sign in </ion-button>
+            <ion-item lines="none" class="signUpButton">
+              <a (click)="gotoSignup()">DON'T HAVE AN ACCOUNT? SIGN UP</a>
+            </ion-item>
           </ion-card-content>
         </ion-col>
       </ion-row>

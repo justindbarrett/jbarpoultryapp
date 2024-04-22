@@ -5,7 +5,7 @@
     height: 100%;
   
     ion-card {
-      max-width: 600px;
+      max-width: 780px;
       .ion-blue-bkg {
         background-color: #4d814a;
         display: flex;
@@ -26,7 +26,7 @@
     }
   }
   
-@media screen and (max-width: 576px) {
+@media screen and (max-width: 780px) {
     .card-container {
         ion-card {
         .ion-blue-bkg {
@@ -41,7 +41,27 @@
 
 .rowStyle {
     left: 5%;
-    width: 80%;
+    width: 90%;
     border-radius: 30px;
     margin-top: 10px;
-  }
+    //max-width: 350px;
+}
+
+.signInButton {
+    margin-top: 15px;
+    margin-left: 5%;
+    height: 40px;
+}
+  
+.signUpButton {
+    margin-top: 12px;
+    left: 3%;
+    font-size: small;
+}
+
+.forgotPassword {
+    font-size: small;
+    float: right;
+    right: 5%;
+    margin-top: 5px;
+}
