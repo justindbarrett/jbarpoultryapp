@@ -11,6 +11,7 @@ import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, indexedDBLocalPersistence, initializeAuth, provideAuth } from '@angular/fire/auth';
 
 import { Capacitor } from '@capacitor/core';
+import { AngularFireModule } from '@angular/fire/compat';
 
 if (environment.production) {
   enableProdMode();
@@ -26,6 +27,7 @@ bootstrapApplication(AppComponent, {
         initializeApp(environment.firebaseConfig)
       )
     ),
+    importProvidersFrom(AngularFireModule.initializeApp(environment.firebaseConfig)),
     importProvidersFrom(
       provideAuth(() => {
         if (Capacitor.isNativePlatform()) {

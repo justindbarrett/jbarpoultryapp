@@ -2,28 +2,28 @@
   <div class="card-container">
     <ion-card>
       <ion-row>
-        <ion-col size-md="4" size="12" class="ion-padding ion-blue-bkg">
+        <ion-col size-md="5" size="12" class="ion-padding ion-blue-bkg">
           <img
             src="./../../../assets/icon/jbarpoultryiconroundtransparent.png"
             alt="Ionic logo"
             loading="lazy"
           />
         </ion-col>
-        <ion-col size-md="8" size="12" class="welcome">
+        <ion-col size-md="7" size="12" class="welcome">
           <ion-card-content>
-            <ion-card-header> Welcome! Please sign in to your J-Bar Poultry account! </ion-card-header>
+            <ion-card-header> Please enter the information necessary to create your J-Bar Poultry account! </ion-card-header>
+            <ion-item lines="none" color="light" class="rowStyle">
+              <ion-input type="text" placeholder="your name" required ngDefaultControl [(ngModel)]="name"></ion-input>
+            </ion-item>
             <ion-item lines="none" color="light" class="rowStyle">
               <ion-input type="text" placeholder="your email" required ngDefaultControl [(ngModel)]="email"></ion-input>
             </ion-item>
             <ion-item lines="none" color="light" class="rowStyle">
               <ion-input type="password" placeholder="your password" required ngDefaultControl [(ngModel)]="password"></ion-input>
             </ion-item>
-            <ion-item lines="none" class="forgotPassword">
-              <a style="text-decoration:none" href="javascript:;" (click)="gotoForgotPassword()">forgot password?</a>
-            </ion-item>
-            <ion-button (click)="login()" shape="round" color="primary" class="signInButton"> Sign in </ion-button>
+            <ion-button (click)="signUp()" shape="round" color="primary" class="signInButton"> Sign up </ion-button>
             <ion-item lines="none" class="signUpButton">
-              <a style="text-decoration:none" href="javascript:;" (click)="gotoSignup()">DON'T HAVE AN ACCOUNT? SIGN UP</a>
+              <a style="text-decoration:none" href="javascript:;" (click)="cancel()"> &#60; CANCEL </a>
             </ion-item>
           </ion-card-content>
         </ion-col>

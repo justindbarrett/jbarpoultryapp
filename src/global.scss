@@ -43,7 +43,7 @@
 	--ion-color-primary-contrast-rgb: 255,255,255;
 	--ion-color-primary-shade: #447241;
 	--ion-color-primary-tint: #5f8e5c;
-    
+
     --ion-color-secondary: #006600;
     --ion-color-secondary-rgb: 0, 102, 0;
     --ion-color-secondary-contrast: #ffffff;
@@ -51,3 +51,7 @@
     --ion-color-secondary-shade: #005a00;
     --ion-color-secondary-tint: #1a751a;
   }
+
+  ion-item {
+    --min-height: 16px;
+}
