@@ -13,6 +13,8 @@ import { getAuth, indexedDBLocalPersistence, initializeAuth, provideAuth } from 
 import { Capacitor } from '@capacitor/core';
 import { AngularFireModule } from '@angular/fire/compat';
 
+import { IonicModule } from '@ionic/angular';
+
 if (environment.production) {
   enableProdMode();
 }
@@ -22,6 +24,7 @@ bootstrapApplication(AppComponent, {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
     provideRouter(routes),
+    importProvidersFrom(IonicModule.forRoot({innerHTMLTemplatesEnabled: true})),
     importProvidersFrom(
       provideFirebaseApp(() =>
         initializeApp(environment.firebaseConfig)

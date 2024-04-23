@@ -19,6 +19,7 @@ export class LoginPage implements OnInit {
 
   public email: string = "";
   public password: string = "";
+  private disableSignInButton = false;
 
   constructor(
     private authService: AuthenticationService,
@@ -29,6 +30,7 @@ export class LoginPage implements OnInit {
   }
 
   login() {
+    this.disableSignInButton = true;
     console.log(`login`);
     console.log(`Email: ${this.email}`);
     console.log(`PW: ${this.password}`);
@@ -49,6 +51,10 @@ export class LoginPage implements OnInit {
     this.navCtrl.navigateForward('forgotpassword');
   }
 
+  disableSignIn(): boolean {
+    return !(this.email && this.password) || this.disableSignInButton;
+  }
+
   async presentAlert(message: string) {
     const alert = await this.alertCtrl.create({
       header: 'Failed Sign In Attempt',
@@ -57,6 +63,10 @@ export class LoginPage implements OnInit {
     });
 
     await alert.present();
+
+    await alert.onDidDismiss().then(() => {
+      this.disableSignInButton = false;
+    });
   }
 
 }

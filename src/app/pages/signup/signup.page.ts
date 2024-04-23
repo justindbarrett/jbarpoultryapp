@@ -17,6 +17,7 @@ export class SignupPage implements OnInit {
   public name: string = "";
   public email: string = "";
   public password: string = "";
+  private disableSignUpButton = false;
 
   constructor(
     private authService: AuthenticationService,
@@ -28,6 +29,7 @@ export class SignupPage implements OnInit {
   }
 
   signUp() {
+    this.disableSignUpButton = true;
     console.log('Sign Up');
     this.authService.registerUser(this.email, this.password)
     .then(auth => {
@@ -41,6 +43,10 @@ export class SignupPage implements OnInit {
     this.navCtrl.navigateBack('login');
   }
 
+  disableSignUp(): boolean {
+    return !(this.name && this.email && this.password) || this.disableSignUpButton;
+  }
+
   async presentAlert(message: string) {
     const alert = await this.alertCtrl.create({
       header: 'Failed Sign Up Attempt',
@@ -49,6 +55,10 @@ export class SignupPage implements OnInit {
     });
 
     await alert.present();
+
+    await alert.onDidDismiss().then(() => {
+      this.disableSignUpButton = false;
+    });
   }
 
 }
