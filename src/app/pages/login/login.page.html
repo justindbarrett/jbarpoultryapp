@@ -16,7 +16,8 @@
               <ion-input type="text" placeholder="your email" required ngDefaultControl [(ngModel)]="email"></ion-input>
             </ion-item>
             <ion-item lines="none" color="light" class="rowStyle">
-              <ion-input type="password" placeholder="your password" required ngDefaultControl [(ngModel)]="password"></ion-input>
+              <ion-input [type]="passwordType" placeholder="your password" required ngDefaultControl [(ngModel)]="password"></ion-input>
+              <ion-icon slot="end" [name]="showHideIcon" ngClass="security-icon" (click)="showHidePassword()"></ion-icon>
             </ion-item>
             <ion-item lines="none" class="forgotPassword">
               <a style="text-decoration:none" href="javascript:;" (click)="gotoForgotPassword()">forgot password?</a>

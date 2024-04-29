@@ -1,30 +1,37 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem, IonIcon, IonInput } from '@ionic/angular/standalone';
 import { AuthenticationService } from 'src/app/authentication.service';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFireModule } from '@angular/fire/compat';
 import { NavController, AlertController } from '@ionic/angular';
+import { eyeOffOutline, eyeOutline } from 'ionicons/icons';
+import { addIcons } from 'ionicons';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [ IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem ],
-  providers: [ AuthenticationService, AngularFireAuth, AngularFireModule]
+  imports: [ IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem, IonIcon, IonInput],
+  providers: [ AuthenticationService, AngularFireAuth, AngularFireModule],
 })
 export class LoginPage implements OnInit {
 
   public email: string = "";
   public password: string = "";
+  public passwordType: string = "password";
+  public showHideIcon: string = "eye-outline";
+  private isPasswordVisible: boolean = false;
   private disableSignInButton = false;
 
   constructor(
     private authService: AuthenticationService,
     private navCtrl: NavController,
-    private alertCtrl: AlertController) { }
+    private alertCtrl: AlertController) {
+      addIcons({ eyeOutline, eyeOffOutline });
+    }
 
   ngOnInit() {
   }
@@ -67,6 +74,20 @@ export class LoginPage implements OnInit {
     await alert.onDidDismiss().then(() => {
       this.disableSignInButton = false;
     });
+  }
+
+  showHidePassword() {
+    console.log('Show Hide Pass');
+    if (this.isPasswordVisible) {
+      this.passwordType = "password";
+      this.showHideIcon = "eye-outline";
+      this.isPasswordVisible = false;
+    }
+    else {
+      this.passwordType = "text";
+      this.showHideIcon = "eye-off-outline";
+      this.isPasswordVisible = true;
+    }
   }
 
 }

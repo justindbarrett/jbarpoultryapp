@@ -1,16 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem, IonIcon, IonInput } from '@ionic/angular/standalone';
 import { AuthenticationService } from 'src/app/authentication.service';
 import { NavController, AlertController } from '@ionic/angular';
+import { eyeOffOutline, eyeOutline } from 'ionicons/icons';
+import { addIcons } from 'ionicons';
 
 @Component({
   selector: 'app-signup',
   templateUrl: './signup.page.html',
   styleUrls: ['./signup.page.scss'],
   standalone: true,
-  imports: [ IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem ],
+  imports: [ IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem, IonIcon, IonInput ],
 })
 export class SignupPage implements OnInit {
 
@@ -18,6 +20,12 @@ export class SignupPage implements OnInit {
   public email: string = "";
   public password: string = "";
   public creationCode: string = "";
+  public passwordType: string = "password";
+  public codeType: string = "password";
+  public showHideIconPassword: string = "eye-outline";
+  public showHideIconCode: string = "eye-outline";
+  private isPasswordVisible: boolean = false;
+  private isCodeVisible: boolean = false;
   private disableSignUpButton = false;
   private remainingAttempts = 5;
 
@@ -25,7 +33,9 @@ export class SignupPage implements OnInit {
     private authService: AuthenticationService,
     private navCtrl: NavController,
     private alertCtrl: AlertController
-  ) { }
+  ) {
+    addIcons({ eyeOutline, eyeOffOutline });
+  }
 
   ngOnInit() {
   }
@@ -74,6 +84,34 @@ export class SignupPage implements OnInit {
     await alert.onDidDismiss().then(() => {
       this.disableSignUpButton = false;
     });
+  }
+
+  showHidePassword() {
+    console.log('Show Hide Pass');
+    if (this.isPasswordVisible) {
+      this.passwordType = "password";
+      this.showHideIconPassword = "eye-outline";
+      this.isPasswordVisible = false;
+    }
+    else {
+      this.passwordType = "text";
+      this.showHideIconPassword = "eye-off-outline";
+      this.isPasswordVisible = true;
+    }
+  }
+
+  showHideCode() {
+    console.log('Show Hide Code');
+    if (this.isCodeVisible) {
+      this.codeType = "password";
+      this.showHideIconCode = "eye-outline";
+      this.isCodeVisible = false;
+    }
+    else {
+      this.codeType = "text";
+      this.showHideIconCode = "eye-off-outline";
+      this.isCodeVisible = true;
+    }
   }
 
 }
