@@ -21,6 +21,9 @@
             <ion-item lines="none" color="light" class="rowStyle">
               <ion-input type="password" placeholder="your password" required ngDefaultControl [(ngModel)]="password"></ion-input>
             </ion-item>
+            <ion-item lines="none" color="light" class="rowStyle">
+              <ion-input type="password" placeholder="account creation code" required ngDefaultControl [(ngModel)]="creationCode"></ion-input>
+            </ion-item>
             <ion-button [disabled]="disableSignUp()" (click)="signUp()" shape="round" color="primary" class="signInButton"> Sign up </ion-button>
             <ion-item lines="none" class="signUpButton">
               <a style="text-decoration:none" href="javascript:;" (click)="cancel()"> &#60; CANCEL </a>
