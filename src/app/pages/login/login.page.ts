@@ -8,6 +8,7 @@ import { AngularFireModule } from '@angular/fire/compat';
 import { NavController, AlertController } from '@ionic/angular';
 import { eyeOffOutline, eyeOutline } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
+import { IdentityService } from 'src/app/identity.service';
 
 @Component({
   selector: 'app-login',
@@ -24,16 +25,32 @@ export class LoginPage implements OnInit {
   public passwordType: string = "password";
   public showHideIcon: string = "eye-outline";
   private isPasswordVisible: boolean = false;
-  private disableSignInButton = false;
+  private disableSignInButton: boolean = false;
 
   constructor(
     private authService: AuthenticationService,
     private navCtrl: NavController,
-    private alertCtrl: AlertController) {
+    private alertCtrl: AlertController,
+    private identityService: IdentityService
+  ) {
       addIcons({ eyeOutline, eyeOffOutline });
-    }
+  }
 
   ngOnInit() {
+  }
+
+  ionViewWillEnter() {
+    this.email = "";
+    this.password= "";
+    this.passwordType = "password";
+    this.showHideIcon = "eye-outline";
+    this.isPasswordVisible = false;
+    this.disableSignInButton = false;
+  }
+
+  ionViewDidLeave() {
+    this.email = "";
+    this.password = "";
   }
 
   login() {
@@ -43,7 +60,10 @@ export class LoginPage implements OnInit {
     console.log(`PW: ${this.password}`);
     this.authService.logInUser(this.email, this.password)
     .then(auth => {
-         this.navCtrl.navigateForward("folder/inbox");
+      console.log(`User Auth: ${JSON.stringify(auth)}`);
+      const userDetails = { displayName: auth.user?.displayName || "", emailAddress: auth.user?.email || "" };
+      this.identityService.setUserDetails(userDetails);
+      this.navCtrl.navigateForward("folder/inbox");
     })
     .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); })
   }
