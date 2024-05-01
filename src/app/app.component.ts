@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { calendarOutline, calendarSharp, cubeOutline, cubeSharp, peopleOutline, peopleSharp } from 'ionicons/icons';
@@ -18,8 +18,13 @@ export class AppComponent {
     { title: 'Schedule', url: '/folder/schedule', icon: 'calendar' },
     { title: 'Lots', url: '/folder/lots', icon: 'cube' },
   ];
-  public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
-  constructor() {
+  constructor(
+    private router: Router
+  ) {
     addIcons({ peopleOutline, peopleSharp, calendarOutline, calendarSharp, cubeOutline, cubeSharp });
   }
-}
+
+  hideMenu() {
+    return !(this.router.url === "/login");
+  }
+ }
