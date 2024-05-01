@@ -41,25 +41,27 @@ export class SignupPage implements OnInit {
   }
 
   signUp() {
-    this.disableSignUpButton = true;
-    console.log('Sign Up');
-
-    // handle remaining attempts and disabling for some time use IP address/device ID?
-    if (this.remainingAttempts <= 0) {
-      return;
-    }
-
-    // TODO: store this code as a 10 digit secret
-    if (this.creationCode == "1234567890") {
-      this.authService.registerUser(this.email, this.password)
-      .then(auth => {
-           this.navCtrl.navigateForward("login");
-      })
-      .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); })
-    }
-    else {
-      this.remainingAttempts = this.remainingAttempts - 1;
-      this.presentAlert(`Invalid account creation code. ${this.remainingAttempts} attempts remaining.`);
+    if (!this.disableSignUp()) {
+      this.disableSignUpButton = true;
+      console.log('Sign Up');
+  
+      // handle remaining attempts and disabling for some time use IP address/device ID?
+      if (this.remainingAttempts <= 0) {
+        return;
+      }
+  
+      // TODO: store this code as a 10 digit secret
+      if (this.creationCode == "1234567890") {
+        this.authService.registerUser(this.email, this.password)
+        .then(auth => {
+             this.navCtrl.navigateForward("login");
+        })
+        .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); })
+      }
+      else {
+        this.remainingAttempts = this.remainingAttempts - 1;
+        this.presentAlert(`Invalid account creation code. ${this.remainingAttempts} attempts remaining.`);
+      }
     }
   }
 

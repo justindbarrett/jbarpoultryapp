@@ -54,18 +54,20 @@ export class LoginPage implements OnInit {
   }
 
   login() {
-    this.disableSignInButton = true;
-    console.log(`login`);
-    console.log(`Email: ${this.email}`);
-    console.log(`PW: ${this.password}`);
-    this.authService.logInUser(this.email, this.password)
-    .then(auth => {
-      console.log(`User Auth: ${JSON.stringify(auth)}`);
-      const userDetails = { displayName: auth.user?.displayName || "", emailAddress: auth.user?.email || "" };
-      this.identityService.setUserDetails(userDetails);
-      this.navCtrl.navigateForward("folder/inbox");
-    })
-    .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); })
+    if (!this.disableSignIn()) {
+      this.disableSignInButton = true;
+      console.log(`login`);
+      console.log(`Email: ${this.email}`);
+      console.log(`PW: ${this.password}`);
+      this.authService.logInUser(this.email, this.password)
+      .then(auth => {
+        console.log(`User Auth: ${JSON.stringify(auth)}`);
+        const userDetails = { displayName: auth.user?.displayName || "", emailAddress: auth.user?.email || "" };
+        this.identityService.setUserDetails(userDetails);
+        this.navCtrl.navigateForward("folder/inbox");
+      })
+      .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); })
+    }
   }
 
   gotoSignup() {

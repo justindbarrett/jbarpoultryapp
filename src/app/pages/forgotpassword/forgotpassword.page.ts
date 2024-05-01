@@ -27,13 +27,15 @@ export class ForgotpasswordPage implements OnInit {
   }
 
   sendReset() {
-    this.disableSendResetButton = true;
-    console.log('send reset');
-    this.authService.resetPassword(this.email)
-    .then(auth => {
-      this.navCtrl.navigateForward("login");
-    })
-    .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); })
+    if (!this.disableSendReset()) {
+      this.disableSendResetButton = true;
+      console.log('send reset');
+      this.authService.resetPassword(this.email)
+      .then(auth => {
+        this.navCtrl.navigateForward("login");
+      })
+      .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); })
+    }
   }
 
   cancel() {

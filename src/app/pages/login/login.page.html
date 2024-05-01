@@ -11,20 +11,58 @@
         </ion-col>
         <ion-col size-md="7" size="12" class="welcome">
           <ion-card-content>
-            <ion-card-header> Welcome! Please sign in to your J-Bar Poultry account! </ion-card-header>
+            <ion-card-header>
+              Welcome! Please sign in to your J-Bar Poultry account!
+            </ion-card-header>
             <ion-item lines="none" color="light" class="rowStyle">
-              <ion-input type="text" placeholder="your email" required ngDefaultControl [(ngModel)]="email"></ion-input>
+              <ion-input
+                type="text"
+                (keyup.enter)="login()"
+                placeholder="your email"
+                required
+                ngDefaultControl
+                [(ngModel)]="email"
+              ></ion-input>
             </ion-item>
             <ion-item lines="none" color="light" class="rowStyle">
-              <ion-input [type]="passwordType" placeholder="your password" required ngDefaultControl [(ngModel)]="password"></ion-input>
-              <ion-icon slot="end" [name]="showHideIcon" ngClass="security-icon" (click)="showHidePassword()"></ion-icon>
+              <ion-input
+                [type]="passwordType"
+                (keyup.enter)="login()"
+                placeholder="your password"
+                required
+                ngDefaultControl
+                [(ngModel)]="password"
+              ></ion-input>
+              <ion-icon
+                slot="end"
+                [name]="showHideIcon"
+                ngClass="security-icon"
+                (click)="showHidePassword()"
+              ></ion-icon>
             </ion-item>
             <ion-item lines="none" class="forgotPassword">
-              <a style="text-decoration:none" href="javascript:;" (click)="gotoForgotPassword()">forgot password?</a>
+              <a
+                style="text-decoration: none"
+                href="javascript:;"
+                (click)="gotoForgotPassword()"
+                >forgot password?</a
+              >
             </ion-item>
-            <ion-button [disabled]="disableSignIn()" (click)="login()" shape="round" color="primary" class="signInButton">Sign in</ion-button>
+            <ion-button
+              [disabled]="disableSignIn()"
+              (click)="login()"
+              shape="round"
+              color="primary"
+              class="signInButton"
+              >Sign in</ion-button
+            >
             <ion-item lines="none" class="signUpButton">
-              <a style="text-decoration:none" href="javascript:;" (click)="gotoSignup()">DON'T HAVE AN ACCOUNT? SIGN UP</a>
+              <a
+                style="text-decoration: none"
+                href="javascript:;"
+                (click)="gotoSignup()"
+                >DON'T HAVE AN ACCOUNT? SIGN UP</a
+              >
             </ion-item>
           </ion-card-content>
         </ion-col>
