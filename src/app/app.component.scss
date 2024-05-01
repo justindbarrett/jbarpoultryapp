@@ -117,3 +117,24 @@ ion-menu ion-content {
   ion-item.selected {
     --color: var(--ion-color-primary);
   }
+
+  .center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .userDisplay {
+    vertical-align: middle;
+    font-size: 18px;
+    margin-left: 20px;
+    float: right;
+    color: var(--ion-color-medium-shade);
+  }
+
+  .logoutButton {
+    position: absolute;
+    left: 25px;
+    bottom: 25px;
+  }
+  

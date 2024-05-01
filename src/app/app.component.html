@@ -2,9 +2,27 @@
   <ion-split-pane contentId="main-content" *ngIf="hideMenu()">
     <ion-menu contentId="main-content" type="overlay">
       <ion-content>
+        <img
+          src="./../../../assets/icon/jbarpoultryiconroundtransparent.png"
+          alt="JBar logo"
+          loading="eager"
+          width="150px"
+          height="150px"
+          class="center"
+        />
         <ion-list id="feature-list">
-          <ion-list-header>Josiah Barrett</ion-list-header>
-          <ion-note>hi&#64;ionicframework.com</ion-note>
+          <ion-item>
+            <span class="userDisplay"
+              >Welcome,<br />{{ userDisplayName }}!</span
+            >
+            <ion-icon
+              aria-hidden="true"
+              slot="end"
+              [ios]="'settings-outline'"
+              [md]="'settings-sharp'"
+              (click)="gotoSettings()"
+            ></ion-icon>
+          </ion-item>
 
           <ion-menu-toggle
             auto-hide="false"
@@ -27,6 +45,7 @@
             </ion-item>
           </ion-menu-toggle>
         </ion-list>
+        <ion-button class="logoutButton" (click)="logOut()">Log Out</ion-button>
       </ion-content>
     </ion-menu>
     <ion-router-outlet id="main-content"></ion-router-outlet>
