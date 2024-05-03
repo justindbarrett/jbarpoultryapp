@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { IonApp, IonSplitPane, IonButton, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { calendarOutline, calendarSharp, cubeOutline, cubeSharp, peopleOutline, peopleSharp } from 'ionicons/icons';
+import { calendarOutline, calendarSharp, cubeOutline, cubeSharp, peopleOutline, peopleSharp, settingsOutline, settingsSharp } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 import { IdentityService } from './identity.service';
 import { AuthenticationService } from './authentication.service';
@@ -18,11 +18,12 @@ import { NavController, AlertController } from '@ionic/angular';
 })
 export class AppComponent implements OnInit, OnDestroy {
   public appPages = [
-    { title: 'Customers', url: '/folder/customers', icon: 'people' },
-    { title: 'Schedule', url: '/folder/schedule', icon: 'calendar' },
-    { title: 'Lots', url: '/folder/lots', icon: 'cube' },
+    { title: 'Customers', url: '/landing/customers', icon: 'people' },
+    { title: 'Schedule', url: '/landing/schedule', icon: 'calendar' },
+    { title: 'Lots', url: '/landing/lots', icon: 'cube' },
   ];
-  public userDisplayName = "";
+  public settingsUrl = 'landing/accountsettings';
+  public userDisplayName = '';
   private userDetailsSubscription = new Subscription();
 
   constructor(
@@ -32,7 +33,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private navCtrl: NavController,
     private alertCtrl: AlertController
   ) {
-    addIcons({ peopleOutline, peopleSharp, calendarOutline, calendarSharp, cubeOutline, cubeSharp });
+    addIcons({ peopleOutline, peopleSharp, calendarOutline, calendarSharp, cubeOutline, cubeSharp, settingsOutline, settingsSharp });
   }
 
   ngOnInit(): void {
@@ -51,6 +52,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   gotoSettings() {
     console.log("Go to settings");
+    this.navCtrl.navigateForward(this.settingsUrl);
   }
 
   logOut() {

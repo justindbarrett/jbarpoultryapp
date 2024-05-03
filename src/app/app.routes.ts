@@ -7,7 +7,7 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
-    path: 'folder/:id',
+    path: 'landing/:id',
     loadComponent: () =>
       import('./folder/folder.page').then((m) => m.FolderPage),
   },
@@ -22,5 +22,5 @@ export const routes: Routes = [
   {
     path: 'forgotpassword',
     loadComponent: () => import('./pages/forgotpassword/forgotpassword.page').then( m => m.ForgotpasswordPage)
-  },
+  }
 ];

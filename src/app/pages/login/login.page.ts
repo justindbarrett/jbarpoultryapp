@@ -64,7 +64,7 @@ export class LoginPage implements OnInit {
         console.log(`User Auth: ${JSON.stringify(auth)}`);
         const userDetails = { displayName: auth.user?.displayName || "", emailAddress: auth.user?.email || "" };
         this.identityService.setUserDetails(userDetails);
-        this.navCtrl.navigateForward("folder/inbox");
+        this.navCtrl.navigateForward("landing/customers");
       })
       .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); })
     }

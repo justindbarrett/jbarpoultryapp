@@ -11,23 +11,30 @@
           class="center"
         />
         <ion-list id="feature-list">
-          <ion-item>
-            <span class="userDisplay"
-              >Welcome,<br />{{ userDisplayName }}!</span
-            >
-            <ion-icon
-              aria-hidden="true"
-              slot="end"
-              [ios]="'settings-outline'"
-              [md]="'settings-sharp'"
-              (click)="gotoSettings()"
-            ></ion-icon>
-          </ion-item>
-
           <ion-menu-toggle
             auto-hide="false"
             *ngFor="let p of appPages; let i = index"
           >
+            <ion-item *ngIf="i == 0">
+              <span class="userDisplay"
+                >Welcome,<br />{{ userDisplayName }}!</span
+              >
+              <ion-item
+                lines="none"
+                slot="end"
+                routerDirection="root"
+                [routerLink]="[settingsUrl]"
+                routerLinkActive="selected"
+              >
+                <ion-icon
+                  aria-hidden="true"
+                  slot="end"
+                  [ios]="'settings-outline'"
+                  [md]="'settings-sharp'"
+                  (click)="gotoSettings()"
+                ></ion-icon>
+              </ion-item>
+            </ion-item>
             <ion-item
               routerDirection="root"
               [routerLink]="[p.url]"
