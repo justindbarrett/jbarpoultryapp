@@ -20,7 +20,6 @@ export class IdentityService implements OnDestroy {
     private consts: Consts
   ) {
       this.authStateSubscription = this.authService.getAuthStateObservable().subscribe((authUser) => {
-        console.log(`Auth User: ${JSON.stringify(authUser)}`);
         if (authUser) {
           const userDetails = { 
             displayName: authUser.displayName, 
@@ -44,7 +43,6 @@ export class IdentityService implements OnDestroy {
     this.currentUser = userDetails;
     this.storageService.set(this.consts.USERDETAILS.USER_ID, this.currentUser.userId);
     this.identityObservable.next(this.currentUser);
-    console.log(`Current User: ${JSON.stringify(this.currentUser)}`);
   }
 
   public updateUserName(newName: string) {

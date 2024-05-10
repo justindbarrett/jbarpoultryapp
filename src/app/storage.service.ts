@@ -24,11 +24,9 @@ export class StorageService implements OnDestroy {
     this._storage = storage;
     this.authStateSubscription = this.authService.getAuthStateObservable().subscribe((authUser) => {
       if (authUser) {
-        console.log(`Setting local storage`);
         this.set(this.consts.USERDETAILS.USER_ID, authUser.uid);
       }
       else {
-        console.log(`Removing local storage`);
         this._storage?.remove(this.consts.USERDETAILS.USER_ID);
       }
     });

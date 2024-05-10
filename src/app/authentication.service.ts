@@ -67,16 +67,13 @@ export class AuthenticationService {
   async isAuthenticated(): Promise<boolean> {
     let isAuthenticated = false;
     await this.getUser().then((user) => {
-      console.log(`Is Authed ? ${JSON.stringify(user)}`);
       if (user == null) {
-        console.log(`Nav to login`);
         this.navCtrl.navigateRoot('login');
       }
       else {
         isAuthenticated = true;
       }
     });
-    console.log(`is this running first?`);
     return isAuthenticated;
   }
 

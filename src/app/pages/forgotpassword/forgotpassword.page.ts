@@ -29,17 +29,15 @@ export class ForgotpasswordPage implements OnInit {
   sendReset() {
     if (!this.disableSendReset()) {
       this.disableSendResetButton = true;
-      console.log('send reset');
       this.authService.resetPassword(this.email)
       .then(auth => {
         this.navCtrl.navigateForward("login");
       })
-      .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); })
+      .catch(err => { this.presentAlert(err.code); })
     }
   }
 
   cancel() {
-    console.log(`Nav Back`);
     this.navCtrl.navigateBack('login');
   }
 

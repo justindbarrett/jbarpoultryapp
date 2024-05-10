@@ -51,19 +51,16 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   gotoSettings() {
-    console.log("Go to settings");
     this.navCtrl.navigateForward(this.settingsUrl);
   }
 
   logOut() {
-    console.log("logging out");
     this.authService.logOutUser()
       .then(auth => {
-        console.log(`User Auth: ${JSON.stringify(auth)}`);
         this.identityService.clearUserDetails();
         this.navCtrl.navigateBack("login");
       })
-      .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); })
+      .catch(err => { this.presentAlert(err.code); })
   }
 
   async presentAlert(message: string) {

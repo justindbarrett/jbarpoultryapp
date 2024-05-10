@@ -57,27 +57,21 @@ export class LoginPage implements OnInit {
   login() {
     if (!this.disableSignIn()) {
       this.disableSignInButton = true;
-      console.log(`login`);
-      console.log(`Email: ${this.email}`);
-      console.log(`PW: ${this.password}`);
       this.loginService.login(this.email, this.password)
       .then(auth => {
-        console.log(`User Auth: ${JSON.stringify(auth)}`);
         const userDetails = { displayName: auth.user?.displayName || "", emailAddress: auth.user?.email || "", userId: auth.user?.uid || "", emailVerified: auth.user?.emailVerified || false };
         this.identityService.setUserDetails(userDetails);
         this.navCtrl.navigateForward("landing/customers");
       })
-      .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); })
+      .catch(err => { this.presentAlert(err.code); })
     }
   }
 
   gotoSignup() {
-    console.log(`signup`);
     this.navCtrl.navigateForward('signup');
   }
 
   gotoForgotPassword() {
-    console.log(`forgot password`);
     this.navCtrl.navigateForward('forgotpassword');
   }
 
@@ -100,7 +94,6 @@ export class LoginPage implements OnInit {
   }
 
   showHidePassword() {
-    console.log('Show Hide Pass');
     if (this.isPasswordVisible) {
       this.passwordType = "password";
       this.showHideIcon = "eye-outline";

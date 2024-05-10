@@ -43,20 +43,19 @@ export class SignupPage implements OnInit {
   signUp() {
     if (!this.disableSignUp()) {
       this.disableSignUpButton = true;
-      console.log('Sign Up');
   
-      // handle remaining attempts and disabling for some time use IP address/device ID?
+      // handle remaining attempts and disabling for some time use IP address/device ID, needs to be done on api?
       if (this.remainingAttempts <= 0) {
         return;
       }
   
       // TODO: store this code as a 10 digit secret
-      if (this.creationCode == "1234567890") {
+      if (this.creationCode == "4515432926") {
         this.authService.registerUser(this.email, this.password)
         .then(auth => {
              this.navCtrl.navigateForward("login");
         })
-        .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); })
+        .catch(err => { this.presentAlert(err.code); })
       }
       else {
         this.remainingAttempts = this.remainingAttempts - 1;
@@ -66,7 +65,6 @@ export class SignupPage implements OnInit {
   }
 
   cancel() {
-    console.log(`Nav Back`);
     this.navCtrl.navigateBack('login');
   }
 
@@ -89,7 +87,6 @@ export class SignupPage implements OnInit {
   }
 
   showHidePassword() {
-    console.log('Show Hide Pass');
     if (this.isPasswordVisible) {
       this.passwordType = "password";
       this.showHideIconPassword = "eye-outline";
@@ -103,7 +100,6 @@ export class SignupPage implements OnInit {
   }
 
   showHideCode() {
-    console.log('Show Hide Code');
     if (this.isCodeVisible) {
       this.codeType = "password";
       this.showHideIconCode = "eye-outline";
