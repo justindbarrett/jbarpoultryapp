@@ -38,7 +38,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.userDetailsSubscription = this.identityService.getUserDetailsObservable().subscribe((userDetails) => {
-      this.userDisplayName = userDetails.displayName;
+      this.userDisplayName = userDetails.displayName || "";
     });
   }
 
@@ -60,8 +60,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.authService.logOutUser()
       .then(auth => {
         console.log(`User Auth: ${JSON.stringify(auth)}`);
-        const userDetails = { displayName: "", emailAddress: "" };
-        this.identityService.setUserDetails(userDetails);
+        this.identityService.clearUserDetails();
         this.navCtrl.navigateBack("login");
       })
       .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); })

@@ -9,6 +9,7 @@ import { NavController, AlertController } from '@ionic/angular';
 import { eyeOffOutline, eyeOutline } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
 import { IdentityService } from 'src/app/identity.service';
+import { LoginService } from 'src/app/login.service';
 
 @Component({
   selector: 'app-login',
@@ -28,7 +29,7 @@ export class LoginPage implements OnInit {
   private disableSignInButton: boolean = false;
 
   constructor(
-    private authService: AuthenticationService,
+    private loginService: LoginService,
     private navCtrl: NavController,
     private alertCtrl: AlertController,
     private identityService: IdentityService
@@ -59,10 +60,10 @@ export class LoginPage implements OnInit {
       console.log(`login`);
       console.log(`Email: ${this.email}`);
       console.log(`PW: ${this.password}`);
-      this.authService.logInUser(this.email, this.password)
+      this.loginService.login(this.email, this.password)
       .then(auth => {
         console.log(`User Auth: ${JSON.stringify(auth)}`);
-        const userDetails = { displayName: auth.user?.displayName || "", emailAddress: auth.user?.email || "" };
+        const userDetails = { displayName: auth.user?.displayName || "", emailAddress: auth.user?.email || "", userId: auth.user?.uid || "" };
         this.identityService.setUserDetails(userDetails);
         this.navCtrl.navigateForward("landing/customers");
       })

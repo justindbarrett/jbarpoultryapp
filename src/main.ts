@@ -14,6 +14,7 @@ import { Capacitor } from '@capacitor/core';
 import { AngularFireModule } from '@angular/fire/compat';
 
 import { IonicModule } from '@ionic/angular';
+import { IonicStorageModule } from '@ionic/storage-angular';
 
 if (environment.production) {
   enableProdMode();
@@ -25,6 +26,7 @@ bootstrapApplication(AppComponent, {
     provideIonicAngular(),
     provideRouter(routes),
     importProvidersFrom(IonicModule.forRoot({innerHTMLTemplatesEnabled: true})),
+    importProvidersFrom(IonicStorageModule.forRoot()),
     importProvidersFrom(
       provideFirebaseApp(() =>
         initializeApp(environment.firebaseConfig)

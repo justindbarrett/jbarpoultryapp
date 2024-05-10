@@ -1,42 +1,131 @@
 <div class="card-container">
-  <ion-card>
+  <ion-card *ngIf="!(showEdit || showChangePassword)">
     <ion-row>
       <ion-col size-md="5" size="12" class="ion-padding ion-blue-bkg">
+        <ion-item lines="none" class="settingsHeader">
+          User Information
+        </ion-item>
       </ion-col>
       <ion-col size-md="7" size="12" class="welcome">
         <ion-card-content>
           <ion-card-header>
-            Please enter an email below. If the email is found to be linked to
-            an existing account, then an email with a reset link will be sent.
+            {{ userName }} <br />
+            {{ userEmail }} <br />
+            <br />
+            User ID: <br />
+            {{ userId }}
           </ion-card-header>
-          <ion-item lines="none" color="light" class="rowStyle">
-            <ion-input
-              type="text"
-              (keyup.enter)="sendReset()"
-              placeholder="your email"
-              required
-              ngDefaultControl
-              [(ngModel)]="email"
-            ></ion-input>
-          </ion-item>
           <ion-button
-            [disabled]="disableSendReset()"
-            (click)="sendReset()"
+            [disabled]="disableEditInfo()"
+            (click)="gotoEditUserInfo()"
             shape="round"
             color="primary"
             class="signInButton"
           >
-            Send Reset Email
+            Edit Information
           </ion-button>
-          <ion-item lines="none" class="signUpButton">
-            <a
-              style="text-decoration: none"
-              href="javascript:;"
-              (click)="cancel()"
-            >
-              &#60; CANCEL
-            </a>
+          <ion-button
+            [disabled]="disableChangePassword()"
+            (click)="gotoChangePassword()"
+            shape="round"
+            color="secondary"
+            class="signInButton"
+          >
+            Change Password
+          </ion-button>
+        </ion-card-content>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+  <ion-card *ngIf="showEdit">
+    <ion-row>
+      <ion-col size-md="5" size="12" class="ion-padding ion-blue-bkg">
+        <ion-item lines="none" class="settingsHeader">
+          Edit User Information
+        </ion-item>
+      </ion-col>
+      <ion-col size-md="7" size="12" class="welcome">
+        <ion-card-content>
+          <ion-item lines="none" color="light" class="rowStyle">
+            <ion-input
+              type="text"
+              [placeholder]="userName"
+              required
+              ngDefaultControl
+              [(ngModel)]="newName"
+            ></ion-input>
           </ion-item>
+          <ion-item lines="none" color="light" class="rowStyle">
+            <ion-input
+              type="text"
+              [placeholder]="userEmail"
+              required
+              ngDefaultControl
+              [(ngModel)]="newEmail"
+            ></ion-input>
+          </ion-item>
+          <ion-button
+            [disabled]="disableSaveInfo()"
+            (click)="saveUserInfo()"
+            shape="round"
+            color="primary"
+            class="signInButton"
+          >
+            Save Information
+          </ion-button>
+          <ion-button
+            (click)="cancelEditInfo()"
+            shape="round"
+            color="secondary"
+            class="signInButton"
+          >
+            Cancel
+          </ion-button>
+        </ion-card-content>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+  <ion-card *ngIf="showChangePassword">
+    <ion-row>
+      <ion-col size-md="5" size="12" class="ion-padding ion-blue-bkg">
+        <ion-item lines="none" class="settingsHeader">
+          Change Password
+        </ion-item>
+      </ion-col>
+      <ion-col size-md="7" size="12" class="welcome">
+        <ion-card-content>
+          <ion-item lines="none" color="light" class="rowStyle">
+            <ion-input
+              [type]="passwordType"
+              placeholder="your new password"
+              required
+              ngDefaultControl
+              [(ngModel)]="newPassword"
+            ></ion-input>
+            <ion-icon
+              slot="end"
+              [name]="showHideIcon"
+              ngClass="security-icon"
+              (click)="showHidePassword()"
+            ></ion-icon>
+          </ion-item>
+          <ion-button
+            [disabled]="disableSaveNewPassword()"
+            (click)="saveNewPassword()"
+            shape="round"
+            color="primary"
+            class="signInButton"
+          >
+            Save Password
+          </ion-button>
+          <ion-button
+            (click)="cancelChangePassword()"
+            shape="round"
+            color="secondary"
+            class="signInButton"
+          >
+            Cancel
+          </ion-button>
         </ion-card-content>
       </ion-col>
     </ion-row>
@@ -46,43 +135,68 @@
   <ion-card>
     <ion-row>
       <ion-col size-md="5" size="12" class="ion-padding ion-blue-bkg">
+        <ion-item lines="none" class="settingsHeader">
+          User Preferences
+        </ion-item>
       </ion-col>
       <ion-col size-md="7" size="12" class="welcome">
         <ion-card-content>
           <ion-card-header>
-            Please enter an email below. If the email is found to be linked to
-            an existing account, then an email with a reset link will be sent.
+            Section to add preferences later, for notifications etc.
           </ion-card-header>
-          <ion-item lines="none" color="light" class="rowStyle">
-            <ion-input
-              type="text"
-              (keyup.enter)="sendReset()"
-              placeholder="your email"
-              required
-              ngDefaultControl
-              [(ngModel)]="email"
-            ></ion-input>
-          </ion-item>
           <ion-button
-            [disabled]="disableSendReset()"
-            (click)="sendReset()"
+            [disabled]="disableEditPreferences()"
+            (click)="gotoEditUserPreferences()"
             shape="round"
             color="primary"
             class="signInButton"
           >
-            Send Reset Email
+            Edit Preferences
           </ion-button>
-          <ion-item lines="none" class="signUpButton">
-            <a
-              style="text-decoration: none"
-              href="javascript:;"
-              (click)="cancel()"
-            >
-              &#60; CANCEL
-            </a>
-          </ion-item>
         </ion-card-content>
       </ion-col>
     </ion-row>
   </ion-card>
 </div>
+<ion-modal
+  [isOpen]="openModal"
+  [initialBreakpoint]="1"
+  [breakpoints]="[0, 1]"
+  canDismiss="true"
+  (didDismiss)="modalDismissed($event)"
+>
+  <ng-template>
+    <div class="card-container">
+      <ion-card-content>
+        <ion-card-header>
+          Please authenticate your account with your password to edit your
+          account settings or password!
+        </ion-card-header>
+        <ion-item lines="none" color="light" class="rowStyle">
+          <ion-input
+            [type]="passwordType"
+            (keyup.enter)="login()"
+            placeholder="your password"
+            required
+            ngDefaultControl
+            [(ngModel)]="password"
+          ></ion-input>
+          <ion-icon
+            slot="end"
+            [name]="showHideIcon"
+            ngClass="security-icon"
+            (click)="showHidePassword()"
+          ></ion-icon>
+        </ion-item>
+        <ion-button
+          [disabled]="disableSignIn()"
+          (click)="login()"
+          shape="round"
+          color="primary"
+          class="signInButton"
+          >Sign in</ion-button
+        >
+      </ion-card-content>
+    </div>
+  </ng-template>
+</ion-modal>

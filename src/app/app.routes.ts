@@ -1,4 +1,6 @@
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
+import { LoginService } from './login.service';
 
 export const routes: Routes = [
   {
@@ -10,6 +12,7 @@ export const routes: Routes = [
     path: 'landing/:id',
     loadComponent: () =>
       import('./folder/folder.page').then((m) => m.FolderPage),
+    //canActivate: [() => inject(LoginService).isLoggedIn()]
   },
   {
     path: 'login',

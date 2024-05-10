@@ -42,21 +42,39 @@
     //max-width: 350px;
 }
 
-.signInButton {
-    margin-top: 15px;
-    margin-left: 5%;
-    height: 40px;
-}
-  
-.signUpButton {
-    margin-top: 12px;
-    left: 3%;
-    font-size: small;
+.settingsLabel {
+  color: gray;
+  max-height: 20px;
 }
 
-.forgotPassword {
-    font-size: small;
-    float: right;
-    right: 5%;
-    margin-top: 5px;
+.settingsDetail {
+  color: gray;
+  padding-left: 20px;
+}
+
+.settingsHeader {
+  color: var(--ion-color-primary);
+  font-size: large;
+}
+
+.signInButton {
+  margin-top: 15px;
+  margin-left: 5%;
+  height: 40px;
+}
+
+.block {
+  width: 100%;
+  height: 500px;
+}
+
+ion-modal {
+  --height: auto;
+}
+
+.security-icon {
+  color: gray;
+  position: absolute;
+  right: 10px;
+  z-index: 100;
 }

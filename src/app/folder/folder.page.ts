@@ -5,11 +5,9 @@ import { IonInput, IonCardHeader, IonCardContent, IonCol, IonRow, IonCard, IonTi
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { calendarOutline, calendarSharp, cubeOutline, cubeSharp, peopleOutline, peopleSharp, settingsOutline, settingsSharp } from 'ionicons/icons';
-import { NavController, AlertController } from '@ionic/angular';
-import { IdentityService } from '../identity.service';
-import { AuthenticationService } from '../authentication.service';
-import { Subscription } from 'rxjs';
+
 import { AccountSettingsPage } from '../pages/accountsettings/accountsettings.page';
+import { AppPages } from '../pages.service';
 
 @Component({
   selector: 'app-folder',
@@ -19,17 +17,19 @@ import { AccountSettingsPage } from '../pages/accountsettings/accountsettings.pa
   imports: [AccountSettingsPage, CommonModule, RouterLink, RouterLinkActive, IonInput, IonCardHeader, IonCardContent, IonCol, IonRow, IonCard, IonHeader, IonMenuButton, IonToolbar, IonButtons, IonTitle, IonButton, IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet]
 })
 export class FolderPage implements OnInit {
-  public folder!: string;
+  public pageTitle!: string;
   private activatedRoute = inject(ActivatedRoute);
 
   constructor(
-    private router: Router
+    private router: Router,
+    private appPages: AppPages
   ) {
     addIcons({ peopleOutline, peopleSharp, calendarOutline, calendarSharp, cubeOutline, cubeSharp, settingsOutline, settingsSharp });
   }
 
   ngOnInit() {
-    this.folder = this.activatedRoute.snapshot.paramMap.get('id') as string;
+    const pageId = this.activatedRoute.snapshot.paramMap.get('id') as string;
+    this.pageTitle = this.appPages.getPage(pageId).title;
   }
 
   showSettingsPage() {
