@@ -25,7 +25,8 @@ export class IdentityService implements OnDestroy {
           const userDetails = { 
             displayName: authUser.displayName, 
             emailAddress: authUser.email,
-            userId: authUser.uid
+            userId: authUser.uid,
+            emailVerified: authUser.emailVerified
           };
           this.setUserDetails(userDetails);
         }
@@ -50,7 +51,8 @@ export class IdentityService implements OnDestroy {
     const userDetails: UserDetails = { 
       displayName: newName, 
       emailAddress: this.currentUser?.emailAddress || null,
-      userId: this.currentUser?.userId || ""
+      userId: this.currentUser?.userId || "",
+      emailVerified: this.currentUser?.emailVerified || false
     };
     this.setUserDetails(userDetails);
   }

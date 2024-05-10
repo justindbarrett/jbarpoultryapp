@@ -28,7 +28,7 @@
             [disabled]="disableChangePassword()"
             (click)="gotoChangePassword()"
             shape="round"
-            color="secondary"
+            color="primary"
             class="signInButton"
           >
             Change Password
@@ -64,6 +64,20 @@
               [(ngModel)]="newEmail"
             ></ion-input>
           </ion-item>
+          <ion-item
+            lines="none"
+            color="light"
+            class="rowStyle"
+            *ngIf="newEmail"
+          >
+            <ion-input
+              type="text"
+              placeholder="confirm new email"
+              required
+              ngDefaultControl
+              [(ngModel)]="newEmailConfirm"
+            ></ion-input>
+          </ion-item>
           <ion-button
             [disabled]="disableSaveInfo()"
             (click)="saveUserInfo()"
@@ -96,7 +110,7 @@
         <ion-card-content>
           <ion-item lines="none" color="light" class="rowStyle">
             <ion-input
-              [type]="passwordType"
+              [type]="passwordNewType"
               placeholder="your new password"
               required
               ngDefaultControl
@@ -104,9 +118,24 @@
             ></ion-input>
             <ion-icon
               slot="end"
-              [name]="showHideIcon"
+              [name]="showHideIconNew"
               ngClass="security-icon"
-              (click)="showHidePassword()"
+              (click)="showHideNewPassword()"
+            ></ion-icon>
+          </ion-item>
+          <ion-item lines="none" color="light" class="rowStyle">
+            <ion-input
+              [type]="passwordConfirmType"
+              placeholder="confirm new password"
+              required
+              ngDefaultControl
+              [(ngModel)]="newPasswordConfirm"
+            ></ion-input>
+            <ion-icon
+              slot="end"
+              [name]="showHideIconConfirm"
+              ngClass="security-icon"
+              (click)="showHideConfirmPassword()"
             ></ion-icon>
           </ion-item>
           <ion-button
@@ -131,7 +160,7 @@
     </ion-row>
   </ion-card>
 </div>
-<div class="card-container">
+<div class="card-container" *ngIf="false">
   <ion-card>
     <ion-row>
       <ion-col size-md="5" size="12" class="ion-padding ion-blue-bkg">

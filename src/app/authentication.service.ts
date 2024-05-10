@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { Subject } from 'rxjs';
 import { NavController } from '@ionic/angular';
-import { getAuth, updateEmail } from '@angular/fire/auth';
+import { getAuth, updateEmail, updatePassword, verifyBeforeUpdateEmail } from '@angular/fire/auth';
 
 @Injectable({
   providedIn: 'root'
@@ -47,7 +47,14 @@ export class AuthenticationService {
   async updateUserEmail(newEmail: string) {
     const auth = getAuth();
     if (auth.currentUser) {
-      return await updateEmail(auth.currentUser, newEmail);
+      return await verifyBeforeUpdateEmail(auth.currentUser, newEmail);
+    }
+  }
+
+  async updateUserPassword(newPassword: string) {
+    const auth = getAuth();
+    if (auth.currentUser) {
+      return await updatePassword(auth.currentUser, newPassword);
     }
   }
 

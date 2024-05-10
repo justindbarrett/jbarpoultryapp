@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
 import { eyeOffOutline, eyeOutline } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
 import { LoginService } from 'src/app/login.service';
+
 @Component({
   selector: 'app-accountsettings',
   templateUrl: './accountsettings.page.html',
@@ -20,13 +21,25 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
 
   public userId: string = "";
   public userName: string = "";
-  public newName: string = "";
   public userEmail: string = "";
+
+  public newName: string = "";
   public newEmail: string = "";
+  public newEmailConfirm: string = "";
+
   public password: string = "";
+  public newPassword: string = "";
+  public newPasswordConfirm: string = "";
   public passwordType: string = "password";
-  public showHideIcon: string = "eye-outline";
+  public passwordNewType: string = "password";
+  public passwordConfirmType: string = "password";
   private isPasswordVisible: boolean = false;
+  private isNewPasswordVisible: boolean = false;
+  private isConfirmPasswordVisible: boolean = false;
+  public showHideIcon: string = "eye-outline";
+  public showHideIconNew: string = "eye-outline";
+  public showHideIconConfirm: string = "eye-outline";
+
   private disableChangePasswordButton: boolean = false;
   private disableEditInfoButton: boolean = false;
   private userDetailsSubscription = new Subscription();
@@ -35,8 +48,9 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
   public showEdit: boolean = false;
   public openModal: boolean = false;
   public showChangePassword: boolean = false;
-  public newPassword: string = "";
+  public showVerifyEmail: boolean = false;
   public disableSavePasswordButton: boolean = false;
+  public shouldContinue: boolean = false;
   @ViewChild(IonModal) modal: IonModal;
 
   constructor(
@@ -50,6 +64,11 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
     }
 
   ngOnInit() {
+    const userDetails = this.identityService.getUserDetails();
+    this.userId = userDetails?.userId || "";
+    this.userName = userDetails?.displayName || "";
+    this.userEmail = userDetails?.emailAddress || "";
+
     this.userDetailsSubscription = this.identityService.getUserDetailsObservable().subscribe((userDetails) => {
       this.userId = userDetails.userId || "";
       this.userName = userDetails.displayName || "";
@@ -61,22 +80,19 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
     this.userDetailsSubscription.unsubscribe();
   }
 
-  ionViewWillEnter() {
-    this.init();
-  }
-
-  ionViewWillLeave() {
-    this.init();
-  }
-
   init() {
     this.newName = "";
     this.newEmail = "";
+    this.newEmailConfirm = "";
     this.password = "";
     this.newPassword = "";
+    this.newPasswordConfirm = "";
     this.passwordType = "password";
+    this.passwordConfirmType = "password";
     this.showHideIcon = "eye-outline";
     this.isPasswordVisible = false;
+    this.isNewPasswordVisible = false;
+    this.isConfirmPasswordVisible = false;
     this.disableChangePasswordButton = false;
     this.disableEditInfoButton = false;
     this.disableSignInButton = false;
@@ -85,10 +101,10 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
     this.openModal = false;
     this.showChangePassword = false;
     this.disableSavePasswordButton = false;
+    this.shouldContinue = false;
   }
 
   modalDismissed(event: Event) {
-    console.log(`Dismissed`);
     this.openModal = false;
     this.password = "";    
     this.passwordType = "password";
@@ -101,14 +117,11 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
   gotoEditUserInfo() {
     this.openModal = true;
     this.disableEditInfoButton = true;
-    console.log(`edit user details`);
   }
 
   gotoChangePassword() {
     this.openModal = true;
     this.disableChangePasswordButton = true;
-    this.showChangePassword = true;
-    console.log(`change password`);
   }
 
   gotoEditUserPreferences() {
@@ -132,24 +145,56 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
   }
 
   disableSaveNewPassword(): boolean {
-    return !(this.newPassword) || this.disableSavePasswordButton;
+    return !(this.newPassword && this.newPasswordConfirm) || this.disableSavePasswordButton;
   }
 
   disableSignIn(): boolean {
     return !(this.password) || this.disableSignInButton;
   }
 
-  async presentAlert(message: string) {
+  async presentAlert(header: string, message: string, buttonText: string) {
     const alert = await this.alertCtrl.create({
-      header: 'Failed Sign Up Attempt',
+      header: header,
       message: message,
-      buttons: ['Try Again'],
+      buttons: [buttonText],
     });
 
     await alert.present();
 
     await alert.onDidDismiss().then(() => {
       this.disableSignInButton = false;
+      this.disableSaveInfoButton = false;
+      this.disableSavePasswordButton = false;
+    });
+  }
+
+  async presentContinueAlert(header: string, message: string) {
+    const alert = await this.alertCtrl.create({
+      header: header,
+      message: message,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => {
+            this.shouldContinue = false;            
+            this.disableSaveInfoButton = false;
+            this.disableSavePasswordButton = false;
+          },
+        },
+        {
+          text: 'Continue',
+          role: 'confirm',
+          handler: () => {
+            this.shouldContinue = true;
+          },
+        },
+      ]
+    });
+
+    await alert.present();
+
+    await alert.onDidDismiss().then(() => {
     });
   }
 
@@ -166,21 +211,52 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
     }
   }
 
+  showHideNewPassword() {
+    if (this.isNewPasswordVisible) {
+      this.passwordNewType = "password";
+      this.showHideIconNew = "eye-outline";
+      this.isNewPasswordVisible = false;
+    }
+    else {
+      this.passwordNewType = "text";
+      this.showHideIconNew = "eye-off-outline";
+      this.isNewPasswordVisible = true;
+    }
+  }
+
+  showHideConfirmPassword() {
+    if (this.isConfirmPasswordVisible) {
+      this.passwordConfirmType = "password";
+      this.showHideIconConfirm = "eye-outline";
+      this.isConfirmPasswordVisible = false;
+    }
+    else {
+      this.passwordConfirmType = "text";
+      this.showHideIconConfirm = "eye-off-outline";
+      this.isConfirmPasswordVisible = true;
+    }
+  }
+
   login() {
     if (!this.disableSignIn()) {
       this.disableSignInButton = true;
       this.loginService.login(this.userEmail, this.password)
       .then(auth => {
         this.password = "";
-        this.showEdit = true;
+        if (this.disableEditInfoButton) {
+          this.showEdit = true;
+        }
+        if (this.disableChangePasswordButton) {
+          this.showChangePassword = true;
+        }
         this.modal.dismiss();
       })
-      .catch(err => { console.log(JSON.stringify(err)); this.presentAlert(err.code); });
+      .catch(err => {this.presentAlert('Failed SignIn Attempt', err.code, 'Try Again'); });
     }
   }
 
   async saveUserInfo() {
-    console.log(`save user info`);
+    this.disableSaveInfoButton = true;
     let nameUpdated = true;
     let emailUpdated = true;
     if (this.newName) {
@@ -189,33 +265,77 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
         nameUpdated = true;
         this.identityService.updateUserName(this.newName);
       }).catch((err) => {
-        console.log(JSON.stringify(err)); this.presentAlert(err.code);
+        this.presentAlert(`Failed Edit User Info Attempt`, err.code, `Try Again`);
       });
     }
     if (this.newEmail) {
       emailUpdated = false;
-      await this.authService.updateUserEmail(this.newEmail).then(() => {
-        emailUpdated = true;
-      }).catch((err) => {
-        console.log(JSON.stringify(err)); this.presentAlert(err.code);
-      });
+      if (this.newEmailConfirm === this.newEmail) {
+        await this.presentContinueAlert(`Continue?`, `This action will sign you out immediately. You will need to verify your new email and sign in again with your new credentials. Would you like to continue?`);
+        if (this.shouldContinue) {
+          await this.authService.updateUserEmail(this.newEmail).then(() => {
+            emailUpdated = true; 
+            this.authService.logOutUser()
+            .then(auth => {
+              emailUpdated = false;
+              this.identityService.clearUserDetails();
+              this.navCtrl.navigateBack("login");
+            }).catch((err) => { 
+              this.presentAlert(`Failed SignOut Attempt`, err, `Try Again`); 
+            });
+          }).catch((err) => {
+            this.presentAlert(`Failed Edit User Info Attempt`, err.code, `Try Again`);
+          });
+        }
+      }
+      else {
+        this.presentAlert(`Confirm New Email`, `Emails must match.`, `Try Again`);
+      }
     }
     this.showEdit = !(nameUpdated && emailUpdated);
-    this.init();
+    if (!this.showEdit) {
+      this.init();
+    }
   }
 
   async saveNewPassword() {
     this.disableSavePasswordButton = true;
-    this.showEdit = false;
-    this.showChangePassword = false;
+    let passwordUpdated = false;
+    if (this.newPassword === this.newPasswordConfirm) {
+      await this.presentContinueAlert(`Continue?`, `This action will sign you out immediately. You will need to sign in again with your new credentials. Would you like to continue?`);
+      if (this.shouldContinue) {
+        await this.authService.updateUserPassword(this.newPassword).then(() => {
+          passwordUpdated = true; 
+          this.authService.logOutUser()
+          .then(auth => {
+            passwordUpdated = false;
+            this.identityService.clearUserDetails();
+            this.navCtrl.navigateBack("login");
+          }).catch((err) => { 
+            this.presentAlert(`Failed SignOut Attempt`, err, `Try Again`); 
+          });
+        }).catch((err) => {
+          this.presentAlert(`Failed Change Password Attempt`, err.code, `Try Again`);
+        });
+      }
+    }
+    else {
+      this.presentAlert(`Confirm New Password`, `Passwords must match.`, `Try Again`);
+    }
+    this.showChangePassword = !passwordUpdated;
+    if (!this.showChangePassword) {
+      this.init();
+    }
   }
 
   cancelEditInfo() {
     this.showEdit = false;
+    this.init();
   }
 
   cancelChangePassword() {
     this.showChangePassword = false;
+    this.init();
   }
 
 }

@@ -63,7 +63,7 @@ export class LoginPage implements OnInit {
       this.loginService.login(this.email, this.password)
       .then(auth => {
         console.log(`User Auth: ${JSON.stringify(auth)}`);
-        const userDetails = { displayName: auth.user?.displayName || "", emailAddress: auth.user?.email || "", userId: auth.user?.uid || "" };
+        const userDetails = { displayName: auth.user?.displayName || "", emailAddress: auth.user?.email || "", userId: auth.user?.uid || "", emailVerified: auth.user?.emailVerified || false };
         this.identityService.setUserDetails(userDetails);
         this.navCtrl.navigateForward("landing/customers");
       })
