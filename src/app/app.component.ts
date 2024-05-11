@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs';
 import { IdentityService } from './identity.service';
 import { AuthenticationService } from './authentication.service';
 import { NavController, AlertController } from '@ionic/angular';
+import { AppPages } from './pages.service';
 
 @Component({
   selector: 'app-root',
@@ -31,7 +32,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private identityService: IdentityService,
     private authService: AuthenticationService,
     private navCtrl: NavController,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private pageService: AppPages
   ) {
     addIcons({ peopleOutline, peopleSharp, calendarOutline, calendarSharp, cubeOutline, cubeSharp, settingsOutline, settingsSharp });
   }
@@ -46,8 +48,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.userDetailsSubscription.unsubscribe();
   }
 
-  hideMenu() {
-    return !(this.router.url == "/login" || this.router.url == "/forgotpassword" || this.router.url == "/signup");
+  showMenu() {
+    return this.pageService.getPage(this.router.url);
   }
 
   gotoSettings() {

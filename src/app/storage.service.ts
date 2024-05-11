@@ -25,9 +25,11 @@ export class StorageService implements OnDestroy {
     this.authStateSubscription = this.authService.getAuthStateObservable().subscribe((authUser) => {
       if (authUser) {
         this.set(this.consts.USERDETAILS.USER_ID, authUser.uid);
+        localStorage.setItem('isAuthenticated', 'true');
       }
       else {
         this._storage?.remove(this.consts.USERDETAILS.USER_ID);
+        localStorage.removeItem('isAuthenticated');
       }
     });
   }

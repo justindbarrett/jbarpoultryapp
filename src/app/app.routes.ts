@@ -1,6 +1,8 @@
 import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { LoginService } from './login.service';
+import { AppPages } from './pages.service';
+
 
 export const routes: Routes = [
   {
@@ -9,10 +11,28 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
-    path: 'landing/:id',
+    path: 'landing/customers',
     loadComponent: () =>
       import('./folder/folder.page').then((m) => m.FolderPage),
-    //canActivate: [() => inject(LoginService).isLoggedIn()]
+    canActivate: [() => inject(LoginService).isLoggedIn()]
+  },
+  {
+    path: 'landing/schedule',
+    loadComponent: () =>
+      import('./folder/folder.page').then((m) => m.FolderPage),
+    canActivate: [() => inject(LoginService).isLoggedIn()]
+  },
+  {
+    path: 'landing/lots',
+    loadComponent: () =>
+      import('./folder/folder.page').then((m) => m.FolderPage),
+    canActivate: [() => inject(LoginService).isLoggedIn()]
+  },
+  {
+    path: 'landing/accountsettings',
+    loadComponent: () =>
+      import('./folder/folder.page').then((m) => m.FolderPage),
+    canActivate: [() => inject(LoginService).isLoggedIn()]
   },
   {
     path: 'login',
@@ -25,5 +45,9 @@ export const routes: Routes = [
   {
     path: 'forgotpassword',
     loadComponent: () => import('./pages/forgotpassword/forgotpassword.page').then( m => m.ForgotpasswordPage)
-  }
+  },
+  {
+    path: '**',
+    loadComponent: () => import('./pages/notfound/notfound.page').then( m => m.NotFoundPage)
+}
 ];

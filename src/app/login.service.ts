@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { StorageService } from './storage.service';
 import { Consts } from './consts';
 import { AuthenticationService } from './authentication.service';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,7 @@ export class LoginService {
 
   constructor(
     private authService: AuthenticationService,
+    private router: Router,
     private storageService: StorageService,
     private consts: Consts
   ) { }
@@ -18,13 +20,14 @@ export class LoginService {
     return this.authService.logInUser(email, password);
   }
 
-  async isLoggedIn(): Promise<boolean> {
-    const user = await this.storageService.get(this.consts.USERDETAILS.USER_ID);
-    console.log(`User from storage: ${user}`);
-    if (user) {
-        return true;
+  isLoggedIn(): boolean {
+    if (localStorage.getItem('isAuthenticated') === 'true') {
+      return true;
     }
-    return false;
+    else {
+      this.router.navigateByUrl("login");
+      return false;
+    }
   }
 
 }

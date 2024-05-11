@@ -28,8 +28,9 @@ export class FolderPage implements OnInit {
   }
 
   ngOnInit() {
-    const pageId = this.activatedRoute.snapshot.paramMap.get('id') as string;
-    this.pageTitle = this.appPages.getPage(pageId).title;
+    const pageUrl = this.router.url;
+    const page = this.appPages.getPage(pageUrl);
+    this.pageTitle =  page ? page.title : "";
   }
 
   showSettingsPage() {
