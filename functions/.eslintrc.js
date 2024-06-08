@@ -31,6 +31,8 @@ module.exports = {
     "indent": 0,
     "linebreak-style": 0,
     "object-curly-spacing": 0,
-
+    "@typescript-eslint/no-var-requires": 0,
+    "max-len": 0,
+    "spaced-comment": 0,
   },
 };

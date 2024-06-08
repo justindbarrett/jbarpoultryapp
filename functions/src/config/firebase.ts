@@ -1,11 +1,14 @@
 import * as admin from "firebase-admin";
-import * as functions from "firebase-functions";
+import "dotenv/config";
+
+require("dotenv").config();
+console.log(process.env);
 
 admin.initializeApp({
     credential: admin.credential.cert({
-        privateKey: functions.config().private.key(/\\n/g, "\n"),
-        projectId: functions.config().project.id,
-        clientEmail: functions.config().client.email,
+        privateKey: process.env.PRIVATE_KEY?.replace(/\\n/g, "\n"),
+        projectId: process.env.PROJECT_ID,
+        clientEmail: process.env.CLIENT_EMAIL,
     }),
     databaseURL: "https://jbar-poultry-web-app.firebase.io.com",
 });

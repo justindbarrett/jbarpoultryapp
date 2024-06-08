@@ -19,13 +19,15 @@ type Request = {
 };
 
 const customerCollectionPath = "customers";
-const customerNumberCollectionPath = "customerNumber";
-const prevCustomerNumberDocumentPath = "prevCustomerNumber";
+const customerConfigCollectionPath = "customerConfig";
+const customerNumberDocumentPath = "customerNumber";
 
 const addCustomer = async (req: Request, res: Response) => {
     const { name, address, phone } = req.body;
     try {
-        const customerDocument = await db.collection(customerCollectionPath).doc();
+        const customerDocument = await db.collection(
+            customerCollectionPath
+        ).doc();
         const customerNumber = await getNewCustomerNumber();
         const customer: CustomerType = {
             id: customerDocument.id,
@@ -34,7 +36,7 @@ const addCustomer = async (req: Request, res: Response) => {
                 name: name,
                 address: address,
                 phone: phone,
-            }
+            },
         };
         await customerDocument.set(customer);
 
@@ -49,11 +51,11 @@ const addCustomer = async (req: Request, res: Response) => {
 };
 
 const getNewCustomerNumber = async () => {
-    const prevCustomerNumberDocument = await db.collection(customerNumberCollectionPath).doc(prevCustomerNumberDocumentPath);
-    const prevCustomerNumber = (await prevCustomerNumberDocument.get()).data();
-    if (prevCustomerNumber) {
-        const newCustomerNumber = prevCustomerNumber as any + 1;
-        prevCustomerNumberDocument.set(newCustomerNumber);
+    const customerNumberDocument = await db.collection(customerConfigCollectionPath).doc(customerNumberDocumentPath);
+    const prevCustomerNumber = (await customerNumberDocument.get()).data()?.prevCustomerNumber;
+    if (prevCustomerNumber !== null && prevCustomerNumber !== undefined) {
+        const newCustomerNumber = prevCustomerNumber + 1;
+        customerNumberDocument.set({prevCustomerNumber: newCustomerNumber});
         return newCustomerNumber as string;
     }
     return "-1";
@@ -68,9 +70,10 @@ const getCustomers = async (req: Request, res: Response) => {
         });
 
         res.status(200).json({
-            customers: customers
+            customers: customers,
         });
     } catch (error) {
+        console.log(`ERROR: ${error}`);
         res.status(500).json(error);
     }
 };
@@ -81,15 +84,17 @@ const updateCustomer = async (req: Request, res: Response) => {
     try {
         const customer = await db.collection(customerCollectionPath).doc(id);
         const currentData = (await customer.get()).data() || {};
-        
-        const newData = {
+
+        const newData: CustomerType = {
             id: id,
             number: currentData.number,
-            name: name || currentData.name,
-            address: address || currentData.address,
-            phone: phone || currentData.phone
+            data: {
+                name: name || currentData.data.name,
+                address: address || currentData.data.address,
+                phone: phone || currentData.data.phone,
+            },
         };
-        await customer.set(newData);
+        await customer.update(newData);
 
         res.status(200).json({
             status: "success",
