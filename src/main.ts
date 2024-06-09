@@ -15,6 +15,7 @@ import { AngularFireModule } from '@angular/fire/compat';
 
 import { IonicModule } from '@ionic/angular';
 import { IonicStorageModule } from '@ionic/storage-angular';
+import { provideHttpClient } from '@angular/common/http';
 
 if (environment.production) {
   enableProdMode();
@@ -25,6 +26,7 @@ bootstrapApplication(AppComponent, {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
     provideRouter(routes),
+    provideHttpClient(),
     importProvidersFrom(IonicModule.forRoot({innerHTMLTemplatesEnabled: true})),
     importProvidersFrom(IonicStorageModule.forRoot()),
     importProvidersFrom(

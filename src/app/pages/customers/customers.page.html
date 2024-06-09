@@ -1,0 +1,88 @@
+<div class="card-container">
+  <ion-card *ngIf="!showAddCustomer">
+    <ion-row>
+      <ion-col size-md="5" size="12" class="ion-padding ion-blue-bkg">
+        <ion-item lines="none" class="settingsHeader"> Customer List </ion-item>
+      </ion-col>
+      <ion-col size-md="7" size="12" class="welcome">
+        <ion-card-content>
+          <ion-searchbar
+            [(ngModel)]="searchTerm"
+            (ionChange)="setFilteredItems()"
+          ></ion-searchbar>
+          <ion-list>
+            <ion-item *ngFor="let customer of customers">
+              {{ customer.data.name }}
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+  <ion-card *ngIf="showAddCustomer">
+    <ion-row>
+      <ion-col size-md="5" size="12" class="ion-padding ion-blue-bkg">
+        <ion-item lines="none" class="settingsHeader"> New Customer </ion-item>
+      </ion-col>
+      <ion-col size-md="7" size="12" class="welcome">
+        <ion-card-content>
+          <ion-item lines="none" color="light" class="rowStyle">
+            <ion-input
+              type="text"
+              placeholder="customer name"
+              required
+              ngDefaultControl
+              [(ngModel)]="newCustomerName"
+            ></ion-input>
+          </ion-item>
+          <ion-item lines="none" color="light" class="rowStyle">
+            <ion-input
+              type="text"
+              placeholder="customer address"
+              required
+              ngDefaultControl
+              [(ngModel)]="newCustomerAddress"
+            ></ion-input>
+          </ion-item>
+          <ion-item lines="none" color="light" class="rowStyle">
+            <ion-input
+              type="text"
+              placeholder="customer phone"
+              required
+              ngDefaultControl
+              [(ngModel)]="newCustomerPhone"
+            ></ion-input>
+          </ion-item>
+          <ion-button
+            [disabled]="false"
+            shape="round"
+            (click)="addCustomer()"
+            color="primary"
+            class="signInButton"
+          >
+            Submit Customer
+          </ion-button>
+          <ion-button
+            (click)="cancelAddCustomer()"
+            shape="round"
+            color="secondary"
+            class="signInButton"
+          >
+            Cancel
+          </ion-button>
+        </ion-card-content>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+</div>
+<ion-fab
+  *ngIf="!showAddCustomer"
+  slot="fixed"
+  vertical="bottom"
+  horizontal="center"
+  [edge]="true"
+>
+  <ion-fab-button (click)="addCustomer()">
+    <ion-icon name="add"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
