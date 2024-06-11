@@ -11,3 +11,14 @@ export type Customer = {
 export type Customers = {
     customers: Customer[],
 };
+
+export type AddCustomerResponse = {
+    status: string,
+    message: string,
+    data: Customer
+};
+
+export type DeleteCustomerResponse = {
+    status: string,
+    message: string
+};

@@ -68,6 +68,7 @@ const getCustomers = async (req: Request, res: Response) => {
         querySnapshot.forEach((doc: any) => {
             customers.push(doc.data());
         });
+        customers.sort((a, b) => a.data.name.toLowerCase().localeCompare(b.data.name.toLowerCase()));
 
         res.status(200).json({
             customers: customers,
