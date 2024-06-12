@@ -9,13 +9,14 @@ import { calendarOutline, calendarSharp, cubeOutline, cubeSharp, peopleOutline, 
 import { AccountSettingsPage } from '../pages/accountsettings/accountsettings.page';
 import { AppPages } from '../pages.service';
 import { CustomersPage } from '../pages/customers/customers.page';
+import { SchedulePage } from '../pages/schedule/schedule.page';
 
 @Component({
   selector: 'app-folder',
   templateUrl: './folder.page.html',
   styleUrls: ['./folder.page.scss'],
   standalone: true,
-  imports: [AccountSettingsPage, CustomersPage, CommonModule, RouterLink, RouterLinkActive, IonInput, IonCardHeader, IonCardContent, IonCol, IonRow, IonCard, IonHeader, IonMenuButton, IonToolbar, IonButtons, IonTitle, IonButton, IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet]
+  imports: [AccountSettingsPage, CustomersPage, SchedulePage, CommonModule, RouterLink, RouterLinkActive, IonInput, IonCardHeader, IonCardContent, IonCol, IonRow, IonCard, IonHeader, IonMenuButton, IonToolbar, IonButtons, IonTitle, IonButton, IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet]
 })
 export class FolderPage implements OnInit {
   public pageTitle!: string;
@@ -40,5 +41,9 @@ export class FolderPage implements OnInit {
 
   showCustomersPage() {
     return this.router.url == "/landing/customers";
+  }
+
+  showSchedulePage() {
+    return this.router.url == "/landing/schedule";
   }
 }

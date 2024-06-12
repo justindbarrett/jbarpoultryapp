@@ -24,6 +24,7 @@
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
+@import 'swiper/css';
 
 /**
  * Ionic Dark Mode
@@ -34,24 +35,48 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+//@import '@ionic/angular/css/palettes/dark.system.css';
 
 :root {
-    --ion-color-primary: #4d814a;
-	--ion-color-primary-rgb: 77,129,74;
-	--ion-color-primary-contrast: #ffffff;
-	--ion-color-primary-contrast-rgb: 255,255,255;
-	--ion-color-primary-shade: #447241;
-	--ion-color-primary-tint: #5f8e5c;
+  --ion-color-primary: #4d814a;
+  --ion-color-primary-rgb: 77,129,74;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255,255,255;
+  --ion-color-primary-shade: #447241;
+  --ion-color-primary-tint: #5f8e5c;
 
-    --ion-color-secondary: #006600;
-    --ion-color-secondary-rgb: 0, 102, 0;
-    --ion-color-secondary-contrast: #ffffff;
-    --ion-color-secondary-contrast-rgb: 255, 255, 255;
-    --ion-color-secondary-shade: #005a00;
-    --ion-color-secondary-tint: #1a751a;
-  }
+  --ion-color-secondary: #006600;
+  --ion-color-secondary-rgb: 0, 102, 0;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #005a00;
+  --ion-color-secondary-tint: #1a751a;
+}
 
-  ion-item {
-    --min-height: 16px;
+ion-item {
+  --min-height: 16px;
+}
+
+ion-input {
+  border-color: transparent !important;
+}
+
+ion-valid {
+  border-color: transparent !important;
+}
+
+.ion-valid.sc-ion-input-md-h {
+  --highlight-color: grey;
+  --border-color: transparent;
+}
+
+.ion-touched.ion-invalid.sc-ion-input-md-h {
+  --highlight-color: grey;
+}
+
+.sc-ion-input-md-h {
+  --highlight-color-focused: grey;
+  --highlight-color-valid: grey;
+  --highlight-color-invalid: grey;
+  --highlight-color: grey;
 }

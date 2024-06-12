@@ -1,0 +1,93 @@
+<div class="card-container">
+  <ion-card *ngIf="true">
+    <ion-row>
+      <ion-col size-md="5" size="12" class="ion-padding ion-blue-bkg">
+        <ion-item lines="none" class="settingsHeader"> Lot Schedule </ion-item>
+      </ion-col>
+      <ion-col size-md="7" size="12" class="welcome">
+        <ion-card-content>
+          <ion-segment [(ngModel)]="calendar.mode">
+            <ion-segment-button value="month"> Month </ion-segment-button>
+            <ion-segment-button value="week"> Week </ion-segment-button>
+            <ion-segment-button value="day"> Day </ion-segment-button>
+          </ion-segment>
+          <ion-row>
+            <ion-col size="2">
+              <ion-button fill="clear" (click)="calendarBack()">
+                <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+              </ion-button>
+            </ion-col>
+            <ion-col size="8">
+              <h2 class="ion-text-center">{{ calendarViewTitle }}</h2>
+            </ion-col>
+            <ion-col size="2">
+              <ion-button fill="clear" (click)="calendarForward()">
+                <ion-icon name="arrow-forward" slot="icon-only"></ion-icon>
+              </ion-button>
+            </ion-col>
+          </ion-row>
+          <calendar
+            [calendarMode]="calendar.mode"
+            (onTitleChanged)="calendarViewTitle = $event"
+            [startingDayWeek]="1"
+            [startHour]="7"
+            [endHour]="17"
+          ></calendar>
+        </ion-card-content>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+</div>
+<ion-fab slot="fixed" vertical="bottom" horizontal="center" [edge]="true">
+  <ion-fab-button id="newEventModal">
+    <ion-icon name="add"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
+
+<ion-modal
+  #modal
+  trigger="newEventModal"
+  [presentingElement]="presentingElement"
+>
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="light">
+        <ion-buttons slot="start">
+          <ion-button (click)="modal.dismiss()"> Cancel </ion-button>
+        </ion-buttons>
+        <ion-buttons slot="end">
+          <ion-button
+            color="primary"
+            strong
+            (click)="scheduleEvent()"
+            [disabled]="!newEvent.title"
+          >
+            Add
+          </ion-button>
+        </ion-buttons>
+        <ion-title> New Lot </ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-card>
+      <ion-item>
+        <ion-input
+          type="text"
+          [(ngModel)]="newEvent.title"
+          placeholder="title"
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label>customer</ion-label>
+        <ionic-selectable
+          [(ngModel)]="customer"
+          [items]="customers"
+          itemValueField="id"
+          itemTextField="data.name"
+          [canSearch]="true"
+          (onChange)="customerChange($event)"
+        >
+        </ionic-selectable>
+      </ion-item>
+    </ion-card>
+  </ng-template>
+</ion-modal>
