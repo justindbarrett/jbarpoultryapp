@@ -98,9 +98,9 @@ export class CustomersPage implements OnInit, OnDestroy {
     this.showCustomerDetails = true;
     this.currentCustomer = customer;
     this.customerNumber = this.currentCustomer.number;
-    this.customerName = this.currentCustomer.data.name;
-    this.customerAddress = this.currentCustomer.data.address;
-    this.customerPhone = this.currentCustomer.data.phone;
+    this.customerName = this.currentCustomer.name;
+    this.customerAddress = this.currentCustomer.address;
+    this.customerPhone = this.currentCustomer.phone;
     console.log(JSON.stringify(this.currentCustomer));
   }
 

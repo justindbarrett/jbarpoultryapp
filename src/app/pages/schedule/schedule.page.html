@@ -27,7 +27,10 @@
             </ion-col>
           </ion-row>
           <calendar
+            [eventSource]="eventSource"
             [calendarMode]="calendar.mode"
+            [currentDate]="calendar.currentDate"
+            (onCurrentDateChanged)="onCurrentDateChanged($event)"
             (onTitleChanged)="calendarViewTitle = $event"
             [startingDayWeek]="1"
             [startHour]="7"
@@ -47,7 +50,8 @@
 <ion-modal
   #modal
   trigger="newEventModal"
-  [presentingElement]="presentingElement"
+  canDismiss="true"
+  (didDismiss)="modalDismissed($event)"
 >
   <ng-template>
     <ion-header>
@@ -60,12 +64,12 @@
             color="primary"
             strong
             (click)="scheduleEvent()"
-            [disabled]="!newEvent.title"
+            [disabled]="disableScheduleEvent()"
           >
             Add
           </ion-button>
         </ion-buttons>
-        <ion-title> New Lot </ion-title>
+        <ion-title> Schedule Lot </ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-card>
@@ -82,7 +86,7 @@
           [(ngModel)]="customer"
           [items]="customers"
           itemValueField="id"
-          itemTextField="data.name"
+          itemTextField="name"
           [canSearch]="true"
           (onChange)="customerChange($event)"
         >
