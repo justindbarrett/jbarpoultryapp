@@ -7,7 +7,7 @@ import { AppPages } from './pages.service';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'landing/customers',
     pathMatch: 'full',
   },
   {
