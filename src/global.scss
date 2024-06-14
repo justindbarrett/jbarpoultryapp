@@ -53,6 +53,14 @@
   --ion-color-secondary-tint: #1a751a;
 }
 
+.weekview-normal-event-container {
+  position: relative !important;
+}
+
+.dayview-normal-event-container {
+  position: relative !important;
+}
+
 ion-item {
   --min-height: 16px;
 }
@@ -79,4 +87,11 @@ ion-valid {
   --highlight-color-valid: grey;
   --highlight-color-invalid: grey;
   --highlight-color: grey;
+}
+
+ion-toast.success-toast {
+  --background: var(--ion-color-primary-tint);
+  --box-shadow: 3px 3px 10px 0 rgba(0, 0, 0, 0.2);
+  --color: #ffffff;
+  text-align: center;
 }

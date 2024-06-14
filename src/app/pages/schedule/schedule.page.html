@@ -6,7 +6,10 @@
       </ion-col>
       <ion-col size-md="7" size="12" class="welcome">
         <ion-card-content>
-          <ion-segment [(ngModel)]="calendar.mode">
+          <ion-segment
+            [(ngModel)]="calendar.mode"
+            (ionChange)="segmentChanged($event)"
+          >
             <ion-segment-button value="month"> Month </ion-segment-button>
             <ion-segment-button value="week"> Week </ion-segment-button>
             <ion-segment-button value="day"> Day </ion-segment-button>
@@ -31,10 +34,12 @@
             [calendarMode]="calendar.mode"
             [currentDate]="calendar.currentDate"
             (onCurrentDateChanged)="onCurrentDateChanged($event)"
+            (onTimeSelected)="onTimeSelected($event)"
             (onTitleChanged)="calendarViewTitle = $event"
+            [autoSelect]="autoSelect"
             [startingDayWeek]="1"
             [startHour]="7"
-            [endHour]="17"
+            [endHour]="19"
           ></calendar>
         </ion-card-content>
       </ion-col>
@@ -92,6 +97,33 @@
         >
         </ionic-selectable>
       </ion-item>
+      <ion-item>
+        <ion-toggle ngDefaultControl [(ngModel)]="newEvent.allDay"
+          >All-day</ion-toggle
+        >
+      </ion-item>
+      <ion-item (click)="showStart = !showStart">
+        <ion-label>Start Time</ion-label>
+        <ion-text>{{ formattedStart }}</ion-text>
+      </ion-item>
+      <ion-datetime
+        #start
+        *ngIf="showStart"
+        [value]="newEvent.startTime"
+        [presentation]="newEvent.allDay ? 'date' : 'time-date'"
+        (ionChange)="startChanged(start.value)"
+      ></ion-datetime>
+      <ion-item (click)="showEnd = !showEnd">
+        <ion-label>End Time</ion-label>
+        <ion-text>{{ formattedEnd }}</ion-text>
+      </ion-item>
+      <ion-datetime
+        #end
+        *ngIf="showEnd"
+        [value]="newEvent.endTime"
+        [presentation]="newEvent.allDay ? 'date' : 'time-date'"
+        (ionChange)="endChanged(end.value)"
+      ></ion-datetime>
     </ion-card>
   </ng-template>
 </ion-modal>
