@@ -22,25 +22,56 @@
   }
   
 @media screen and (max-width: 780px) {
-    .card-container {
-        ion-card {
-        .ion-blue-bkg {
-            max-height: 200px;
-        }
-        .welcome {
-            min-height: 200px;
-        }
-        }
-    }
+  .card-container {
+      ion-card {
+      .ion-blue-bkg {
+          max-height: 200px;
+      }
+      .welcome {
+          min-height: 200px;
+      }
+      }
+  }
+}
+
+.scrollableList {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.searchbarStyle {
+  border-radius: 10px;
+}
+
+.customerListStyle {
+  border-radius: 10px;
+  min-height: 40px;
+  font-size: large;
+  color: gray;
+  display: flex;
+  align-items: center;
 }
 
 .rowStyle {
-    left: 5%;
-    width: 90%;
-    border-radius: 30px;
-    margin-top: 5px;
-    margin-bottom: 20px;
-    //max-width: 350px;
+  left: 5%;
+  width: 90%;
+  border-radius: 30px;
+  margin-top: 5px;
+  margin-bottom: 20px;
+}
+
+.lastRowStyle {
+  left: 5%;
+  width: 90%;
+  border-radius: 30px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.errorMessage {
+  color: red;
+  font-size: smaller;
+  padding-left: 10px;
 }
 
 .settingsLabel {

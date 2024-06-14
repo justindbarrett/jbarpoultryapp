@@ -1,43 +1,67 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { IonFab, IonFabButton, IonSearchbar, IonModal, IonInput, IonIcon, IonList, IonLabel, IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem } from '@ionic/angular/standalone';
+import { FormControl, FormGroup, FormsModule, Validators } from '@angular/forms';
+import { IonToast, IonFab, IonFabButton, IonSearchbar, IonModal, IonInput, IonIcon, IonList, IonLabel, IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem } from '@ionic/angular/standalone';
 import { Customer } from 'src/app/models/customer.model';
 import { CustomersService } from 'src/app/customers.service';
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 import { AlertController } from '@ionic/angular';
+import { Subscription, filter } from 'rxjs';
 
 @Component({
   selector: 'app-customers',
   templateUrl: './customers.page.html',
   styleUrls: ['./customers.page.scss'],
   standalone: true,
-  imports: [ IonFab, IonFabButton, IonSearchbar, IonModal, IonInput, IonIcon, IonList, IonLabel, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem ],
+  imports: [ IonToast, IonFab, IonFabButton, IonSearchbar, IonModal, IonInput, IonIcon, IonList, IonLabel, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem ],
   providers: [ CustomersService ]
 })
 export class CustomersPage implements OnInit, OnDestroy {
 
+  // customer list
+  public showCustomerList: boolean = true;
   public searchTerm: string = "";
   public customers: Customer[] = [];
+
+  // customer details
+  public showCustomerDetails: boolean = false;
+  public currentCustomer: Customer | null = null;
   public customerNumber: string = "";
   public customerName: string = "";
   public customerAddress: string = "";
   public customerPhone: string = "";
+
+  // customer add
+  public showAddCustomer: boolean = false;
   public newCustomerName: string = "";
   public newCustomerAddress: string = "";
   public newCustomerPhone: string = "";
-  public showCustomerList: boolean = true;
-  public showAddCustomer: boolean = false;
-  public showCustomerDetails: boolean = false;
+
+  // customer edit
   public showEditCustomer: boolean = false;
-  public currentCustomer: Customer | null = null;
-  public shouldContinue: boolean = false;
-  public disableAddCustomerSaveButton: boolean = false;
-  public disableEditCustomerSaveButton: boolean = false;
+  public editCustomerName: string = "";
+  public editCustomerAddress: string = "";
+  public editCustomerPhone: string = "";
   private editNameChanged: boolean = false;
   private editAddressChanged: boolean = false;
   private editPhoneChanged: boolean = false;
+
+  // validation
+  public disableAddCustomerSaveButton: boolean = false;
+  public disableEditCustomerSaveButton: boolean = false;
+  public shouldContinue: boolean = false;
+  public validPhone: boolean = true;
+
+  // toast
+  public isToastOpen: boolean = false;
+  public successToastMessage: string = "";
+
+  // subscriptions
+  private getCustomersSubscription: Subscription;
+  private addCustomerSubscription: Subscription;
+  private updateCustomerSubscription: Subscription;
+  private deleteCustomerSubscription: Subscription;
 
   constructor(
     private alertCtrl: AlertController,
@@ -51,20 +75,43 @@ export class CustomersPage implements OnInit, OnDestroy {
   }
 
   init() {
-    this.customersService.getCustomers().subscribe(resp => {
-      this.customers = resp.customers;
-      this.customersService.setCurrentCustomerList(this.customers);
-    });
+    this.getCustomersSubscription = this.customersService.getCustomers().subscribe(
+      (resp) => {
+        this.customers = resp.customers;
+        this.customersService.setCurrentCustomerList(this.customers);
+      },
+      (error) => {
+        this.presentAlert("Error Retrieving Customer List", error.message, "Try Again");
+      }
+    );
     this.setFilteredCustomers();
     
     this.newCustomerName = "";
     this.newCustomerAddress = "";
     this.newCustomerPhone = "";
+    this.editCustomerName = "";
+    this.editCustomerAddress = "";
+    this.editCustomerPhone = "";
     this.currentCustomer = null;
     this.shouldContinue = false;
+    this.editNameChanged = false;
+    this.editAddressChanged = false;
+    this.editPhoneChanged = false;
+    this.disableAddCustomerSaveButton = false;
+    this.disableEditCustomerSaveButton = false;
+    this.shouldContinue = false;
+    this.validPhone = true;
   }
 
   ngOnDestroy(): void {
+    if (this.getCustomersSubscription)
+      this.getCustomersSubscription.unsubscribe();
+    if (this.addCustomerSubscription)
+      this.addCustomerSubscription.unsubscribe();
+    if (this.updateCustomerSubscription)
+      this.updateCustomerSubscription.unsubscribe();
+    if (this.deleteCustomerSubscription)
+      this.deleteCustomerSubscription.unsubscribe();
   }
 
   setFilteredCustomers() {
@@ -78,30 +125,27 @@ export class CustomersPage implements OnInit, OnDestroy {
 
   addCustomer() {
     this.disableAddCustomerSaveButton = true;
-    this.customersService.addCustomer(this.newCustomerName, this.newCustomerAddress, this.newCustomerPhone).subscribe(
+    this.addCustomerSubscription = this.customersService.addCustomer(
+      this.newCustomerName, this.newCustomerAddress, this.newCustomerPhone).subscribe(
       (resp) => {
-        console.log(resp);
-        if (resp !== null && resp !== undefined) {
+        if (resp && resp.status === "success") {
           this.resetViewControls();
           this.showCustomerList = true;
           this.init();
+          this.openSuccessToast(true, "Customer Added Successfully!");
+        }
+        else {
+          this.presentAlert("Failed Add Customer Attempt", "Unknown Error Occurred", "Try Again");
         }
       },
       (error) => {
-        console.log(error);
+        this.presentAlert("Failed Add Customer Attempt", error.message, "Try Again");
       }
     );
   }
 
-  customerDetails(customer: Customer) {
-    this.showCustomerList = false;
-    this.showCustomerDetails = true;
-    this.currentCustomer = customer;
-    this.customerNumber = this.currentCustomer.number;
-    this.customerName = this.currentCustomer.name;
-    this.customerAddress = this.currentCustomer.address;
-    this.customerPhone = this.currentCustomer.phone;
-    console.log(JSON.stringify(this.currentCustomer));
+  disableAddCustomerSave() {
+    return !(this.newCustomerName) || !(this.validPhone) || this.disableAddCustomerSaveButton;
   }
 
   cancelAddCustomer() {
@@ -110,29 +154,55 @@ export class CustomersPage implements OnInit, OnDestroy {
     this.init();
   }
 
+  customerDetails(customer: Customer) {
+    this.resetViewControls();
+    this.showCustomerDetails = true;
+    this.currentCustomer = customer;
+    this.customerNumber = this.currentCustomer.number;
+    this.customerName = this.currentCustomer.name;
+    this.customerAddress = this.currentCustomer.address;
+    this.customerPhone = this.currentCustomer.phone;
+  }
+
+  cancelCustomerDetails() {
+    this.resetViewControls();
+    this.showCustomerList = true;
+    this.init();
+  }
+
   editCustomer() {
     this.resetViewControls();
     this.showEditCustomer = true;    
+    this.editCustomerName = this.customerName;
+    this.editCustomerAddress = this.customerAddress;
+    this.editCustomerPhone = this.customerPhone;
   }
 
   async editCustomerSave() {
     this.disableEditCustomerSaveButton = true;
     if (this.currentCustomer) {
-      await this.presentContinueAlert(`Continue?`, `This action will update this customer in the system. Are you sure you want to continue?`);
+      await this.presentContinueAlert(
+        `Continue?`, 
+        `This action will update this customer in the system. Are you sure you want to continue?`);
       if (this.shouldContinue) {
-        this.customersService.updateCustomer(this.currentCustomer.id, this.customerName, this.customerAddress, this.customerPhone).subscribe(
+        this.updateCustomerSubscription = this.customersService.updateCustomer(
+          this.currentCustomer.id, 
+          this.editCustomerName, 
+          this.editCustomerAddress, 
+          this.editCustomerPhone).subscribe(
           (resp) => {
-            if (resp !== null && resp !== undefined && resp.status === "success") {
+            if (resp && resp.status === "success") {
               this.resetViewControls();
-              this.showCustomerDetails = true;
+              this.showCustomerList = true;
               this.init();
+              this.openSuccessToast(true, "Customer Updated Successfully!");
             }
             else {
               this.presentAlert("Failed Update Customer Attempt", "Unknown Error Occurred", "Try Again");
             }
           },
           (error) => {
-            this.presentAlert("Failed Update Customer Attempt", error, "Try Again");
+            this.presentAlert("Failed Update Customer Attempt", error.message, "Try Again");
           }
         );
       }
@@ -143,36 +213,17 @@ export class CustomersPage implements OnInit, OnDestroy {
     }
   }
 
-  nameChanged() {
-    console.log(`Name Changed`)
-    this.editNameChanged = true;
-  }
-
-  addressChanged() {
-    console.log(`Address Changed`)
-    this.editAddressChanged = true;
-  }
-
-  phoneChanged() {
-    console.log(`Phone Changed`)
-    this.editPhoneChanged = true;
-  }
-
-  cancelEditCustomer() {
-    this.resetViewControls();
-    this.showCustomerDetails = true;
-  }
-
   async deleteCustomer() {
     if (this.currentCustomer) {
       await this.presentContinueAlert(`Continue?`, `This action will remove this customer from the system. Are you sure you want to continue?`);
       if (this.shouldContinue) {
-        this.customersService.deleteCustomer(this.currentCustomer.id).subscribe(
+        this.deleteCustomerSubscription = this.customersService.deleteCustomer(this.currentCustomer.id).subscribe(
           (resp) => {
-            if (resp !== null && resp !== undefined && resp.status === "success") {
+            if (resp && resp.status === "success") {
               this.resetViewControls();
               this.showCustomerList = true;
               this.init();
+              this.openSuccessToast(true, "Customer Deleted Successfully!");
             }
             else {
               this.presentAlert("Failed Delete Customer Attempt", "Unknown Error Occurred", "Try Again");
@@ -190,10 +241,40 @@ export class CustomersPage implements OnInit, OnDestroy {
     }
   }
 
-  cancelCustomerDetails() {
-    this.resetViewControls();
-    this.showCustomerList = true;
+  disableEditCustomerSave() {
+    return !((this.editCustomerName) 
+    && (this.editNameChanged || this.editAddressChanged || this.editPhoneChanged))
+    || !(this.validPhone)
+    || this.disableEditCustomerSaveButton;
   }
+
+  cancelEditCustomer() {
+    this.resetViewControls();
+    this.showCustomerDetails = true;
+    this.validPhone = true;
+  }
+
+  nameChanged() {
+    this.editNameChanged = (this.editCustomerName !== this.customerName);
+  }
+
+  addressChanged() {
+    this.editAddressChanged = (this.editCustomerAddress !== this.customerAddress);
+  }
+
+  phoneChanged(event: any) {
+    const value = event.target!.value;
+    const filteredValue = value.replace(/\D[^\.]/g, "");
+    const formattedNumber = filteredValue.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+
+    this.newCustomerPhone = this.editCustomerPhone = formattedNumber;
+
+    const phoneRegex = /^[0-9]{3}-[0-9]{3}-[0-9]{4}$/g;
+    this.validPhone = phoneRegex.test(this.newCustomerPhone) || (this.newCustomerPhone == "") || phoneRegex.test(this.editCustomerPhone) || (this.editCustomerPhone == "");
+
+    this.editPhoneChanged = (this.editCustomerPhone !== this.customerPhone);
+  }
+
 
   resetViewControls() {
     this.showCustomerList = false;
@@ -201,15 +282,6 @@ export class CustomersPage implements OnInit, OnDestroy {
     this.showCustomerDetails = false;
     this.showEditCustomer = false;
   }
-
-  disableAddCustomerSave() {
-    return !(this.newCustomerName) || this.disableAddCustomerSaveButton;
-  }
-
-  disableEditCustomerSave() {
-    return !(!(this.customerName) && !(this.editNameChanged || this.editAddressChanged || this.editPhoneChanged )) || this.disableEditCustomerSaveButton;
-  }
-
 
   async presentAlert(header: string, message: string, buttonText: string) {
     const alert = await this.alertCtrl.create({
@@ -221,9 +293,8 @@ export class CustomersPage implements OnInit, OnDestroy {
     await alert.present();
 
     await alert.onDidDismiss().then(() => {
-      //this.disableSignInButton = false;
-      //this.disableSaveInfoButton = false;
-      //this.disableSavePasswordButton = false;
+      this.disableAddCustomerSaveButton = false;
+      this.disableEditCustomerSaveButton = false;
     });
   }
 
@@ -237,8 +308,7 @@ export class CustomersPage implements OnInit, OnDestroy {
           role: 'cancel',
           handler: () => {
             this.shouldContinue = false;            
-            //this.disableSaveInfoButton = false;
-            //this.disableSavePasswordButton = false;
+            this.disableEditCustomerSaveButton = false;
           },
         },
         {
@@ -255,5 +325,10 @@ export class CustomersPage implements OnInit, OnDestroy {
 
     await alert.onDidDismiss().then(() => {
     });
+  }
+
+  openSuccessToast(open: boolean, message: string) {
+    this.successToastMessage = message;
+    this.isToastOpen = open;
   }
 }

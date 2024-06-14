@@ -7,15 +7,17 @@
       <ion-col size-md="7" size="12" class="welcome">
         <ion-card-content>
           <ion-searchbar
+            class="searchbarStyle"
             [(ngModel)]="searchTerm"
             (ionInput)="setFilteredCustomers()"
           ></ion-searchbar>
-          <ion-list>
+          <ion-list class="scrollableList">
             <ion-item
+              class="customerListStyle"
               *ngFor="let customer of customers"
               (click)="customerDetails(customer)"
             >
-              {{ customer.name }}
+              #{{ customer.number }} | {{ customer.name }}
             </ion-item>
           </ion-list>
         </ion-card-content>
@@ -54,14 +56,21 @@
             ></ion-input>
           </ion-item>
           <ion-label>Phone</ion-label>
-          <ion-item lines="none" color="light" class="rowStyle">
+          <ion-item lines="none" color="light" class="lastRowStyle">
             <ion-input
-              type="text"
+              type="tel"
               placeholder="customer phone"
               required
               ngDefaultControl
+              maxlength="12"
               [(ngModel)]="newCustomerPhone"
+              (ionInput)="phoneChanged($event)"
             ></ion-input>
+          </ion-item>
+          <ion-item lines="none">
+            <span *ngIf="!validPhone" class="errorMessage"
+              >Enter valid phone number</span
+            >
           </ion-item>
           <ion-button
             [disabled]="disableAddCustomerSave()"
@@ -99,7 +108,6 @@
             <ion-input
               disabled="true"
               type="text"
-              placeholder="customer name"
               required
               ngDefaultControl
               [(ngModel)]="customerName"
@@ -110,7 +118,6 @@
             <ion-input
               disabled="true"
               type="text"
-              placeholder="customer address"
               required
               ngDefaultControl
               [(ngModel)]="customerAddress"
@@ -121,7 +128,6 @@
             <ion-input
               disabled="true"
               type="text"
-              placeholder="customer phone"
               required
               ngDefaultControl
               [(ngModel)]="customerPhone"
@@ -177,7 +183,7 @@
               placeholder="customer name"
               required
               ngDefaultControl
-              [(ngModel)]="customerName"
+              [(ngModel)]="editCustomerName"
               (ionInput)="nameChanged()"
             ></ion-input>
           </ion-item>
@@ -188,20 +194,26 @@
               placeholder="customer address"
               required
               ngDefaultControl
-              [(ngModel)]="customerAddress"
+              [(ngModel)]="editCustomerAddress"
               (ionInput)="addressChanged()"
             ></ion-input>
           </ion-item>
           <ion-label>Phone</ion-label>
-          <ion-item lines="none" color="light" class="rowStyle">
+          <ion-item lines="none" color="light" class="lastRowStyle">
             <ion-input
-              type="text"
+              type="tel"
               placeholder="customer phone"
               required
               ngDefaultControl
-              [(ngModel)]="customerPhone"
-              (ionInput)="phoneChanged()"
+              maxlength="12"
+              [(ngModel)]="editCustomerPhone"
+              (ionInput)="phoneChanged($event)"
             ></ion-input>
+          </ion-item>
+          <ion-item lines="none">
+            <span *ngIf="!validPhone" class="errorMessage"
+              >Enter valid phone number</span
+            >
           </ion-item>
           <ion-button
             [disabled]="disableEditCustomerSave()"
@@ -236,3 +248,11 @@
     <ion-icon name="add"></ion-icon>
   </ion-fab-button>
 </ion-fab>
+
+<ion-toast
+  [isOpen]="isToastOpen"
+  message="{{successToastMessage}}"
+  [duration]="5000"
+  class="success-toast"
+  (didDismiss)="openSuccessToast(false, successToastMessage)"
+></ion-toast>
