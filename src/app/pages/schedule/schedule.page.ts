@@ -36,18 +36,22 @@ export class SchedulePage implements OnInit {
     title: "",
     allDay: false,
     startTime: null,
-    endTime: null
+    endTime: null,
+    customerId: "",
+    lotId: "",
+    id: "",
   };
   public eventSource: IEvent[] = [];
   public calendarViewTitle: string = "";
   public presentingElement: any = null;
   public customers: Customer[] = [];
-  public customer: Customer | null = null;
+  public customer: Customer | undefined = undefined;
   public showStart: boolean = false;
   public showEnd: boolean = false;
   public formattedStart: string = "";
   public formattedEnd: string = "";
   public autoSelect: boolean = true;
+  public lotDetails: boolean = false;
 
   constructor(private ionRouterOutlet: IonRouterOutlet,
     private customersService: CustomersService,
@@ -58,22 +62,22 @@ export class SchedulePage implements OnInit {
   }
 
   ngOnInit(): void {
+    this.init();
+  }
+
+  init() {
+    this.eventSource = [];
+    this.lotDetails = false;
     this.customersService.getCustomers().subscribe(resp => {
       this.customers = resp.customers;
       this.customersService.setCurrentCustomerList(this.customers);
     });
     this.scheduleService.getScheduledLots().subscribe(resp => {
-      resp.lots.forEach(lot => {
-        const event: IEvent = {
-          title: lot.eventData.title,
-          allDay: lot.eventData.allDay,
-          startTime: new Date(lot.eventData.startTime),
-          endTime: new Date(lot.eventData.endTime)
-        }
-        this.eventSource.push(event);
+       resp.lots.forEach(lot => {
+         this.eventSource.push(this.transformLotEvent(lot));
+         this.calendarView.loadEvents();
       });
     });
-    console.log(this.newEvent.allDay)
   }
 
   calendarBack() {
@@ -86,17 +90,17 @@ export class SchedulePage implements OnInit {
 
   scheduleEvent() {
     if (this.customer) {
-      const eventToAdd: IEvent = {
-        title: this.newEvent.title,
-        allDay: this.newEvent.allDay,
-        startTime: new Date(this.newEvent.startTime),
-        endTime: new Date(this.newEvent.endTime)
-      }
-      this.scheduleService.scheduleLot(this.customer.id, "", eventToAdd).subscribe(
+      this.scheduleService.scheduleLot(
+        this.customer.id, 
+        "",
+        this.newEvent.allDay,
+        new Date(this.newEvent.endTime),
+        new Date(this.newEvent.startTime),
+        this.newEvent.title).subscribe(
         (resp) => {
           if (resp) {
             this.newEventModal.dismiss();
-            this.eventSource.push(eventToAdd);
+            this.eventSource.push(this.transformLotEvent(resp.data));
             this.calendarView.loadEvents();
             // show toast
           }
@@ -157,6 +161,75 @@ export class SchedulePage implements OnInit {
 
   modalDismissed(event: Event) {
     this.newEvent.title = "";
-    this.customer = null;
+    this.customer = undefined;
+    this.lotDetails = false;
+  }
+
+  onEventSelected(event: any) {
+    console.log(JSON.stringify(event));
+    this.lotDetails = true;
+    this.customer = this.customers.find((cust) =>
+      cust.id === event.customerId
+    );
+    console.log(this.customer);
+    this.newEvent = { ...event };
+    this.newEventModal.present();
+  }
+
+  saveEditEvent() {
+    if (this.customer) {
+      this.scheduleService.updateSchedule(
+        this.newEvent.id,
+        this.customer.id, 
+        this.newEvent.lotId,
+        this.newEvent.allDay,
+        new Date(this.newEvent.endTime),
+        new Date(this.newEvent.startTime),
+        this.newEvent.title).subscribe(
+        (resp) => {
+          if (resp) {
+            //this.eventSource.push(this.transformLotEvent(resp.data));
+            //this.calendarView.loadEvents();
+            this.init();
+            this.newEventModal.dismiss();
+            // show toast
+          }
+        }
+      );
+    }
+  }
+
+  disableSaveEditEvent() {
+    return !(this.newEvent.title && this.customer);
+  }
+
+  transformLotEvent(scheduledLot: ScheduledLot) {
+    const event: ScheduledLot = {
+      id: scheduledLot.id,
+      customerId: scheduledLot.customerId,
+      lotId: scheduledLot.lotId,
+      title: scheduledLot.title,
+      allDay: scheduledLot.allDay,
+      startTime: new Date(scheduledLot.startTime),
+      endTime: new Date(scheduledLot.endTime)
+    }
+    return event;
+  }
+
+  deleteEvent() {
+    this.scheduleService.deleteCustomer(
+      this.newEvent.id).subscribe(
+      (resp) => {
+        if (resp) {
+          this.init();
+          this.newEventModal.dismiss();
+          // show toast
+        }
+      }
+    );
+  }
+
+  disableDeleteEvent() {
+    return !(this.newEvent.title && this.customer);
   }
 }

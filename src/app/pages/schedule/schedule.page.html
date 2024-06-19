@@ -35,6 +35,7 @@
             [currentDate]="calendar.currentDate"
             (onCurrentDateChanged)="onCurrentDateChanged($event)"
             (onTimeSelected)="onTimeSelected($event)"
+            (onEventSelected)="onEventSelected($event)"
             (onTitleChanged)="calendarViewTitle = $event"
             [autoSelect]="autoSelect"
             [startingDayWeek]="1"
@@ -66,15 +67,35 @@
         </ion-buttons>
         <ion-buttons slot="end">
           <ion-button
-            color="primary"
+            color="secondary"
             strong
             (click)="scheduleEvent()"
             [disabled]="disableScheduleEvent()"
+            *ngIf="!lotDetails"
           >
             Add
           </ion-button>
+          <ion-button
+            color="secondary"
+            strong
+            (click)="saveEditEvent()"
+            [disabled]="disableSaveEditEvent()"
+            *ngIf="lotDetails"
+          >
+            Save
+          </ion-button>
+          <ion-button
+            color="primary"
+            strong
+            (click)="deleteEvent()"
+            [disabled]="disableDeleteEvent()"
+            *ngIf="lotDetails"
+          >
+            Delete
+          </ion-button>
         </ion-buttons>
-        <ion-title> Schedule Lot </ion-title>
+        <ion-title *ngIf="!lotDetails"> Schedule Lot </ion-title>
+        <ion-title *ngIf="lotDetails"> Lot Details </ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-card>

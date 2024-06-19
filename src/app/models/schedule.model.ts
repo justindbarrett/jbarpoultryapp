@@ -1,10 +1,14 @@
 import { IEvent } from "ionic7-calendar/calendar.interface";
 
 export type ScheduledLot = {
-    id: string,
-    customerId: string,
-    lotId: string,
-    eventData: IEvent
+    id: string;
+    customerId: string;
+    lotId: string;
+    allDay: boolean;
+    endTime: Date;
+    startTime: Date;
+    title: string;
+    category?: string;
 };
 
 export type ScheduledLots = {

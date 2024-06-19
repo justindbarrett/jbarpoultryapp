@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { AddCustomerResponse, Customer, Customers, DeleteCustomerResponse } from "./models/customer.model";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, catchError, map } from "rxjs";
-import { ScheduleLotResponse, ScheduledLot, ScheduledLots } from "./models/schedule.model";
+import { DeleteScheduleLotResponse, ScheduleLotResponse, ScheduledLot, ScheduledLots } from "./models/schedule.model";
 import { IEvent } from "ionic7-calendar/calendar.interface";
 
 @Injectable({
@@ -18,11 +18,22 @@ export class ScheduleService {
     return this.http.get<ScheduledLots>("https://app-mdoldxqroa-uc.a.run.app/schedule");
   };
 
-  scheduleLot(customerId: string, lotId: string, eventData: IEvent): Observable<ScheduleLotResponse> {
+  scheduleLot(
+    customerId: string, 
+    lotId: string, 
+    allDay: boolean, 
+    endTime: Date, 
+    startTime: Date, 
+    title: string, 
+    category: string = ""): Observable<ScheduleLotResponse> {
     const body = {
       "customerId": customerId,
       "lotId": lotId,
-      "eventData": eventData
+      "allDay": allDay,
+      "endTime": endTime,
+      "startTime": startTime,
+      "title": title,
+      "category": category
     };
     const headers = {
       headers : new HttpHeaders({"Content-Type": "application/json"}),
@@ -30,23 +41,31 @@ export class ScheduleService {
     return this.http.post<ScheduleLotResponse>("https://app-mdoldxqroa-uc.a.run.app/schedule", body, headers);
   };
 
-  updateCustomer(
+  updateSchedule(
+    scheduledLotId: string,
     customerId: string, 
-    customerName: string, 
-    customerAddress: string, 
-    customerPhone: string): Observable<AddCustomerResponse> {
+    lotId: string, 
+    allDay: boolean, 
+    endTime: Date, 
+    startTime: Date, 
+    title: string, 
+    category: string = ""): Observable<ScheduleLotResponse> {
     const body = {
-      "name": customerName,
-      "address": customerAddress,
-      "phone": customerPhone
+      "customerId": customerId,
+      "lotId": lotId,
+      "allDay": allDay,
+      "endTime": endTime,
+      "startTime": startTime,
+      "title": title,
+      "category": category
     };
     const headers = {
       headers : new HttpHeaders({"Content-Type": "application/json"}),
     };
-    return this.http.patch<AddCustomerResponse>(`https://app-mdoldxqroa-uc.a.run.app/customers/${customerId}`, body, headers);
+    return this.http.patch<ScheduleLotResponse>(`https://app-mdoldxqroa-uc.a.run.app/schedule/${scheduledLotId}`, body, headers);
   };
 
-  deleteCustomer(customerId: string) {
-    return this.http.delete<DeleteCustomerResponse>(`https://app-mdoldxqroa-uc.a.run.app/customers/${customerId}`);
+  deleteCustomer(scheduledLotId: string) {
+    return this.http.delete<DeleteScheduleLotResponse>(`https://app-mdoldxqroa-uc.a.run.app/schedule/${scheduledLotId}`);
   }
 }
