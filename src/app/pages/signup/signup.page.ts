@@ -1,7 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem, IonIcon, IonInput } from '@ionic/angular/standalone';
+import { 
+  IonSpinner,
+  IonContent,
+  IonHeader,
+  IonTitle,
+  IonToolbar,
+  IonButton,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
+  IonCol,
+  IonRow,
+  IonCard,
+  IonItem,
+  IonIcon,
+  IonInput } from '@ionic/angular/standalone';
 import { AuthenticationService } from 'src/app/authentication.service';
 import { NavController, AlertController } from '@ionic/angular';
 import { eyeOffOutline, eyeOutline } from 'ionicons/icons';
@@ -12,7 +27,24 @@ import { addIcons } from 'ionicons';
   templateUrl: './signup.page.html',
   styleUrls: ['./signup.page.scss'],
   standalone: true,
-  imports: [ IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem, IonIcon, IonInput ],
+  imports: [ 
+    IonSpinner,
+    IonContent,
+    IonHeader,
+    IonTitle, 
+    IonToolbar,
+    CommonModule,
+    FormsModule,
+    IonButton,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
+    IonCol,
+    IonRow,
+    IonCard,
+    IonItem,
+    IonIcon,
+    IonInput ],
 })
 export class SignupPage implements OnInit {
 
@@ -24,6 +56,7 @@ export class SignupPage implements OnInit {
   public codeType: string = "password";
   public showHideIconPassword: string = "eye-outline";
   public showHideIconCode: string = "eye-outline";
+  public loading: boolean = false;
   private isPasswordVisible: boolean = false;
   private isCodeVisible: boolean = false;
   private disableSignUpButton = false;
@@ -43,21 +76,29 @@ export class SignupPage implements OnInit {
   signUp() {
     if (!this.disableSignUp()) {
       this.disableSignUpButton = true;
+      this.loading = true;
   
       // handle remaining attempts and disabling for some time use IP address/device ID, needs to be done on api?
       if (this.remainingAttempts <= 0) {
+        this.loading = false;
         return;
       }
   
       // TODO: store this code as a 10 digit secret
       if (this.creationCode == "4515432926") {
         this.authService.registerUser(this.email, this.password)
-        .then(auth => {
-             this.navCtrl.navigateForward("login");
+        .then(result => {
+          result.user?.updateProfile({ displayName: this.name });
+          this.navCtrl.navigateForward("login");
+          this.loading = false;
         })
-        .catch(err => { this.presentAlert(err.code); })
+        .catch(err => {
+          this.loading = false;
+          this.presentAlert(err.code); 
+        })
       }
       else {
+        this.loading = false;
         this.remainingAttempts = this.remainingAttempts - 1;
         this.presentAlert(`Invalid account creation code. ${this.remainingAttempts} attempts remaining.`);
       }

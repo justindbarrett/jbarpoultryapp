@@ -1,7 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem } from '@ionic/angular/standalone';
+import { 
+  IonSpinner,
+  IonContent,
+  IonHeader,
+  IonTitle,
+  IonToolbar,
+  IonButton,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
+  IonCol,
+  IonRow,
+  IonCard,
+  IonItem } from '@ionic/angular/standalone';
 import { AuthenticationService } from 'src/app/authentication.service';
 import { NavController, AlertController } from '@ionic/angular';
 
@@ -10,11 +23,27 @@ import { NavController, AlertController } from '@ionic/angular';
   templateUrl: './forgotpassword.page.html',
   styleUrls: ['./forgotpassword.page.scss'],
   standalone: true,
-  imports: [ IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem ],
+  imports: [ 
+    IonSpinner,
+    IonContent,
+    IonHeader,
+    IonTitle,
+    IonToolbar,
+    CommonModule,
+    FormsModule,
+    IonButton,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
+    IonCol,
+    IonRow,
+    IonCard,
+    IonItem ],
 })
 export class ForgotpasswordPage implements OnInit {
 
   public email: string = "";
+  public loading: boolean = false;
   private disableSendResetButton = false;
 
   constructor(
@@ -29,11 +58,16 @@ export class ForgotpasswordPage implements OnInit {
   sendReset() {
     if (!this.disableSendReset()) {
       this.disableSendResetButton = true;
+      this.loading = true;
       this.authService.resetPassword(this.email)
       .then(auth => {
         this.navCtrl.navigateForward("login");
+        this.loading = false;
       })
-      .catch(err => { this.presentAlert(err.code); })
+      .catch(err => { 
+        this.loading = false;
+        this.presentAlert(err.code); 
+      })
     }
   }
 

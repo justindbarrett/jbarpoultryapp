@@ -16,9 +16,10 @@
             *ngFor="let p of appPages; let i = index"
           >
             <ion-item *ngIf="i == 0">
-              <span class="userDisplay"
+              <span *ngIf="!loading" class="userDisplay"
                 >Welcome,<br />{{ userDisplayName }}!</span
               >
+              <ion-spinner color="primary" *ngIf="loading"></ion-spinner>
               <ion-item
                 lines="none"
                 slot="end"

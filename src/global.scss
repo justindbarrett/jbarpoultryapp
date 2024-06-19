@@ -74,19 +74,35 @@ ion-valid {
 }
 
 .ion-valid.sc-ion-input-md-h {
-  --highlight-color: grey;
+  --highlight-color: black;
   --border-color: transparent;
 }
 
 .ion-touched.ion-invalid.sc-ion-input-md-h {
-  --highlight-color: grey;
+  --highlight-color: black;
 }
 
 .sc-ion-input-md-h {
-  --highlight-color-focused: grey;
-  --highlight-color-valid: grey;
-  --highlight-color-invalid: grey;
-  --highlight-color: grey;
+  --highlight-color-focused: black;
+  --highlight-color-valid: black;
+  --highlight-color-invalid: black;
+  --highlight-color: black;
+}
+
+.ion-valid.sc-ion-input-ios-h {
+  --highlight-color: black;
+  --border-color: transparent;
+}
+
+.ion-touched.ion-invalid.sc-ion-input-ios-h {
+  --highlight-color: black;
+}
+
+.sc-ion-input-ios-h {
+  --highlight-color-focused: black;
+  --highlight-color-valid: black;
+  --highlight-color-invalid: black;
+  --highlight-color: black;
 }
 
 ion-toast.success-toast {
@@ -94,4 +110,8 @@ ion-toast.success-toast {
   --box-shadow: 3px 3px 10px 0 rgba(0, 0, 0, 0.2);
   --color: #ffffff;
   text-align: center;
+}
+
+ion-alert {
+  z-index: 999999 !important;
 }

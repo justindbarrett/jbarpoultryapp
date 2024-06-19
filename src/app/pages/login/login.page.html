@@ -49,6 +49,7 @@
               >
             </ion-item>
             <ion-button
+              *ngIf="!loading"
               [disabled]="disableSignIn()"
               (click)="login()"
               shape="round"
@@ -56,6 +57,9 @@
               class="signInButton"
               >Sign in</ion-button
             >
+            <ion-item lines="none" *ngIf="loading">
+              <ion-spinner color="primary" *ngIf="loading"></ion-spinner>
+            </ion-item>
             <ion-item lines="none" class="signUpButton">
               <a
                 style="text-decoration: none"

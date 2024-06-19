@@ -1,18 +1,44 @@
+import { 
+  IonToast, 
+  IonToggle, 
+  IonText, 
+  IonDatetime, 
+  IonButtons, 
+  IonRouterOutlet, 
+  IonSegment, 
+  IonSegmentButton, 
+  IonFab, 
+  IonFabButton, 
+  IonSearchbar, 
+  IonModal, 
+  IonInput, 
+  IonIcon, 
+  IonList, 
+  IonLabel, 
+  IonContent, 
+  IonHeader, 
+  IonTitle, 
+  IonToolbar, 
+  IonButton, 
+  IonCardContent, 
+  IonCardHeader, 
+  IonCardTitle, 
+  IonCol, 
+  IonRow, 
+  IonCard, 
+  IonItem } from '@ionic/angular/standalone';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonToggle, IonText, IonDatetime, IonButtons, IonRouterOutlet, IonSegment, IonSegmentButton, IonFab, IonFabButton, IonSearchbar, IonModal, IonInput, IonIcon, IonList, IonLabel, IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem } from '@ionic/angular/standalone';
 import { Customer } from 'src/app/models/customer.model';
 import { CustomersService } from 'src/app/customers.service';
 import { addIcons } from 'ionicons';
 import { add, arrowBack, arrowForward, checkmarkCircle, radioButtonOff } from 'ionicons/icons';
 import { AlertController } from '@ionic/angular';
 import { CalendarComponent, CalendarMode, NgCalendarModule } from 'ionic7-calendar';
-
 import { IonicSelectableComponent } from 'ionic-selectable';
 import { ScheduleService } from 'src/app/schedule.service';
 import { ScheduledLot } from 'src/app/models/schedule.model';
-import { IEvent } from 'ionic7-calendar/calendar.interface';
 import { format } from 'date-fns/format';
 import { parseISO } from 'date-fns/parseISO';
 
@@ -21,7 +47,39 @@ import { parseISO } from 'date-fns/parseISO';
   templateUrl: './schedule.page.html',
   styleUrls: ['./schedule.page.scss'],
   standalone: true,
-  imports: [ IonToggle, IonText, IonDatetime, IonicSelectableComponent, IonButtons, IonRouterOutlet, NgCalendarModule, IonSegment, IonSegmentButton, IonFab, IonFabButton, IonSearchbar, IonModal, IonInput, IonIcon, IonList, IonLabel, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem ],
+  imports: [ 
+    IonToast, 
+    IonToggle, 
+    IonText, 
+    IonDatetime, 
+    IonicSelectableComponent, 
+    IonButtons, 
+    IonRouterOutlet, 
+    NgCalendarModule, 
+    IonSegment, 
+    IonSegmentButton, 
+    IonFab, 
+    IonFabButton, 
+    IonSearchbar, 
+    IonModal, 
+    IonInput, 
+    IonIcon, 
+    IonList, 
+    IonLabel, 
+    IonContent, 
+    IonHeader, 
+    IonTitle, 
+    IonToolbar, 
+    CommonModule, 
+    FormsModule, 
+    IonButton, 
+    IonCardContent, 
+    IonCardHeader, 
+    IonCardTitle, 
+    IonCol, 
+    IonRow, 
+    IonCard, 
+    IonItem ],
   providers: [ CustomersService ]
 })
 export class SchedulePage implements OnInit {
@@ -41,7 +99,7 @@ export class SchedulePage implements OnInit {
     lotId: "",
     id: "",
   };
-  public eventSource: IEvent[] = [];
+  public eventSource: ScheduledLot[] = [];
   public calendarViewTitle: string = "";
   public presentingElement: any = null;
   public customers: Customer[] = [];
@@ -52,10 +110,17 @@ export class SchedulePage implements OnInit {
   public formattedEnd: string = "";
   public autoSelect: boolean = true;
   public lotDetails: boolean = false;
+  private shouldContinue: boolean = false;
 
-  constructor(private ionRouterOutlet: IonRouterOutlet,
+  // toast
+  public isToastOpen: boolean = false;
+  public successToastMessage: string = "";
+
+  constructor(
+    private ionRouterOutlet: IonRouterOutlet,
     private customersService: CustomersService,
     private scheduleService: ScheduleService,
+    private alertCtrl: AlertController,
   ) {
     addIcons({ add, arrowBack, arrowForward, radioButtonOff, checkmarkCircle });
     this.presentingElement = this.ionRouterOutlet.nativeEl;
@@ -98,14 +163,23 @@ export class SchedulePage implements OnInit {
         new Date(this.newEvent.startTime),
         this.newEvent.title).subscribe(
         (resp) => {
-          if (resp) {
+          if (resp && resp.status == "success") {
+            this.init();
             this.newEventModal.dismiss();
-            this.eventSource.push(this.transformLotEvent(resp.data));
-            this.calendarView.loadEvents();
-            // show toast
+            this.openSuccessToast(true, "Lot Event Added Successfully!");
           }
+          else {
+            this.presentAlert("Failed Add Event Attempt", "Unknown Error Occurred", "Try Again");
+          }
+        },
+        (error) => {
+          this.presentAlert("Failed Add Event Attempt", error, "Try Again");
         }
       );
+    }
+    else {
+      this.presentAlert("Failed Add Event Attempt", "Customer on event is not defined", "Try Again");
+      this.newEventModal.dismiss();
     }
   }
 
@@ -159,43 +233,59 @@ export class SchedulePage implements OnInit {
     }
   }
 
-  modalDismissed(event: Event) {
+  modalDismissed() {
     this.newEvent.title = "";
     this.customer = undefined;
     this.lotDetails = false;
   }
 
   onEventSelected(event: any) {
-    console.log(JSON.stringify(event));
     this.lotDetails = true;
     this.customer = this.customers.find((cust) =>
       cust.id === event.customerId
     );
-    console.log(this.customer);
     this.newEvent = { ...event };
+    this.formattedStart = format(event.startTime, 'HH:mm, MMM d, yyyy');
+    this.newEvent.startTime = format(event.startTime, "yyyy-MM-dd'T'HH:mm:ss");
+    this.formattedEnd = format(event.endTime, 'HH:mm, MMM d, yyyy');
+    this.newEvent.endTime = format(event.endTime, "yyyy-MM-dd'T'HH:mm:ss");
     this.newEventModal.present();
   }
 
-  saveEditEvent() {
+  async saveEditEvent() {
     if (this.customer) {
-      this.scheduleService.updateSchedule(
-        this.newEvent.id,
-        this.customer.id, 
-        this.newEvent.lotId,
-        this.newEvent.allDay,
-        new Date(this.newEvent.endTime),
-        new Date(this.newEvent.startTime),
-        this.newEvent.title).subscribe(
-        (resp) => {
-          if (resp) {
-            //this.eventSource.push(this.transformLotEvent(resp.data));
-            //this.calendarView.loadEvents();
-            this.init();
-            this.newEventModal.dismiss();
-            // show toast
-          }
-        }
+      await this.presentContinueAlert(
+        `Continue?`, 
+        `This action will update the scheduled event in the system. Are you sure you want to continue?`
       );
+      if (this.shouldContinue) {
+        this.scheduleService.updateSchedule(
+          this.newEvent.id,
+          this.customer.id, 
+          this.newEvent.lotId,
+          this.newEvent.allDay,
+          new Date(this.newEvent.endTime),
+          new Date(this.newEvent.startTime),
+          this.newEvent.title).subscribe(
+          (resp) => {
+            if (resp && resp.status == "success") {
+              this.init();
+              this.newEventModal.dismiss();
+              this.openSuccessToast(true, "Lot Event Updated Successfully!");
+            }   
+            else {
+              this.presentAlert("Failed Event Update Attempt", "Unknown Error Occurred", "Try Again");
+            }
+          },
+          (error) => {
+            this.presentAlert("Failed Update Event Attempt", error, "Try Again");
+          }
+        );
+      }
+    }
+    else {
+      this.presentAlert("Failed Update Event Attempt", "Customer on event is not defined", "Try Again");
+      this.newEventModal.dismiss();
     }
   }
 
@@ -216,20 +306,75 @@ export class SchedulePage implements OnInit {
     return event;
   }
 
-  deleteEvent() {
-    this.scheduleService.deleteCustomer(
-      this.newEvent.id).subscribe(
-      (resp) => {
-        if (resp) {
-          this.init();
-          this.newEventModal.dismiss();
-          // show toast
-        }
-      }
+  async deleteEvent() {
+    await this.presentContinueAlert(
+      `Continue?`, 
+      `This action will delete the scheduled event in the system. Are you sure you want to continue?`
     );
+    if (this.shouldContinue) {
+      this.scheduleService.deleteCustomer(
+        this.newEvent.id).subscribe(
+        (resp) => {
+          if (resp && resp.status == "success") {
+            this.init();
+            this.newEventModal.dismiss();
+            this.openSuccessToast(true, "Lot Event Deleted Successfully!");
+          }
+          else {
+            this.presentAlert("Failed Event Delete Attempt", "Unknown Error Occurred", "Try Again");
+          }
+        },
+        (error) => {
+          this.presentAlert("Failed Event Delete Attempt", error, "Try Again");
+        }
+      );
+    }
   }
 
-  disableDeleteEvent() {
-    return !(this.newEvent.title && this.customer);
+  async presentAlert(header: string, message: string, buttonText: string) {
+    const alert = await this.alertCtrl.create({
+      cssClass: 'alertOverModal',
+      header: header,
+      message: message,
+      buttons: [buttonText],
+    });
+
+    await alert.present();
+
+    await alert.onDidDismiss().then(() => {
+    });
+  }
+
+  async presentContinueAlert(header: string, message: string) {
+    const alert = await this.alertCtrl.create({
+      header: header,
+      message: message,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => {
+            this.shouldContinue = false;            
+          },
+        },
+        {
+          text: 'Continue',
+          role: 'confirm',
+          handler: () => {
+            this.shouldContinue = true;
+          },
+        },
+      ]
+    });
+
+    await alert.present();
+
+    await alert.onDidDismiss().then(() => {
+    });
+  }
+
+  openSuccessToast(open: boolean, message: string) {
+    this.successToastMessage = message;
+    this.isToastOpen = open;
   }
 }

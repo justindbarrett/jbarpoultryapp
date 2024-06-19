@@ -118,13 +118,20 @@ ion-menu ion-content {
     --color: var(--ion-color-primary);
   }
 
-  .center {
+  .ios .center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 30px;
+  }
+
+  .md .center {
     display: block;
     margin-left: auto;
     margin-right: auto;
   }
 
-  .userDisplay {
+  .userDisplay.ios {
     vertical-align: middle;
     font-size: 18px;
     margin-left: 20px;

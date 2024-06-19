@@ -57,7 +57,7 @@
   #modal
   trigger="newEventModal"
   canDismiss="true"
-  (didDismiss)="modalDismissed($event)"
+  (didDismiss)="modalDismissed()"
 >
   <ng-template>
     <ion-header>
@@ -88,7 +88,6 @@
             color="primary"
             strong
             (click)="deleteEvent()"
-            [disabled]="disableDeleteEvent()"
             *ngIf="lotDetails"
           >
             Delete
@@ -148,3 +147,11 @@
     </ion-card>
   </ng-template>
 </ion-modal>
+
+<ion-toast
+  [isOpen]="isToastOpen"
+  message="{{successToastMessage}}"
+  [duration]="5000"
+  class="success-toast"
+  (didDismiss)="openSuccessToast(false, successToastMessage)"
+></ion-toast>

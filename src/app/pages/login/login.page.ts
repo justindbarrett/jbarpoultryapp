@@ -1,7 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem, IonIcon, IonInput } from '@ionic/angular/standalone';
+import { 
+  IonSpinner,
+  IonContent,
+  IonHeader,
+  IonTitle,
+  IonToolbar,
+  IonButton,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
+  IonCol,
+  IonRow,
+  IonCard,
+  IonItem,
+  IonIcon,
+  IonInput } from '@ionic/angular/standalone';
 import { AuthenticationService } from 'src/app/authentication.service';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFireModule } from '@angular/fire/compat';
@@ -16,7 +31,24 @@ import { LoginService } from 'src/app/login.service';
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [ IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem, IonIcon, IonInput],
+  imports: [
+    IonSpinner,
+    IonContent,
+    IonHeader,
+    IonTitle,
+    IonToolbar,
+    CommonModule,
+    FormsModule,
+    IonButton,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
+    IonCol,
+    IonRow,
+    IonCard,
+    IonItem,
+    IonIcon,
+    IonInput],
   providers: [ AuthenticationService, AngularFireAuth, AngularFireModule],
 })
 export class LoginPage implements OnInit {
@@ -25,6 +57,7 @@ export class LoginPage implements OnInit {
   public password: string = "";
   public passwordType: string = "password";
   public showHideIcon: string = "eye-outline";
+  public loading: boolean = false;
   private isPasswordVisible: boolean = false;
   private disableSignInButton: boolean = false;
 
@@ -57,13 +90,22 @@ export class LoginPage implements OnInit {
   login() {
     if (!this.disableSignIn()) {
       this.disableSignInButton = true;
+      this.loading = true;
       this.loginService.login(this.email, this.password)
       .then(auth => {
-        const userDetails = { displayName: auth.user?.displayName || "", emailAddress: auth.user?.email || "", userId: auth.user?.uid || "", emailVerified: auth.user?.emailVerified || false };
+        const userDetails = { 
+          displayName: auth.user?.displayName || "", 
+          emailAddress: auth.user?.email || "", 
+          userId: auth.user?.uid || "", 
+          emailVerified: auth.user?.emailVerified || false };
         this.identityService.setUserDetails(userDetails);
         this.navCtrl.navigateForward("landing/customers");
+        this.loading = false;
       })
-      .catch(err => { this.presentAlert(err.code); })
+      .catch(err => { 
+        this.loading = false;
+        this.presentAlert(err.code); 
+      })
     }
   }
 

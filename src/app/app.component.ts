@@ -1,9 +1,31 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { IonApp, IonSplitPane, IonButton, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet } from '@ionic/angular/standalone';
+import { 
+  IonApp,
+  IonSplitPane,
+  IonButton,
+  IonMenu,
+  IonContent,
+  IonList,
+  IonListHeader,
+  IonNote,
+  IonMenuToggle,
+  IonItem, 
+  IonIcon,
+  IonLabel,
+  IonRouterOutlet,
+  IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { calendarOutline, calendarSharp, cubeOutline, cubeSharp, peopleOutline, peopleSharp, settingsOutline, settingsSharp } from 'ionicons/icons';
+import { 
+  calendarOutline,
+  calendarSharp,
+  cubeOutline,
+  cubeSharp,
+  peopleOutline,
+  peopleSharp,
+  settingsOutline,
+  settingsSharp } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 import { IdentityService } from './identity.service';
 import { AuthenticationService } from './authentication.service';
@@ -15,7 +37,25 @@ import { AppPages } from './pages.service';
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CommonModule, IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet, IonButton],
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    CommonModule,
+    IonApp,
+    IonSplitPane,
+    IonMenu,
+    IonContent,
+    IonList,
+    IonListHeader,
+    IonNote,
+    IonMenuToggle,
+    IonItem,
+    IonIcon,
+    IonLabel,
+    IonRouterOutlet,
+    IonButton,
+    IonSpinner
+  ],
 })
 export class AppComponent implements OnInit, OnDestroy {
   public appPages = [
@@ -25,6 +65,7 @@ export class AppComponent implements OnInit, OnDestroy {
   ];
   public settingsUrl = 'landing/accountsettings';
   public userDisplayName = '';
+  public loading = true;
   private userDetailsSubscription = new Subscription();
 
   constructor(
@@ -38,10 +79,14 @@ export class AppComponent implements OnInit, OnDestroy {
     addIcons({ peopleOutline, peopleSharp, calendarOutline, calendarSharp, cubeOutline, cubeSharp, settingsOutline, settingsSharp });
   }
 
-  ngOnInit(): void {
-    this.userDetailsSubscription = this.identityService.getUserDetailsObservable().subscribe((userDetails) => {
-      this.userDisplayName = userDetails.displayName || "";
-    });
+  ngOnInit() {
+    this.loading = true;
+    this.userDetailsSubscription = this.identityService.getUserDetailsObservable().subscribe(
+      (userDetails) => {
+        this.userDisplayName = userDetails.displayName || "";
+        this.loading = false;
+      }
+    );
   }
 
   ngOnDestroy(): void {

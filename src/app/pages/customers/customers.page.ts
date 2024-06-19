@@ -1,20 +1,67 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormGroup, FormsModule, Validators } from '@angular/forms';
-import { IonToast, IonFab, IonFabButton, IonSearchbar, IonModal, IonInput, IonIcon, IonList, IonLabel, IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem } from '@ionic/angular/standalone';
+import { FormsModule } from '@angular/forms';
+import { 
+  IonSpinner,
+  IonToast,
+  IonFab,
+  IonFabButton,
+  IonSearchbar,
+  IonModal,
+  IonInput,
+  IonIcon,
+  IonList,
+  IonLabel,
+  IonContent,
+  IonHeader,
+  IonTitle,
+  IonToolbar,
+  IonButton,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
+  IonCol,
+  IonRow,
+  IonCard,
+  IonItem } from '@ionic/angular/standalone';
 import { Customer } from 'src/app/models/customer.model';
 import { CustomersService } from 'src/app/customers.service';
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 import { AlertController } from '@ionic/angular';
-import { Subscription, filter } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { Capacitor } from '@capacitor/core';
 
 @Component({
   selector: 'app-customers',
   templateUrl: './customers.page.html',
   styleUrls: ['./customers.page.scss'],
   standalone: true,
-  imports: [ IonToast, IonFab, IonFabButton, IonSearchbar, IonModal, IonInput, IonIcon, IonList, IonLabel, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem ],
+  imports: [ 
+    IonSpinner,
+    IonToast,
+    IonFab,
+    IonFabButton,
+    IonSearchbar,
+    IonModal,
+    IonInput,
+    IonIcon,
+    IonList,
+    IonLabel,
+    IonContent,
+    IonHeader,
+    IonTitle,
+    IonToolbar, 
+    CommonModule,
+    FormsModule,
+    IonButton,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
+    IonCol,
+    IonRow,
+    IonCard,
+    IonItem ],
   providers: [ CustomersService ]
 })
 export class CustomersPage implements OnInit, OnDestroy {
@@ -23,6 +70,8 @@ export class CustomersPage implements OnInit, OnDestroy {
   public showCustomerList: boolean = true;
   public searchTerm: string = "";
   public customers: Customer[] = [];
+  public searchFocused: boolean = false;
+  public loading: boolean = true;
 
   // customer details
   public showCustomerDetails: boolean = false;
@@ -65,7 +114,7 @@ export class CustomersPage implements OnInit, OnDestroy {
 
   constructor(
     private alertCtrl: AlertController,
-    private customersService: CustomersService
+    private customersService: CustomersService,
   ) {
     addIcons({ add });
   }
@@ -74,14 +123,23 @@ export class CustomersPage implements OnInit, OnDestroy {
     this.init();
   }
 
+  setSearchFocus(focused: boolean) {
+    if (Capacitor.isNativePlatform()) {
+      this.searchFocused = focused;
+    }
+  }
+
   init() {
+    this.loading = true;
     this.getCustomersSubscription = this.customersService.getCustomers().subscribe(
       (resp) => {
         this.customers = resp.customers;
         this.customersService.setCurrentCustomerList(this.customers);
+        this.loading = false;
       },
       (error) => {
         this.presentAlert("Error Retrieving Customer List", error.message, "Try Again");
+        this.loading = false;
       }
     );
     this.setFilteredCustomers();
@@ -236,7 +294,7 @@ export class CustomersPage implements OnInit, OnDestroy {
       }
     }
     else {
-      this.presentAlert("Failed Delete Customer Attempt", "Current Customer is not Defined", "Try Again");
+      this.presentAlert("Failed Delete Customer Attempt", "Current Customer is not defined", "Try Again");
       this.cancelCustomerDetails();
     }
   }

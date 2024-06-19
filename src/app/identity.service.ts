@@ -40,6 +40,7 @@ export class IdentityService implements OnDestroy {
   }
 
   public setUserDetails(userDetails: UserDetails) {
+    console.log(`Setting User Details: ${JSON.stringify(userDetails)}`);
     this.currentUser = userDetails;
     this.storageService.set(this.consts.USERDETAILS.USER_ID, this.currentUser.userId);
     this.identityObservable.next(this.currentUser);

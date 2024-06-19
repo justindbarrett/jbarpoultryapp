@@ -10,8 +10,12 @@
             class="searchbarStyle"
             [(ngModel)]="searchTerm"
             (ionInput)="setFilteredCustomers()"
+            (ionFocus)="setSearchFocus(true)"
+            (ionBlur)="setSearchFocus(false)"
           ></ion-searchbar>
-          <ion-list class="scrollableList">
+          <ion-list
+            [ngClass]="searchFocused ? 'scrollableListSearch': 'scrollableList'"
+          >
             <ion-item
               class="customerListStyle"
               *ngFor="let customer of customers"
@@ -19,6 +23,7 @@
             >
               #{{ customer.number }} | {{ customer.name }}
             </ion-item>
+            <ion-spinner color="primary" *ngIf="loading"></ion-spinner>
           </ion-list>
         </ion-card-content>
       </ion-col>

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { Subject } from 'rxjs';
 import { NavController } from '@ionic/angular';
-import { getAuth, updateEmail, updatePassword, verifyBeforeUpdateEmail } from '@angular/fire/auth';
+import { getAuth, updatePassword, verifyBeforeUpdateEmail } from '@angular/fire/auth';
 
 @Injectable({
   providedIn: 'root'
