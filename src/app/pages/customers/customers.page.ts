@@ -31,6 +31,9 @@ import { add } from 'ionicons/icons';
 import { AlertController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
+import { IdentityService } from 'src/app/identity.service';
+import { AuthenticationService } from 'src/app/authentication.service';
+import { idToken } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-customers',
@@ -111,16 +114,47 @@ export class CustomersPage implements OnInit, OnDestroy {
   private addCustomerSubscription: Subscription;
   private updateCustomerSubscription: Subscription;
   private deleteCustomerSubscription: Subscription;
+  private userStableSubscription: Subscription;
 
   constructor(
     private alertCtrl: AlertController,
     private customersService: CustomersService,
+    private identityService: IdentityService,
+    private authenticationService: AuthenticationService
   ) {
     addIcons({ add });
   }
 
-  ngOnInit() {
-    this.init();
+  async ngOnInit() {
+    this.loading = true;
+    let isStable = false;
+    await this.authenticationService.getUserIdToken().then(
+      (token) => {
+        if (token === null || token === undefined) {
+          isStable = false;
+        }
+        else {
+          isStable = true;
+        }
+      }
+    ).catch(
+      (error) => {
+        isStable = false;
+    });
+    
+    if (isStable) {
+      this.init();
+    }
+    else {
+      this.userStableSubscription = this.identityService.getUserDetailsObservable().subscribe(
+        (userDetails) => {
+          this.init();
+        },
+        (error) => {
+          this.presentAlert("Error Getting Logged In User", error.message, "Try Again");
+        }
+      );
+    }
   }
 
   setSearchFocus(focused: boolean) {
@@ -170,6 +204,8 @@ export class CustomersPage implements OnInit, OnDestroy {
       this.updateCustomerSubscription.unsubscribe();
     if (this.deleteCustomerSubscription)
       this.deleteCustomerSubscription.unsubscribe();
+    if (this.userStableSubscription)
+      this.userStableSubscription.unsubscribe();
   }
 
   setFilteredCustomers() {

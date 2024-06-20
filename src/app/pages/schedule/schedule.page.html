@@ -5,6 +5,7 @@
         <ion-item lines="none" class="settingsHeader"> Lot Schedule </ion-item>
       </ion-col>
       <ion-col size-md="7" size="12" class="welcome">
+        <ion-spinner color="primary" *ngIf="loading"></ion-spinner>
         <ion-card-content>
           <ion-segment
             [(ngModel)]="calendar.mode"
@@ -39,8 +40,8 @@
             (onTitleChanged)="calendarViewTitle = $event"
             [autoSelect]="autoSelect"
             [startingDayWeek]="1"
-            [startHour]="7"
-            [endHour]="19"
+            [startHour]="8"
+            [endHour]="18"
           ></calendar>
         </ion-card-content>
       </ion-col>

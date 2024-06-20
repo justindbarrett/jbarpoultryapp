@@ -15,7 +15,7 @@ export class ScheduleService {
   ) {}
 
   getScheduledLots(): Observable<ScheduledLots> {
-    return this.http.get<ScheduledLots>("https://app-mdoldxqroa-uc.a.run.app/schedule");
+    return this.http.get<ScheduledLots>("schedule");
   };
 
   scheduleLot(
@@ -38,7 +38,7 @@ export class ScheduleService {
     const headers = {
       headers : new HttpHeaders({"Content-Type": "application/json"}),
     };
-    return this.http.post<ScheduleLotResponse>("https://app-mdoldxqroa-uc.a.run.app/schedule", body, headers);
+    return this.http.post<ScheduleLotResponse>("schedule", body, headers);
   };
 
   updateSchedule(
@@ -62,10 +62,10 @@ export class ScheduleService {
     const headers = {
       headers : new HttpHeaders({"Content-Type": "application/json"}),
     };
-    return this.http.patch<ScheduleLotResponse>(`https://app-mdoldxqroa-uc.a.run.app/schedule/${scheduledLotId}`, body, headers);
+    return this.http.patch<ScheduleLotResponse>(`schedule/${scheduledLotId}`, body, headers);
   };
 
   deleteCustomer(scheduledLotId: string) {
-    return this.http.delete<DeleteScheduleLotResponse>(`https://app-mdoldxqroa-uc.a.run.app/schedule/${scheduledLotId}`);
+    return this.http.delete<DeleteScheduleLotResponse>(`schedule/${scheduledLotId}`);
   }
 }

@@ -62,19 +62,9 @@ export class AuthenticationService {
     return this.authStateObservable.asObservable();
   }
 
-  // We need to route after auth state changed is called
-  // navigation service to handle this?
-  async isAuthenticated(): Promise<boolean> {
-    let isAuthenticated = false;
-    await this.getUser().then((user) => {
-      if (user == null) {
-        this.navCtrl.navigateRoot('login');
-      }
-      else {
-        isAuthenticated = true;
-      }
-    });
-    return isAuthenticated;
+  async getUserIdToken() {
+    const auth = getAuth();
+    return await auth.currentUser?.getIdToken(true);
   }
 
 }

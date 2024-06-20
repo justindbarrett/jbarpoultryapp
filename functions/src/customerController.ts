@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { NextFunction, Response } from "express";
 import { db } from "./config/firebase";
 
 type CustomerDataType = {
@@ -7,10 +7,12 @@ type CustomerDataType = {
     phone: string,
 };
 
-type CustomerType = {
+export type CustomerType = {
     id: string,
     number: string,
-    data: CustomerDataType
+    name: string,
+    address: string,
+    phone: string,
 }
 
 type Request = {
@@ -32,11 +34,9 @@ const addCustomer = async (req: Request, res: Response) => {
         const customer: CustomerType = {
             id: customerDocument.id,
             number: customerNumber,
-            data: {
-                name: name,
-                address: address,
-                phone: phone,
-            },
+            name: name,
+            address: address,
+            phone: phone,
         };
         await customerDocument.set(customer);
 
@@ -61,14 +61,14 @@ const getNewCustomerNumber = async () => {
     return "-1";
 };
 
-const getCustomers = async (req: Request, res: Response) => {
+const getCustomers = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const customers: CustomerType[] = [];
         const querySnapshot = await db.collection(customerCollectionPath).get();
         querySnapshot.forEach((doc: any) => {
             customers.push(doc.data());
         });
-        customers.sort((a, b) => a.data.name.toLowerCase().localeCompare(b.data.name.toLowerCase()));
+        customers.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 
         res.status(200).json({
             customers: customers,
@@ -89,11 +89,9 @@ const updateCustomer = async (req: Request, res: Response) => {
         const newData: CustomerType = {
             id: id,
             number: currentData.number,
-            data: {
-                name: name || currentData.data.name,
-                address: address || currentData.data.address,
-                phone: phone || currentData.data.phone,
-            },
+            name: name || currentData.data.name,
+            address: address || currentData.data.address,
+            phone: phone || currentData.data.phone,
         };
         await customer.update(newData);
 

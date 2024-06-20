@@ -5,13 +5,21 @@ import { addCustomer,
     deleteCustomer,
     getCustomers,
     updateCustomer } from "./customerController";
+import { deleteScheduledLot, getScheduledLots, scheduleLot, updateScheduledLot } from "./scheduleController";
+import { verifyToken } from "./middleware/authenticator";
 
 const app = express();
 app.use(cors());
-app.get("/", (req, res) => res.status(200).send("HeyHeyHey"));
+app.use(verifyToken);
+
+app.get("/", (req, res) => res.status(200).send("Healthy"));
 app.post("/customers", addCustomer);
 app.get("/customers", getCustomers);
 app.patch("/customers/:id", updateCustomer);
 app.delete("/customers/:id", deleteCustomer);
+app.post("/schedule", scheduleLot);
+app.get("/schedule", getScheduledLots);
+app.patch("/schedule/:id", updateScheduledLot);
+app.delete("/schedule/:id", deleteScheduledLot);
 
 exports.app = onRequest(app);

@@ -15,7 +15,9 @@ import { AngularFireModule } from '@angular/fire/compat';
 
 import { IonicModule } from '@ionic/angular';
 import { IonicStorageModule } from '@ionic/storage-angular';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { baseUrlInterceptor } from './app/interceptors/baseurl.interceptor';
+import { authorizationInterceptor } from './app/interceptors/authorization.interceptor';
 
 if (environment.production) {
   enableProdMode();
@@ -26,7 +28,9 @@ bootstrapApplication(AppComponent, {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
     provideRouter(routes),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([
+      baseUrlInterceptor,
+      authorizationInterceptor])),
     importProvidersFrom(IonicModule.forRoot({innerHTMLTemplatesEnabled: true})),
     importProvidersFrom(IonicStorageModule.forRoot()),
     importProvidersFrom(

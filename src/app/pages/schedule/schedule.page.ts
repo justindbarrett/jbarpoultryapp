@@ -1,4 +1,5 @@
 import { 
+  IonSpinner,
   IonToast, 
   IonToggle, 
   IonText, 
@@ -27,7 +28,7 @@ import {
   IonRow, 
   IonCard, 
   IonItem } from '@ionic/angular/standalone';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Customer } from 'src/app/models/customer.model';
@@ -41,6 +42,9 @@ import { ScheduleService } from 'src/app/schedule.service';
 import { ScheduledLot } from 'src/app/models/schedule.model';
 import { format } from 'date-fns/format';
 import { parseISO } from 'date-fns/parseISO';
+import { Subscription, catchError } from 'rxjs';
+import { IdentityService } from 'src/app/identity.service';
+import { AuthenticationService } from 'src/app/authentication.service';
 
 @Component({
   selector: 'app-schedule',
@@ -48,6 +52,7 @@ import { parseISO } from 'date-fns/parseISO';
   styleUrls: ['./schedule.page.scss'],
   standalone: true,
   imports: [ 
+    IonSpinner,
     IonToast, 
     IonToggle, 
     IonText, 
@@ -82,7 +87,7 @@ import { parseISO } from 'date-fns/parseISO';
     IonItem ],
   providers: [ CustomersService ]
 })
-export class SchedulePage implements OnInit {
+export class SchedulePage implements OnInit, OnDestroy {
 
   @ViewChild(CalendarComponent) calendarView: CalendarComponent;
   @ViewChild('modal') newEventModal: IonModal;
@@ -111,6 +116,12 @@ export class SchedulePage implements OnInit {
   public autoSelect: boolean = true;
   public lotDetails: boolean = false;
   private shouldContinue: boolean = false;
+  public loading: boolean = true;
+  private userStableSubscription: Subscription;
+
+  public calendarOptions = {
+    weekDayNames: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+  };
 
   // toast
   public isToastOpen: boolean = false;
@@ -121,28 +132,77 @@ export class SchedulePage implements OnInit {
     private customersService: CustomersService,
     private scheduleService: ScheduleService,
     private alertCtrl: AlertController,
+    private identityService: IdentityService,
+    private authenticationService: AuthenticationService
   ) {
     addIcons({ add, arrowBack, arrowForward, radioButtonOff, checkmarkCircle });
     this.presentingElement = this.ionRouterOutlet.nativeEl;
   }
 
-  ngOnInit(): void {
-    this.init();
+  async ngOnInit() {
+    this.loading = true;
+    let isStable = false;
+    await this.authenticationService.getUserIdToken().then(
+      (token) => {
+        if (token === null || token === undefined) {
+          isStable = false;
+        }
+        else {
+          isStable = true;
+        }
+      }
+    ).catch(
+      (error) => {
+        isStable = false;
+    });
+    
+    if (isStable) {
+      this.init();
+    }
+    else {
+      this.userStableSubscription = this.identityService.getUserDetailsObservable().subscribe(
+        (userDetails) => {
+          this.init();
+        },
+        (error) => {
+          this.presentAlert("Error Getting Logged In User", error.message, "Try Again");
+        }
+      );
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.userStableSubscription)
+      this.userStableSubscription.unsubscribe();
   }
 
   init() {
+    this.loading = true;
     this.eventSource = [];
     this.lotDetails = false;
-    this.customersService.getCustomers().subscribe(resp => {
+    this.customersService.getCustomers().subscribe(
+      (resp) => {
       this.customers = resp.customers;
       this.customersService.setCurrentCustomerList(this.customers);
-    });
-    this.scheduleService.getScheduledLots().subscribe(resp => {
-       resp.lots.forEach(lot => {
-         this.eventSource.push(this.transformLotEvent(lot));
-         this.calendarView.loadEvents();
-      });
-    });
+      },
+      (error) => {
+        this.presentAlert("Error Retrieving Customer List", error.message, "Try Again");
+        this.loading = false;
+      }
+    );
+    this.scheduleService.getScheduledLots().subscribe(
+      (resp) => {
+        resp.lots.forEach(lot => {
+          this.eventSource.push(this.transformLotEvent(lot));
+          this.calendarView.loadEvents();
+        });
+        this.loading = false;
+      },
+      (error) => {
+        this.presentAlert("Error Retrieving Schedule Events", error.message, "Try Again");
+        this.loading = false;
+      }
+    );
   }
 
   calendarBack() {
