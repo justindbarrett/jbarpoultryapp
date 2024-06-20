@@ -115,3 +115,32 @@ ion-toast.success-toast {
 ion-alert {
   z-index: 999999 !important;
 }
+
+.monthview-primary-with-event, .calendar-event-inner {
+  background-color: grey !important;
+}
+
+.monthview-current {
+  font-weight: bold;
+  background-color: var(--ion-color-primary-contrast) !important;
+  color: var(--ion-color-primary) !important;
+}
+
+.monthview-selected {
+  font-weight: bold;
+  background-color: var(--ion-color-secondary-tint) !important;
+  color: var(--ion-color-primary-contrast) !important;
+}
+
+.arrowCol {
+  display: flex;
+  justify-content: center;
+}
+
+.calendar-event {
+  width: 100% !important;
+}
+
+.calendar-event-inner {
+  height: 50px;
+}

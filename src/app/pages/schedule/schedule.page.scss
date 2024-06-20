@@ -80,3 +80,13 @@ ion-modal {
   z-index: 100;
 }
 
+.ios .calTitle {
+  margin-top: 16px;
+  font-size: 1.25rem;
+}
+
+.md .calTitle {
+  margin-top: 6px;
+  font-size: 1.25rem;
+}
+
