@@ -111,7 +111,7 @@
           <ion-label>Name</ion-label>
           <ion-item lines="none" color="light" class="rowStyle">
             <ion-input
-              disabled="true"
+              readonly
               type="text"
               required
               ngDefaultControl
@@ -120,18 +120,19 @@
           </ion-item>
           <ion-label>Address</ion-label>
           <ion-item lines="none" color="light" class="rowStyle">
-            <ion-input
-              disabled="true"
-              type="text"
+            <ion-textarea
+              readonly
+              rows="2"
+              maxlength="60"
               required
               ngDefaultControl
               [(ngModel)]="customerAddress"
-            ></ion-input>
+            ></ion-textarea>
           </ion-item>
           <ion-label>Phone</ion-label>
           <ion-item lines="none" color="light" class="rowStyle">
             <ion-input
-              disabled="true"
+              readonly
               type="text"
               required
               ngDefaultControl

@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { 
+  IonTextarea,
   IonSpinner,
   IonToast,
   IonFab,
@@ -41,6 +42,7 @@ import { idToken } from '@angular/fire/auth';
   styleUrls: ['./customers.page.scss'],
   standalone: true,
   imports: [ 
+    IonTextarea,
     IonSpinner,
     IonToast,
     IonFab,
