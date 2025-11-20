@@ -1,0 +1,50 @@
+<div class="card-container">
+  <ion-card *ngIf="true"> </ion-card>
+</div>
+<ion-fab slot="fixed" vertical="bottom" horizontal="center" [edge]="true">
+  <ion-fab-button id="newLotModal">
+    <ion-icon name="add"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
+
+<ion-modal
+  #modal
+  trigger="newLotModal"
+  canDismiss="true"
+  (didDismiss)="modalDismissed()"
+>
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="light">
+        <ion-buttons slot="start">
+          <ion-button (click)="modal.dismiss()"> Cancel </ion-button>
+        </ion-buttons>
+        <ion-buttons slot="end">
+          <ion-button
+            color="secondary"
+            strong
+            (click)="addLot()"
+            [disabled]="disableAddLot()"
+          >
+            Add
+          </ion-button>
+        </ion-buttons>
+        <ion-title> New Lot </ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-card>
+      <ion-item>
+        <ion-label>customer</ion-label>
+        <ionic-selectable
+          [(ngModel)]="customer"
+          [items]="customers"
+          itemValueField="id"
+          itemTextField="name"
+          [canSearch]="true"
+          (onChange)="customerChange($event)"
+        >
+        </ionic-selectable>
+      </ion-item>
+    </ion-card>
+  </ng-template>
+</ion-modal>

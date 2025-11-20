@@ -1,0 +1,92 @@
+.card-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  
+    ion-card {
+      max-width: 780px;
+      .ion-blue-bkg {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+  
+      .welcome {
+        #trigger-icon {
+          float: right;
+          margin-bottom: 16px;
+        }
+      }
+    }
+  }
+  
+@media screen and (max-width: 780px) {
+    .card-container {
+        ion-card {
+        .ion-blue-bkg {
+            max-height: 200px;
+        }
+        .welcome {
+            min-height: 200px;
+        }
+        }
+    }
+}
+
+.rowStyle {
+    left: 5%;
+    width: 90%;
+    border-radius: 30px;
+    margin-top: 5px;
+    margin-bottom: 20px;
+    //max-width: 350px;
+}
+
+.settingsLabel {
+  color: gray;
+  max-height: 20px;
+}
+
+.settingsDetail {
+  color: gray;
+  padding-left: 20px;
+}
+
+.settingsHeader {
+  color: var(--ion-color-primary);
+  font-size: large;
+}
+
+.signInButton {
+  margin-top: 15px;
+  margin-left: 5%;
+  height: 40px;
+}
+
+.block {
+  width: 100%;
+  height: 500px;
+}
+
+ion-modal {
+  --height: auto;
+}
+
+.security-icon {
+  color: gray;
+  position: absolute;
+  right: 10px;
+  z-index: 100;
+}
+
+.ios .calTitle {
+  margin-top: 16px;
+  font-size: 1.25rem;
+}
+
+.md .calTitle {
+  margin-top: 6px;
+  font-size: 1.25rem;
+}
+
