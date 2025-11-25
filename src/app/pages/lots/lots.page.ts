@@ -27,7 +27,11 @@ import {
   IonCol, 
   IonRow, 
   IonCard, 
-  IonItem } from '@ionic/angular/standalone';
+  IonItem,
+  IonAccordion,
+  IonDatetimeButton,
+  IonSelectOption,
+  IonAccordionGroup } from '@ionic/angular/standalone';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -41,6 +45,7 @@ import { IonicSelectableComponent } from 'ionic-selectable';
 import { Subscription } from 'rxjs';
 import { IdentityService } from 'src/app/identity.service';
 import { AuthenticationService } from 'src/app/authentication.service';
+import { NavController } from '@ionic/angular';
 
 @Component({
   selector: 'app-lots',
@@ -80,7 +85,13 @@ import { AuthenticationService } from 'src/app/authentication.service';
     IonCol, 
     IonRow, 
     IonCard, 
-    IonItem ],
+    IonItem,
+    IonDatetime,
+    IonAccordion,
+    IonDatetimeButton,
+    IonSelectOption,
+    IonAccordionGroup,
+    IonAccordionGroup],
   providers: [ CustomersService ]
 })
 export class LotsPage implements OnInit, OnDestroy {
@@ -97,7 +108,11 @@ export class LotsPage implements OnInit, OnDestroy {
   };
   public customers: Customer[] = [];
   public customer: Customer | undefined = undefined;
+  poultryTypes: string[] = ['Broiler', 'Layer', 'Turkey', 'Duck', 'Quail', 'Other'];
 
+  // Accordion management (optional)
+  accordionValue: string = 'core'; // Keeps the first section open by default
+  
   private shouldContinue: boolean = false;
   public loading: boolean = true;
   public presentingElement: HTMLElement;
@@ -108,12 +123,12 @@ export class LotsPage implements OnInit, OnDestroy {
   public successToastMessage: string = "";
 
   constructor(
+    private navCtrl: NavController,
     private ionRouterOutlet: IonRouterOutlet,
     private customersService: CustomersService,
     private alertCtrl: AlertController,
     private identityService: IdentityService,
-    private authenticationService: AuthenticationService
-  ) {
+    private authenticationService: AuthenticationService  ) {
     addIcons({ add, arrowBack, arrowForward, radioButtonOff, checkmarkCircle });
     this.presentingElement = this.ionRouterOutlet.nativeEl;
   }
@@ -170,7 +185,7 @@ export class LotsPage implements OnInit, OnDestroy {
   }
 
   addLot() {
-
+    this.navCtrl.navigateForward('/landing/lots/new-lot');
   }
 
   disableAddLot() {
