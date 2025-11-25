@@ -128,6 +128,7 @@ export class LotsPage implements OnInit, OnDestroy {
   public mockLotSchedule: Lot[] = [
     {
       id: 'lot1',
+      processDate: '2024-06-15',
       customer: {
         id: 'cust1',
         number: 'CUST-001',
@@ -148,6 +149,7 @@ export class LotsPage implements OnInit, OnDestroy {
     },
     {
       id: 'lot2',
+      processDate: '2024-06-15',
       customer: {
         id: 'cust2',
         number: 'CUST-002',
@@ -300,5 +302,9 @@ export class LotsPage implements OnInit, OnDestroy {
 
   generateSchedule() {
     this.pdfGeneratorService.generateDailySchedule(this.mockLotSchedule);
+  }
+
+  generateLotLabels() {
+    this.pdfGeneratorService.generateLotLabelsPdf(this.mockLotSchedule);
   }
 }

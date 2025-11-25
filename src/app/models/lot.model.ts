@@ -2,6 +2,7 @@ import { Customer } from "./customer.model";
 
 export type Lot = {
     id: string,
+    processDate: string,
     customer: Customer,
     timeIn: string,
     withdrawalMet: boolean,

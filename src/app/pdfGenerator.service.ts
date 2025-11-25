@@ -2,13 +2,17 @@ import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import autoTable from 'jspdf-autotable';
+import * as QRCode from 'qrcode';
+import { BaseUrlService } from './baseUrl.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PdfGeneratorService {
 
-  constructor() { }
+  constructor(
+    private baseUrlService: BaseUrlService,
+  ) { }
 
   public generateDailySchedule(scheduleData: any[]): void {
     // 1. Initialize jsPDF: Landscape (Letter), Narrow Margins
@@ -146,5 +150,98 @@ export class PdfGeneratorService {
 
     // --- 4. Final Save ---
     doc.save(`Daily_Schedule_${new Date().toISOString().substring(0, 10)}.pdf`);
+  }
+
+  public async generateLotLabelsPdf(lotsToPrint: any[]): Promise<void> {
+    const doc = new jsPDF({
+      orientation: 'portrait', 
+      unit: 'mm',
+      format: 'letter'
+    });
+    
+    const INCH_TO_MM = 25.4;
+    const labelWidth = 4 * INCH_TO_MM;   // 101.6 mm
+    const labelHeight = 5 * INCH_TO_MM;  // 127.0 mm
+    
+    const pageW = doc.internal.pageSize.getWidth();
+    const MIN_MARGIN = 5; 
+
+    const startMarginX = (pageW - (labelWidth * 2)) / 2;
+    const startMarginY = MIN_MARGIN; 
+    
+    const qrSizeMM = 35; 
+    
+    let currentX = startMarginX;
+    let currentY = startMarginY;
+    let labelsOnPage = 0;
+    
+    for (const lot of lotsToPrint) {
+      if (labelsOnPage > 0 && labelsOnPage % 4 === 0) {
+        doc.addPage();
+        currentX = startMarginX;
+        currentY = startMarginY;
+        labelsOnPage = 0;
+      }
+      
+      const lotNumber = lot.lotNumber;
+      // Assuming baseUrlService is correctly injected and used
+      const absoluteUrl = this.baseUrlService.getBaseUrl() + '/landing/lots/lot-details/' + lotNumber; 
+      
+      // --- A. Generate QR Code Image Data URL ---
+      const qrDataURL = await QRCode.toDataURL(absoluteUrl, {
+        errorCorrectionLevel: 'M',
+        margin: 1,
+        width: qrSizeMM * 4
+      });
+      
+      // --- B. Draw Label Content (Stacked Layout) ---
+      
+      // Label Border (for cutting guide) - Must be drawn first
+      doc.setDrawColor(150); 
+      doc.rect(currentX, currentY, labelWidth, labelHeight); 
+        
+      // 🔑 FIX: Start content (elementY) 12mm down from the currentY position.
+      // This ensures the 22pt font baseline is well below the top label border.
+      let elementY = currentY + 12; 
+      
+      // 1. LOT NUMBER (Top of the label, Centered)
+      doc.setFontSize(22);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`LOT #: ${lotNumber}`, currentX + (labelWidth / 2), elementY, { align: 'center' }); 
+      elementY += 10; // Space for the QR code below
+      
+      // 2. QR CODE (Below Lot #, Centered)
+      const qrStartX = currentX + (labelWidth / 2) - (qrSizeMM / 2);
+      doc.addImage(qrDataURL, 'PNG', qrStartX, elementY, qrSizeMM, qrSizeMM);
+      elementY += qrSizeMM + 10; // Move Y down past the QR code plus 10mm buffer
+      
+      // 3. OTHER DETAILS (Below QR Code)
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+
+      // Customer Info
+      doc.text(`Owner: ${lot.customer.name || 'N/A'}`, currentX + 5, elementY);
+      elementY += 8;
+
+      // Species Info
+      doc.text(`Species: ${lot.species || 'N/A'}`, currentX + 5, elementY);
+      elementY += 8;
+
+      // Process Date
+      const procDate = new Date(lot.processDate).toLocaleDateString('en-US');
+      doc.text(`Proc. Date: ${procDate}`, currentX + 5, elementY);
+
+      // --- C. Update Position for Next Label ---
+      labelsOnPage++;
+      
+      if (labelsOnPage % 2 === 0) {
+        currentX = startMarginX;
+        currentY += labelHeight;
+      } else {
+        currentX += labelWidth;
+      }
+    }
+
+    doc.save(`Lot_Labels_4x5_Narrow_Margin_${new Date().toISOString().substring(0, 10)}.pdf`);
   }
 }
