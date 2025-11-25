@@ -46,6 +46,8 @@ import { Subscription } from 'rxjs';
 import { IdentityService } from 'src/app/identity.service';
 import { AuthenticationService } from 'src/app/authentication.service';
 import { NavController } from '@ionic/angular';
+import { PdfGeneratorService } from 'src/app/pdfGenerator.service';
+import { Lot } from 'src/app/models/lot.model';
 
 @Component({
   selector: 'app-lots',
@@ -112,7 +114,7 @@ export class LotsPage implements OnInit, OnDestroy {
 
   // Accordion management (optional)
   accordionValue: string = 'core'; // Keeps the first section open by default
-  
+
   private shouldContinue: boolean = false;
   public loading: boolean = true;
   public presentingElement: HTMLElement;
@@ -122,13 +124,59 @@ export class LotsPage implements OnInit, OnDestroy {
   public isToastOpen: boolean = false;
   public successToastMessage: string = "";
 
+  // Example data structure that combines fields from your form
+  public mockLotSchedule: Lot[] = [
+    {
+      id: 'lot1',
+      customer: {
+        id: 'cust1',
+        number: 'CUST-001',
+        name: 'John Doe',
+        phone: '555-1234',
+        address: '123 Farm Rd'
+      },
+      timeIn: '08:00 AM',
+      withdrawalMet: true,
+      isOrganic: false,
+      lotNumber: 'LOTA-001',
+      species: 'Broiler',
+      customerCount: 150,
+      specialInstructions: 'Quick chill required',
+      anteMortemTime: '11:00 AM',
+      fsisInitial: 'JD',
+      finalCount: 148
+    },
+    {
+      id: 'lot2',
+      customer: {
+        id: 'cust2',
+        number: 'CUST-002',
+        name: 'Jane Smith',
+        phone: '555-5678',
+        address: '456 Ranch St'
+      },
+      timeIn: '09:30 AM',
+      withdrawalMet: false,
+      isOrganic: true,
+      lotNumber: 'LOTB-002',
+      species: 'Turkey',
+      customerCount: 80,
+      specialInstructions: 'Handle with care',
+      anteMortemTime: '12:30 PM',
+      fsisInitial: 'JS',
+      finalCount: 80
+    },
+    // ... add more lots, up to 8 ...
+  ];
+
   constructor(
     private navCtrl: NavController,
     private ionRouterOutlet: IonRouterOutlet,
     private customersService: CustomersService,
     private alertCtrl: AlertController,
     private identityService: IdentityService,
-    private authenticationService: AuthenticationService  ) {
+    private authenticationService: AuthenticationService,
+    private pdfGeneratorService: PdfGeneratorService ) {
     addIcons({ add, arrowBack, arrowForward, radioButtonOff, checkmarkCircle });
     this.presentingElement = this.ionRouterOutlet.nativeEl;
   }
@@ -248,5 +296,9 @@ export class LotsPage implements OnInit, OnDestroy {
   openSuccessToast(open: boolean, message: string) {
     this.successToastMessage = message;
     this.isToastOpen = open;
+  }
+
+  generateSchedule() {
+    this.pdfGeneratorService.generateDailySchedule(this.mockLotSchedule);
   }
 }

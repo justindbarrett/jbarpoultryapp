@@ -1,5 +1,9 @@
 <div class="card-container">
-  <ion-card *ngIf="true"> </ion-card>
+  <ion-card *ngIf="true">
+    <ion-button (click)="generateSchedule()">
+      Generate Daily Schedule PDF
+    </ion-button>
+  </ion-card>
 </div>
 <ion-fab slot="fixed" vertical="bottom" horizontal="center" [edge]="true">
   <ion-fab-button id="newLotModal">
