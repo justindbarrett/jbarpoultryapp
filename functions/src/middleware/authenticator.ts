@@ -9,7 +9,7 @@ const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
         console.log(idToken);
         if (idToken) {
             getAuth().verifyIdToken(idToken).then(
-                (decodedToken) => {
+                () => {
                     console.log("Valid Token");
                     next();
                 }

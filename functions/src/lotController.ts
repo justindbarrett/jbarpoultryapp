@@ -75,7 +75,7 @@ const createLotDocument = async (lotData: LotDataType): Promise<LotType> => {
         specialInstructions: specialInstructions || "",
         anteMortemTime: anteMortemTime || "",
         fsisInitial: fsisInitial || "",
-        finalCount: finalCount || 0
+        finalCount: finalCount || 0,
     };
     
     await lotDocument.set(lot);
@@ -152,7 +152,7 @@ const updateLotDocument = async (id: string, lotData: Partial<LotDataType>): Pro
         specialInstructions: specialInstructions || currentData.specialInstructions,
         anteMortemTime: anteMortemTime || currentData.anteMortemTime,
         fsisInitial: fsisInitial || currentData.fsisInitial,
-        finalCount: finalCount || currentData.finalCount
+        finalCount: finalCount || currentData.finalCount,
     };
     
     await lot.update(newData);

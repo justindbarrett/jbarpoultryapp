@@ -16,8 +16,11 @@ import {
   IonCard,
   IonItem,
   IonIcon,
-  IonInput } from '@ionic/angular/standalone';
+  IonInput,
+  IonSelect,
+  IonSelectOption } from '@ionic/angular/standalone';
 import { AuthenticationService } from 'src/app/authentication.service';
+import { UsersService } from 'src/app/users.service';
 import { NavController, AlertController } from '@ionic/angular';
 import { eyeOffOutline, eyeOutline } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
@@ -44,7 +47,9 @@ import { addIcons } from 'ionicons';
     IonCard,
     IonItem,
     IonIcon,
-    IonInput ],
+    IonInput,
+    IonSelect,
+    IonSelectOption ],
 })
 export class SignupPage implements OnInit {
 
@@ -52,6 +57,7 @@ export class SignupPage implements OnInit {
   public email: string = "";
   public password: string = "";
   public creationCode: string = "";
+  public accountType: 'service' | 'admin' | 'inspector' | '' = '';
   public passwordType: string = "password";
   public codeType: string = "password";
   public showHideIconPassword: string = "eye-outline";
@@ -64,6 +70,7 @@ export class SignupPage implements OnInit {
 
   constructor(
     private authService: AuthenticationService,
+    private usersService: UsersService,
     private navCtrl: NavController,
     private alertCtrl: AlertController
   ) {
@@ -88,9 +95,33 @@ export class SignupPage implements OnInit {
       if (this.creationCode == "4515432926") {
         this.authService.registerUser(this.email, this.password)
         .then(result => {
-          result.user?.updateProfile({ displayName: this.name });
-          this.navCtrl.navigateForward("login");
-          this.loading = false;
+          if (result.user) {
+            result.user.updateProfile({ displayName: this.name });
+            
+            // Extract initials from name (first letter of each word)
+            const initials = this.name
+              .split(' ')
+              .map(word => word.charAt(0).toUpperCase())
+              .filter(char => char.match(/[A-Z]/));
+            
+            // Create user record in database
+            this.usersService.createUser(
+              result.user.uid,
+              initials,
+              this.accountType as 'service' | 'admin' | 'inspector'
+            ).subscribe({
+              next: (response) => {
+                console.log('User created in database:', response);
+                this.navCtrl.navigateForward("login");
+                this.loading = false;
+              },
+              error: (err) => {
+                console.error('Error creating user in database:', err);
+                this.loading = false;
+                this.presentAlert('Account created but failed to save user details. Please contact support.');
+              }
+            });
+          }
         })
         .catch(err => {
           this.loading = false;
@@ -110,7 +141,7 @@ export class SignupPage implements OnInit {
   }
 
   disableSignUp(): boolean {
-    return !(this.name && this.email && this.password && this.creationCode) || this.disableSignUpButton;
+    return !(this.name && this.email && this.password && this.creationCode && this.accountType) || this.disableSignUpButton;
   }
 
   async presentAlert(message: string) {

@@ -1,4 +1,4 @@
-import { NextFunction, Response } from "express";
+import { Response } from "express";
 import { db } from "./config/firebase";
 
 type CustomerDataType = {
@@ -61,7 +61,7 @@ const getNewCustomerNumber = async () => {
     return "-1";
 };
 
-const getCustomers = async (req: Request, res: Response, next: NextFunction) => {
+const getCustomers = async (req: Request, res: Response) => {
     try {
         const customers: CustomerType[] = [];
         const querySnapshot = await db.collection(customerCollectionPath).get();

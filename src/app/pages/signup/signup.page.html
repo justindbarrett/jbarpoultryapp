@@ -67,6 +67,20 @@
                 (click)="showHideCode()"
               ></ion-icon>
             </ion-item>
+            <ion-item lines="none" color="light" class="rowStyle">
+              <ion-select
+                label="Account Type"
+                labelPlacement="floating"
+                [(ngModel)]="accountType"
+                interface="popover"
+              >
+                <ion-select-option value="service">Service</ion-select-option>
+                <ion-select-option value="admin">Admin</ion-select-option>
+                <ion-select-option value="inspector"
+                  >Inspector</ion-select-option
+                >
+              </ion-select>
+            </ion-item>
             <ion-button
               *ngIf="!loading"
               [disabled]="disableSignUp()"
