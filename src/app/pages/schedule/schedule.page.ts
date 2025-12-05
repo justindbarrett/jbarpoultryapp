@@ -489,7 +489,14 @@ export class SchedulePage implements OnInit, OnDestroy {
           lotNumber: `${datePrefix}${String(index + 1).padStart(2, '0')}`,
           species: "",
           customerCount: 0,
-          specialInstructions: "",
+          processingInstructions: {
+            wholeBirds: 0,
+            cutUpBirds: 0,
+            halves: 0,
+            sixPiece: 0,
+            eightPiece: 0,
+            notes: ""
+          },
           anteMortemTime: "",
           fsisInitial: "",
           finalCount: 0

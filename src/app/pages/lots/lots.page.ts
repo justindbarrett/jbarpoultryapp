@@ -48,6 +48,7 @@ import { AuthenticationService } from 'src/app/authentication.service';
 import { NavController } from '@ionic/angular';
 import { PdfGeneratorService } from 'src/app/pdfGenerator.service';
 import { Lot } from 'src/app/models/lot.model';
+import { format } from 'date-fns/format';
 
 @Component({
   selector: 'app-lots',
@@ -111,6 +112,7 @@ export class LotsPage implements OnInit, OnDestroy {
   public customers: Customer[] = [];
   public customer: Customer | undefined = undefined;
   poultryTypes: string[] = ['Broiler', 'Layer', 'Turkey', 'Duck', 'Quail', 'Other'];
+  public currentDate: string = "";
 
   // Accordion management (optional)
   accordionValue: string = 'core'; // Keeps the first section open by default
@@ -142,7 +144,14 @@ export class LotsPage implements OnInit, OnDestroy {
       lotNumber: 'LOTA-001',
       species: 'Broiler',
       customerCount: 150,
-      specialInstructions: 'Quick chill required',
+      processingInstructions: {
+        wholeBirds: 100,
+        cutUpBirds: 50,
+        halves: 0,
+        sixPiece: 25,
+        eightPiece: 25,
+        notes: 'Quick chill required'
+      },
       anteMortemTime: '11:00 AM',
       fsisInitial: 'JD',
       finalCount: 148
@@ -163,7 +172,14 @@ export class LotsPage implements OnInit, OnDestroy {
       lotNumber: 'LOTB-002',
       species: 'Turkey',
       customerCount: 80,
-      specialInstructions: 'Handle with care',
+      processingInstructions: {
+        wholeBirds: 80,
+        cutUpBirds: 0,
+        halves: 0,
+        sixPiece: 0,
+        eightPiece: 0,
+        notes: 'Handle with care'
+      },
       anteMortemTime: '12:30 PM',
       fsisInitial: 'JS',
       finalCount: 80
@@ -222,10 +238,12 @@ export class LotsPage implements OnInit, OnDestroy {
 
   init() {
     this.loading = true;
+    this.currentDate = format(new Date(), 'EEEE, MMMM d, yyyy');
     this.customersService.getCustomers().subscribe(
       (resp) => {
       this.customers = resp.customers;
       this.customersService.setCurrentCustomerList(this.customers);
+      this.loading = false;
       },
       (error) => {
         this.presentAlert("Error Retrieving Customer List", error.message, "Try Again");
@@ -306,5 +324,15 @@ export class LotsPage implements OnInit, OnDestroy {
 
   generateLotLabels() {
     this.pdfGeneratorService.generateLotLabelsPdf(this.mockLotSchedule);
+  }
+
+  onLotSelected(lot: Lot) {
+    console.log('Lot selected:', lot);
+    // Navigate to detail page and pass the lot in navigation state
+    try {
+      this.navCtrl.navigateForward(`/landing/lots/${lot.id}`, { state: { lot } });
+    } catch (e) {
+      console.error('Navigation failed', e);
+    }
   }
 }

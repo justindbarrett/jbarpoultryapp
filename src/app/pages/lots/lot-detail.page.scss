@@ -1,0 +1,115 @@
+/* Basic styling for Lot Detail page */
+.lot-detail {
+  display: block;
+}
+
+ion-item {
+  --padding-start: 0;
+}
+
+ion-input, ion-textarea {
+  width: 100%;
+}
+
+.ion-margin-top {
+  margin-top: 12px;
+}
+
+/* Info field styling for read-only display */
+.info-field {
+  margin-bottom: 8px;
+}
+
+.info-field strong {
+  display: block;
+  font-size: 12px;
+  color: var(--ion-color-medium);
+  margin-bottom: 2px;
+}
+
+.info-field p {
+  margin: 0;
+  font-size: 16px;
+  color: var(--ion-text-color);
+}
+
+/* Toggle field styling with label above */
+.toggle-field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 8px 8px;
+}
+
+.toggle-field .toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.toggle-field strong {
+  display: block;
+  font-size: 12px;
+  color: var(--ion-color-medium);
+}
+
+.toggle-field ion-icon {
+  font-size: 16px;
+  color: var(--ion-color-primary);
+  cursor: pointer;
+}
+
+.toggle-field ion-toggle {
+  margin: 0;
+}
+
+/* Card spacing */
+ion-card {
+  margin-bottom: 16px;
+}
+
+ion-card-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Grid responsive tweaks */
+ion-grid {
+  padding: 0;
+}
+
+.top-info-grid {
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+.top-info-grid ion-card {
+  height: 100%;
+  margin: 0;
+}
+
+.compact-grid {
+  padding: 0;
+}
+
+.compact-grid ion-row {
+  margin-bottom: 4px;
+}
+
+.compact-grid ion-col {
+  padding: 4px 8px;
+}
+
+ion-row {
+  margin-bottom: 0;
+}
+
+/* Small responsive tweaks */
+@media (min-width: 768px) {
+  .lot-detail {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}

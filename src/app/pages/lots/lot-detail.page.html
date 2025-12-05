@@ -1,0 +1,248 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="navCtrl.back()">Cancel</ion-button>
+    </ion-buttons>
+    <ion-title>Lot Details</ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="primary" (click)="save()">Save</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="lot; else noLot">
+    <!-- Top Row: Lot and Customer Info Side by Side -->
+    <ion-grid class="top-info-grid">
+      <ion-row>
+        <ion-col size="12" size-md="6">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>Lot Information</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-grid class="compact-grid">
+                <ion-row>
+                  <ion-col size="4">
+                    <div class="info-field">
+                      <strong>Lot Number:</strong>
+                      <p>{{ lot.lotNumber }}</p>
+                    </div>
+                  </ion-col>
+                  <ion-col size="4">
+                    <div class="info-field">
+                      <strong>Process Date:</strong>
+                      <p>{{ lot.processDate }}</p>
+                    </div>
+                  </ion-col>
+                  <ion-col size="4">
+                    <div class="info-field">
+                      <strong>Time In:</strong>
+                      <p>{{ lot.timeIn }}</p>
+                    </div>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="12" size-md="6">
+          <ion-card *ngIf="lot.customer">
+            <ion-card-header>
+              <ion-card-title>Customer Information</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-grid class="compact-grid">
+                <ion-row>
+                  <ion-col size="4">
+                    <div class="info-field">
+                      <strong>Name:</strong>
+                      <p>{{ lot.customer.name }}</p>
+                    </div>
+                  </ion-col>
+                  <ion-col size="4">
+                    <div class="info-field">
+                      <strong>Phone:</strong>
+                      <p>{{ lot.customer.phone }}</p>
+                    </div>
+                  </ion-col>
+                  <ion-col size="4">
+                    <div class="info-field">
+                      <strong>Address:</strong>
+                      <p>{{ lot.customer.address }}</p>
+                    </div>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <!-- Processing Instructions Card -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Processing Instructions</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-md="2">
+              <ion-item lines="none">
+                <ion-label position="stacked">Whole Birds</ion-label>
+                <ion-input
+                  type="number"
+                  [(ngModel)]="lot.processingInstructions.wholeBirds"
+                ></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="2">
+              <ion-item lines="none">
+                <ion-label position="stacked">Cut Up Birds</ion-label>
+                <ion-input
+                  type="number"
+                  [(ngModel)]="lot.processingInstructions.cutUpBirds"
+                ></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="2">
+              <ion-item lines="none">
+                <ion-label position="stacked">Halves</ion-label>
+                <ion-input
+                  type="number"
+                  [(ngModel)]="lot.processingInstructions.halves"
+                ></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="2">
+              <ion-item lines="none">
+                <ion-label position="stacked">6-Piece (leg quarters)</ion-label>
+                <ion-input
+                  type="number"
+                  [(ngModel)]="lot.processingInstructions.sixPiece"
+                ></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="2">
+              <ion-item lines="none">
+                <ion-label position="stacked">8-Piece (thighs drums)</ion-label>
+                <ion-input
+                  type="number"
+                  [(ngModel)]="lot.processingInstructions.eightPiece"
+                ></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="2">
+              <ion-item lines="none">
+                <ion-select
+                  label="Extras to Save"
+                  labelPlacement="stacked"
+                  [(ngModel)]="lot.processingInstructions.extrasToSave"
+                  multiple="true"
+                >
+                  <ion-select-option value="neck">Neck</ion-select-option>
+                  <ion-select-option value="heart">Heart</ion-select-option>
+                  <ion-select-option value="feet">Feet</ion-select-option>
+                  <ion-select-option value="liver">Liver</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="12">
+              <ion-item lines="none">
+                <ion-label position="stacked">Notes</ion-label>
+                <ion-textarea
+                  rows="2"
+                  [(ngModel)]="lot.processingInstructions.notes"
+                  placeholder="Additional processing notes..."
+                ></ion-textarea>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Lot Details Card -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Check-In Details</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-md="2">
+              <ion-item lines="none">
+                <ion-select
+                  label="Species"
+                  labelPlacement="stacked"
+                  [(ngModel)]="lot.species"
+                >
+                  <ion-select-option
+                    *ngFor="let type of poultryTypes"
+                    [value]="type"
+                    >{{ type }}</ion-select-option
+                  >
+                </ion-select>
+              </ion-item>
+            </ion-col>
+            <ion-col size="6" size-md="2">
+              <div class="toggle-field">
+                <div class="toggle-label">
+                  <strong>Withdrawal Time Met?</strong>
+                  <ion-icon
+                    name="information-circle-outline"
+                    (click)="showWithdrawalInfo()"
+                  ></ion-icon>
+                </div>
+                <ion-toggle [(ngModel)]="lot.withdrawalMet"></ion-toggle>
+              </div>
+            </ion-col>
+            <ion-col size="6" size-md="2">
+              <div class="toggle-field">
+                <div class="toggle-label">
+                  <strong>Organic?</strong>
+                  <ion-icon
+                    name="information-circle-outline"
+                    (click)="showOrganicInfo()"
+                  ></ion-icon>
+                </div>
+                <ion-toggle [(ngModel)]="lot.isOrganic"></ion-toggle>
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="2">
+              <ion-item lines="none">
+                <ion-label position="stacked">Customer Count</ion-label>
+                <ion-input
+                  type="number"
+                  [(ngModel)]="lot.customerCount"
+                ></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="2">
+              <ion-item lines="none">
+                <ion-label position="stacked">Final Count</ion-label>
+                <ion-input
+                  type="number"
+                  [(ngModel)]="lot.finalCount"
+                ></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="2">
+              <ion-button expand="block" color="secondary">
+                FSIS Initial
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <ng-template #noLot>
+    <p>No lot data available.</p>
+  </ng-template>
+</ion-content>

@@ -1,13 +1,40 @@
 <div class="card-container">
   <ion-card *ngIf="true">
-    <ion-card-content>
-      <ion-button expand="block" (click)="generateLotLabels()">
-        Generate Daily Lot Labels PDF
-      </ion-button>
-      <ion-button expand="block" (click)="generateSchedule()">
-        Generate Daily Schedule PDF
-      </ion-button>
-    </ion-card-content>
+    <ion-row>
+      <ion-col size-md="5" size="12" class="ion-padding ion-blue-bkg">
+        <ion-item lines="none" class="settingsHeader">
+          Lots In Process
+        </ion-item>
+      </ion-col>
+      <ion-col size-md="7" size="12" class="welcome">
+        <ion-spinner color="primary" *ngIf="loading"></ion-spinner>
+        <ion-card-content>
+          <h2 class="ion-padding">{{ currentDate }}</h2>
+          <ion-list>
+            <ion-item
+              *ngFor="let lot of mockLotSchedule"
+              (click)="onLotSelected(lot)"
+              button
+              detail
+            >
+              <ion-label>
+                <h3>{{ lot.lotNumber }}</h3>
+                <p>{{ lot.customer.name }} - {{ lot.species }}</p>
+                <p>Count: {{ lot.customerCount }}</p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+          <div class="ion-padding-top ion-margin-top ion-text-center">
+            <ion-button color="tertiary" (click)="generateLotLabels()">
+              Generate Lot Labels
+            </ion-button>
+            <ion-button color="tertiary" (click)="generateSchedule()">
+              Generate Daily Worksheet
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-col>
+    </ion-row>
   </ion-card>
 </div>
 <ion-fab slot="fixed" vertical="bottom" horizontal="center" [edge]="true">

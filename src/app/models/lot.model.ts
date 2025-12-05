@@ -1,5 +1,15 @@
 import { Customer } from "./customer.model";
 
+export type ProcessingInstructions = {
+    wholeBirds: number;
+    cutUpBirds: number;
+    halves: number;
+    sixPiece: number;
+    eightPiece: number;
+    extrasToSave?: string[];
+    notes?: string;
+};
+
 export type Lot = {
     id: string,
     processDate: string,
@@ -10,7 +20,7 @@ export type Lot = {
     lotNumber: string,
     species: string,
     customerCount: number,
-    specialInstructions: string,
+    processingInstructions: ProcessingInstructions,
     anteMortemTime: string,
     fsisInitial: string,
     finalCount: number

@@ -29,6 +29,18 @@ export const routes: Routes = [
     canActivate: [() => inject(LoginService).isLoggedIn()]
   },
   {
+    path: 'landing/lots/:id',
+    loadComponent: () =>
+      import('./pages/lots/lot-detail.page').then((m) => m.LotDetailPage),
+    canActivate: [() => inject(LoginService).isLoggedIn()]
+  },
+  {
+    path: 'landing/lots/new-lot',
+    loadComponent: () =>
+      import('./folder/folder.page').then((m) => m.FolderPage),
+    canActivate: [() => inject(LoginService).isLoggedIn()]
+  },
+  {
     path: 'landing/accountsettings',
     loadComponent: () =>
       import('./folder/folder.page').then((m) => m.FolderPage),
