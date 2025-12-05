@@ -6,6 +6,7 @@ import { addCustomer,
     getCustomers,
     updateCustomer } from "./customerController";
 import { deleteScheduledLot, getScheduledLots, scheduleLot, updateScheduledLot } from "./scheduleController";
+import { createLots, getLots, updateLot, updateLots, deleteLot, createLot } from "./lotController";
 import { verifyToken } from "./middleware/authenticator";
 
 const app = express();
@@ -21,5 +22,11 @@ app.post("/schedule", scheduleLot);
 app.get("/schedule", getScheduledLots);
 app.patch("/schedule/:id", updateScheduledLot);
 app.delete("/schedule/:id", deleteScheduledLot);
+app.post("/lot", createLot);
+app.patch("/lot/:id", updateLot);
+app.delete("/lot/:id", deleteLot);
+app.post("/lots", createLots);
+app.get("/lots", getLots);
+app.patch("/lots", updateLots);
 
 exports.app = onRequest(app);
