@@ -46,6 +46,7 @@ import { parseISO } from 'date-fns/parseISO';
 import { Subscription, catchError } from 'rxjs';
 import { IdentityService } from 'src/app/identity.service';
 import { AuthenticationService } from 'src/app/authentication.service';
+import { LotsService } from 'src/app/lots.service';
 
 @Component({
   selector: 'app-schedule',
@@ -132,6 +133,7 @@ export class SchedulePage implements OnInit, OnDestroy {
     private ionRouterOutlet: IonRouterOutlet,
     private customersService: CustomersService,
     private scheduleService: ScheduleService,
+    private lotsService: LotsService,
     private alertCtrl: AlertController,
     private identityService: IdentityService,
     private authenticationService: AuthenticationService
@@ -439,7 +441,7 @@ export class SchedulePage implements OnInit, OnDestroy {
     this.isToastOpen = open;
   }
 
-  processTodaysLots() {
+  async processTodaysLots() {
     // Get today's date at midnight
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -455,43 +457,61 @@ export class SchedulePage implements OnInit, OnDestroy {
       eventDate.setHours(0, 0, 0, 0);
       return eventDate.getTime() === today.getTime();
     });
+
+    if (todaysEvents.length === 0) {
+      this.presentAlert("No Lots to Process", "There are no lots scheduled for today.", "OK");
+      return;
+    }
     
-    // Convert ScheduledLot to Lot
-    const lotsToProcess: Lot[] = todaysEvents.map((scheduledLot) => {
-      const customer = this.customers.find((cust) => cust.id === scheduledLot.customerId);
+    // Present confirmation alert
+    await this.presentContinueAlert(
+      "Process Today's Lots?",
+      `This action will process ${todaysEvents.length} lot(s) for today. Are you sure you want to continue?`
+    );
+
+    
+    if (this.shouldContinue) {
+      // Format lot numbers
+      const today = new Date();
+      const datePrefix = format(today, 'yyyyMMdd');
+
+      // Convert ScheduledLot to Lot
+      const lotsToProcess: Lot[] = todaysEvents.map((scheduledLot, index) => {
+        const customer = this.customers.find((cust) => cust.id === scheduledLot.customerId);
+        
+        return {
+          id: "",
+          processDate: processDateStr,
+          customer: customer || {} as Customer,
+          timeIn: timeInStr,
+          withdrawalMet: false,
+          isOrganic: false,
+          lotNumber: `${datePrefix}${String(index + 1).padStart(2, '0')}`,
+          species: "",
+          customerCount: 0,
+          specialInstructions: "",
+          anteMortemTime: "",
+          fsisInitial: "",
+          finalCount: 0
+        };
+      });
       
-      return {
-        id: "",
-        processDate: processDateStr,
-        customer: customer || {} as Customer,
-        timeIn: timeInStr,
-        withdrawalMet: false,
-        isOrganic: false,
-        lotNumber: "",
-        species: "",
-        customerCount: 0,
-        specialInstructions: "",
-        anteMortemTime: "",
-        fsisInitial: "",
-        finalCount: 0
-      };
-    });
-    
-    // TODO: Call backend to save/process the lots
-    // this.lotsService.processLots(lotsToProcess).subscribe(
-    //   (resp) => {
-    //     if (resp && resp.status == "success") {
-    //       this.openSuccessToast(true, "Lots processed successfully!");
-    //     }
-    //     else {
-    //       this.presentAlert("Failed Process Lots Attempt", "Unknown Error Occurred", "Try Again");
-    //     }
-    //   },
-    //   (error) => {
-    //     this.presentAlert("Failed Process Lots Attempt", error, "Try Again");
-    //   }
-    // );
-    
-    console.log('Processing today\'s lots:', lotsToProcess);
+      // Call backend to save/process the lots
+      this.lotsService.createLots(lotsToProcess).subscribe(
+        (resp) => {
+          if (resp && resp.status == "success") {
+            this.openSuccessToast(true, "Lots processed successfully!");
+          }
+          else {
+            this.presentAlert("Failed Process Lots Attempt", "Unknown Error Occurred", "Try Again");
+          }
+        },
+        (error) => {
+          this.presentAlert("Failed Process Lots Attempt", error, "Try Again");
+        }
+      );
+      
+      console.log('Processing today\'s lots:', lotsToProcess);
+    }
   }
 }
