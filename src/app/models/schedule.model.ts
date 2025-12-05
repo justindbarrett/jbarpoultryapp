@@ -1,5 +1,3 @@
-import { IEvent } from "ionic7-calendar/calendar.interface";
-
 export type ScheduledLot = {
     id: string;
     customerId: string;

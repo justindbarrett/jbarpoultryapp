@@ -43,16 +43,21 @@
             [startHour]="8"
             [endHour]="18"
           ></calendar>
+          <div class="ion-padding-top">
+            <ion-button color="tertiary" (click)="processTodaysLots()">
+              Process Today's Lots
+            </ion-button>
+          </div>
         </ion-card-content>
       </ion-col>
     </ion-row>
   </ion-card>
+  <ion-fab slot="fixed" vertical="bottom" horizontal="center" [edge]="true">
+    <ion-fab-button id="newEventModal">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </div>
-<ion-fab slot="fixed" vertical="bottom" horizontal="center" [edge]="true">
-  <ion-fab-button id="newEventModal">
-    <ion-icon name="add"></ion-icon>
-  </ion-fab-button>
-</ion-fab>
 
 <ion-modal
   #modal

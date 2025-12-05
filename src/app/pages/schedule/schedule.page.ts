@@ -40,6 +40,7 @@ import { CalendarComponent, CalendarMode, NgCalendarModule } from 'ionic7-calend
 import { IonicSelectableComponent } from 'ionic-selectable';
 import { ScheduleService } from 'src/app/schedule.service';
 import { ScheduledLot } from 'src/app/models/schedule.model';
+import { Lot } from 'src/app/models/lot.model';
 import { format } from 'date-fns/format';
 import { parseISO } from 'date-fns/parseISO';
 import { Subscription, catchError } from 'rxjs';
@@ -436,5 +437,61 @@ export class SchedulePage implements OnInit, OnDestroy {
   openSuccessToast(open: boolean, message: string) {
     this.successToastMessage = message;
     this.isToastOpen = open;
+  }
+
+  processTodaysLots() {
+    // Get today's date at midnight
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Get current time for timeIn
+    const now = new Date();
+    const timeInStr = format(now, 'HH:mm:ss');
+    const processDateStr = format(today, 'yyyy-MM-dd');
+    
+    // Filter events for today
+    const todaysEvents = this.eventSource.filter((event) => {
+      const eventDate = new Date(event.startTime);
+      eventDate.setHours(0, 0, 0, 0);
+      return eventDate.getTime() === today.getTime();
+    });
+    
+    // Convert ScheduledLot to Lot
+    const lotsToProcess: Lot[] = todaysEvents.map((scheduledLot) => {
+      const customer = this.customers.find((cust) => cust.id === scheduledLot.customerId);
+      
+      return {
+        id: "",
+        processDate: processDateStr,
+        customer: customer || {} as Customer,
+        timeIn: timeInStr,
+        withdrawalMet: false,
+        isOrganic: false,
+        lotNumber: "",
+        species: "",
+        customerCount: 0,
+        specialInstructions: "",
+        anteMortemTime: "",
+        fsisInitial: "",
+        finalCount: 0
+      };
+    });
+    
+    // TODO: Call backend to save/process the lots
+    // this.lotsService.processLots(lotsToProcess).subscribe(
+    //   (resp) => {
+    //     if (resp && resp.status == "success") {
+    //       this.openSuccessToast(true, "Lots processed successfully!");
+    //     }
+    //     else {
+    //       this.presentAlert("Failed Process Lots Attempt", "Unknown Error Occurred", "Try Again");
+    //     }
+    //   },
+    //   (error) => {
+    //     this.presentAlert("Failed Process Lots Attempt", error, "Try Again");
+    //   }
+    // );
+    
+    console.log('Processing today\'s lots:', lotsToProcess);
   }
 }
