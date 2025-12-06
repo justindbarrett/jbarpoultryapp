@@ -8,13 +8,23 @@ import { addCustomer,
 import { deleteScheduledLot, getScheduledLots, scheduleLot, updateScheduledLot } from "./scheduleController";
 import { createLots, getLots, updateLot, updateLots, deleteLot, createLot } from "./lotController";
 import { addUser, getUsers, getUser, getUserByUserId, updateUser, deleteUser } from "./userController";
+import { getCurrentCode, verifyCode } from "./dailyCodeController";
 import { verifyToken } from "./middleware/authenticator";
+
+// Export scheduled function
+export { dailyCodeGenerator } from "./scheduled/dailyCode";
 
 const app = express();
 app.use(cors());
-app.use(verifyToken);
 
 app.get("/", (req, res) => res.status(200).send("Healthy"));
+
+// Public endpoint - no authentication required
+app.post("/dailycode/verify", verifyCode);
+
+// Apply authentication to all other routes
+app.use(verifyToken);
+
 app.post("/customers", addCustomer);
 app.get("/customers", getCustomers);
 app.patch("/customers/:id", updateCustomer);
@@ -35,5 +45,7 @@ app.get("/users/:id", getUser);
 app.get("/users/auth/:userId", getUserByUserId);
 app.patch("/users/:id", updateUser);
 app.delete("/users/:id", deleteUser);
+app.get("/dailycode", getCurrentCode);
+app.post("/dailycode/verify", verifyCode);
 
 exports.app = onRequest(app);

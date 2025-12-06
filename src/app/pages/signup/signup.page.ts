@@ -21,6 +21,7 @@ import {
   IonSelectOption } from '@ionic/angular/standalone';
 import { AuthenticationService } from 'src/app/authentication.service';
 import { UsersService } from 'src/app/users.service';
+import { DailyCodeService } from 'src/app/dailyCode.service';
 import { NavController, AlertController } from '@ionic/angular';
 import { eyeOffOutline, eyeOutline } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
@@ -71,6 +72,7 @@ export class SignupPage implements OnInit {
   constructor(
     private authService: AuthenticationService,
     private usersService: UsersService,
+    private dailyCodeService: DailyCodeService,
     private navCtrl: NavController,
     private alertCtrl: AlertController
   ) {
@@ -90,50 +92,59 @@ export class SignupPage implements OnInit {
         this.loading = false;
         return;
       }
-  
-      // TODO: store this code as a 10 digit secret
-      if (this.creationCode == "4515432926") {
-        this.authService.registerUser(this.email, this.password)
-        .then(result => {
-          if (result.user) {
-            result.user.updateProfile({ displayName: this.name });
-            
-            // Extract initials from name (concatenate first letters)
-            const initials = this.name
-              .split(' ')
-              .map(word => word.charAt(0).toUpperCase())
-              .filter(char => char.match(/[A-Z]/))
-              .join('');
-            
-            // Create user record in database
-            this.usersService.createUser(
-              result.user.uid,
-              [initials],
-              this.accountType as 'service' | 'admin' | 'inspector'
-            ).subscribe({
-              next: (response) => {
-                console.log('User created in database:', response);
-                this.navCtrl.navigateForward("login");
-                this.loading = false;
-              },
-              error: (err) => {
-                console.error('Error creating user in database:', err);
-                this.loading = false;
-                this.presentAlert('Account created but failed to save user details. Please contact support.');
+
+      this.dailyCodeService.verifyCode(this.creationCode).subscribe({
+        next: (response) => {
+          if (response.status === 'success' && response.data.valid) {
+            // Code is valid, proceed with registration
+            this.authService.registerUser(this.email, this.password)
+            .then(result => {
+              if (result.user) {
+                result.user.updateProfile({ displayName: this.name });
+                
+                // Extract initials from name (concatenate first letters)
+                const initials = this.name
+                  .split(' ')
+                  .map(word => word.charAt(0).toUpperCase())
+                  .filter(char => char.match(/[A-Z]/))
+                  .join('');
+                
+                // Create user record in database
+                this.usersService.createUser(
+                  result.user.uid,
+                  [initials],
+                  this.accountType as 'service' | 'admin' | 'inspector'
+                ).subscribe({
+                  next: (response) => {
+                    console.log('User created in database:', response);
+                    this.navCtrl.navigateForward("login");
+                    this.loading = false;
+                  },
+                  error: (err) => {
+                    console.error('Error creating user in database:', err);
+                    this.loading = false;
+                    this.presentAlert('Account created but failed to save user details. Please contact support.');
+                  }
+                });
               }
+            })
+            .catch(err => {
+              this.loading = false;
+              this.presentAlert(err.code); 
             });
+          } else {
+            this.loading = false;
+            this.remainingAttempts = this.remainingAttempts - 1;
+            this.presentAlert(`Invalid account creation code. ${this.remainingAttempts} attempts remaining.`);
           }
-        })
-        .catch(err => {
+        },
+        error: (err) => {
           this.loading = false;
-          this.presentAlert(err.code); 
-        })
-      }
-      else {
-        this.loading = false;
-        this.remainingAttempts = this.remainingAttempts - 1;
-        this.presentAlert(`Invalid account creation code. ${this.remainingAttempts} attempts remaining.`);
-      }
+          this.remainingAttempts = this.remainingAttempts - 1;
+          const errorMessage = err.error?.message || 'Invalid account creation code';
+          this.presentAlert(`${errorMessage}. ${this.remainingAttempts} attempts remaining.`);
+        }
+      });
     }
   }
 

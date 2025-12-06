@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IonModal, IonInput, IonIcon, IonList, IonLabel, IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem } from '@ionic/angular/standalone';
 import { AuthenticationService } from 'src/app/authentication.service';
 import { UsersService } from 'src/app/users.service';
+import { DailyCodeService } from 'src/app/dailyCode.service';
 import { User } from 'src/app/models/user.model';
 import { NavController, AlertController } from '@ionic/angular';
 import { IdentityService } from 'src/app/identity.service';
@@ -27,6 +28,8 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
   public userInitials: string[] = [];
   public activeInitials: string = "";
   public userRole: string = "";
+  public dailyCode: string = "";
+  public dailyCodeDate: string = "";
 
   public newName: string = "";
   public newEmail: string = "";
@@ -65,6 +68,7 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
     private loginService: LoginService,
     private authService: AuthenticationService,
     private usersService: UsersService,
+    private dailyCodeService: DailyCodeService,
     private navCtrl: NavController,
     private alertCtrl: AlertController,
     private identityService: IdentityService
@@ -86,6 +90,19 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
           this.activeInitials = this.userInitials[0] || "";
           this.userRole = response.data.role || "";
           this.userDocId = response.data.id || "";
+          
+          // Fetch daily code if user is admin
+          if (this.userRole === 'admin') {
+            this.dailyCodeService.getCurrentCode().subscribe({
+              next: (codeResponse) => {
+                this.dailyCode = codeResponse.data.code;
+                this.dailyCodeDate = codeResponse.data.date;
+              },
+              error: (err) => {
+                console.error('Error loading daily code:', err);
+              }
+            });
+          }
         },
         error: (err) => {
           console.error('Error loading user data:', err);
@@ -106,6 +123,19 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
             this.activeInitials = this.userInitials[0] || "";
             this.userRole = response.data.role || "";
             this.userDocId = response.data.id || "";
+            
+            // Fetch daily code if user is admin
+            if (this.userRole === 'admin') {
+              this.dailyCodeService.getCurrentCode().subscribe({
+                next: (codeResponse) => {
+                  this.dailyCode = codeResponse.data.code;
+                  this.dailyCodeDate = codeResponse.data.date;
+                },
+                error: (err) => {
+                  console.error('Error loading daily code:', err);
+                }
+              });
+            }
           },
           error: (err) => {
             console.error('Error loading user data:', err);

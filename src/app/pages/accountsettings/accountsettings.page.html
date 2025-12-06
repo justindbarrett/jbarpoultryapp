@@ -12,10 +12,21 @@
             {{ userName }} <br />
             {{ userEmail }} <br />
             <br />
-            User ID: <br />
-            {{ userId }}
-            <br />
-            <span *ngIf="userRole"> Account Type: {{ userRole }} <br /> </span>
+            <span *ngIf="userRole"> Account Type: {{ userRole }}</span>
+            <span *ngIf="userRole === 'admin' && dailyCode">
+              <br />
+              Account Creation Code:
+              <br />
+              <span
+                style="font-size: 1.2em; font-weight: bold; letter-spacing: 2px"
+                >{{ dailyCode }}</span
+              >
+              <br />
+              <span style="font-size: 0.9em; color: #666"
+                >(Valid for {{ dailyCodeDate }})</span
+              >
+              <br />
+            </span>
           </ion-card-header>
           <ion-button
             [disabled]="disableEditInfo()"
