@@ -7,6 +7,7 @@ export type ScheduledLot = {
     startTime: Date;
     title: string;
     category?: string;
+    species?: string;
 };
 
 export type ScheduledLots = {

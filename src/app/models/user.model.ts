@@ -1,6 +1,7 @@
 export type UserRole = 'service' | 'admin' | 'inspector';
 
 export type User = {
+    id: string;
     userId: string;
     initials: string[];
     role: UserRole;

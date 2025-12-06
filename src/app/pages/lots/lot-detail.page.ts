@@ -7,6 +7,7 @@ import { Lot } from 'src/app/models/lot.model';
 import { AlertController, NavController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { informationCircleOutline } from 'ionicons/icons';
+import { Consts } from 'src/app/consts';
 
 @Component({
   selector: 'app-lot-detail',
@@ -17,7 +18,7 @@ import { informationCircleOutline } from 'ionicons/icons';
 })
 export class LotDetailPage implements OnInit {
   public lot: any = null;
-  poultryTypes: string[] = ['Broiler', 'Layer', 'Turkey', 'Duck', 'Quail', 'Other'];
+  poultryTypes: string[] = Consts.SPECIES_TYPES;
 
   constructor(
     private lotsService: LotsService,

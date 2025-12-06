@@ -1,0 +1,215 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>New Lot Intake Form</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="lotForm" (ngSubmit)="onSubmit()">
+    <ion-accordion-group expand="full" value="core">
+      <ion-accordion value="core">
+        <ion-item slot="header" color="light">
+          <ion-label>1. Core Lot Details</ion-label>
+        </ion-item>
+        <div class="ion-padding" slot="content" formGroupName="coreDetails">
+          <ion-item>
+            <ion-select
+              label="Customer"
+              labelPlacement="stacked"
+              formControlName="customer"
+              placeholder="Select Customer"
+            >
+              <ion-select-option
+                *ngFor="let customer of customers"
+                [value]="customer"
+                >{{ customer }}</ion-select-option
+              >
+            </ion-select>
+          </ion-item>
+          <div
+            class="validation-error"
+            *ngIf="f['coreDetails'].get('customer')?.invalid && f['coreDetails'].get('customer')?.touched"
+          >
+            <p>Customer selection is required.</p>
+          </div>
+
+          <ion-item>
+            <ion-label position="stacked">Process Date</ion-label>
+            <ion-datetime-button datetime="processDate"></ion-datetime-button>
+            <ion-modal [keepContentsMounted]="true">
+              <ng-template>
+                <ion-datetime
+                  id="processDate"
+                  displayFormat="MM/DD/YYYY"
+                  [value]="todayISOString"
+                  [max]="maxDate"
+                  formControlName="processDate"
+                ></ion-datetime>
+              </ng-template>
+            </ion-modal>
+          </ion-item>
+          <div
+            class="validation-error"
+            *ngIf="f['coreDetails'].get('processDate')?.invalid && f['coreDetails'].get('processDate')?.touched"
+          >
+            <p>Process Date is required.</p>
+          </div>
+
+          <ion-item>
+            <ion-input
+              label="Lot Number (Auto-set)"
+              labelPlacement="stacked"
+              formControlName="lotNumber"
+            ></ion-input>
+          </ion-item>
+        </div>
+      </ion-accordion>
+
+      <ion-accordion value="intake">
+        <ion-item slot="header" color="light">
+          <ion-label>2. Lot Intake Information</ion-label>
+        </ion-item>
+        <div class="ion-padding" slot="content" formGroupName="lotIntake">
+          <ion-item>
+            <ion-label position="stacked">Time In</ion-label>
+            <ion-datetime-button datetime="timeIn"></ion-datetime-button>
+            <ion-modal [keepContentsMounted]="true">
+              <ng-template>
+                <ion-datetime
+                  id="timeIn"
+                  displayFormat="h:mm A"
+                  pickerFormat="h:mm A"
+                  [value]="currentTimeISOString"
+                  formControlName="timeIn"
+                ></ion-datetime>
+              </ng-template>
+            </ion-modal>
+          </ion-item>
+
+          <ion-item lines="none" class="ion-margin-top">
+            <ion-label>Withdrawal Time Met?</ion-label>
+            <ion-toggle slot="end" formControlName="withdrawalMet"></ion-toggle>
+          </ion-item>
+
+          <ion-item lines="none">
+            <ion-label>Is Lot Organic?</ion-label>
+            <ion-toggle slot="end" formControlName="isOrganic"></ion-toggle>
+          </ion-item>
+
+          <ion-item>
+            <ion-select
+              label="Poultry Type"
+              labelPlacement="stacked"
+              formControlName="poultryType"
+              placeholder="Select Type"
+            >
+              <ion-select-option
+                *ngFor="let type of poultryTypes"
+                [value]="type"
+                >{{ type }}</ion-select-option
+              >
+            </ion-select>
+          </ion-item>
+          <div
+            class="validation-error"
+            *ngIf="f['lotIntake'].get('poultryType')?.invalid && f['lotIntake'].get('poultryType')?.touched"
+          >
+            <p>Poultry Type is required.</p>
+          </div>
+
+          <ion-item>
+            <ion-input
+              label="Initial Count"
+              labelPlacement="stacked"
+              type="number"
+              placeholder="Enter total count"
+              formControlName="initialCount"
+            ></ion-input>
+          </ion-item>
+          <div
+            class="validation-error"
+            *ngIf="f['lotIntake'].get('initialCount')?.invalid && f['lotIntake'].get('initialCount')?.touched"
+          >
+            <p>Initial Count is required and must be at least 1.</p>
+          </div>
+
+          <ion-item lines="full">
+            <ion-textarea
+              label="Special Instructions"
+              labelPlacement="stacked"
+              placeholder="Any specific handling notes..."
+              formControlName="specialInstructions"
+              rows="3"
+            ></ion-textarea>
+          </ion-item>
+        </div>
+      </ion-accordion>
+
+      <ion-accordion value="completion">
+        <ion-item slot="header" color="light">
+          <ion-label>3. Lot Completion</ion-label>
+        </ion-item>
+        <div class="ion-padding" slot="content" formGroupName="lotCompletion">
+          <ion-item>
+            <ion-label position="stacked">Time Out</ion-label>
+            <ion-datetime-button datetime="timeOut"></ion-datetime-button>
+            <ion-modal [keepContentsMounted]="true">
+              <ng-template>
+                <ion-datetime
+                  id="timeOut"
+                  displayFormat="h:mm A"
+                  pickerFormat="h:mm A"
+                  [value]="currentTimeISOString"
+                  formControlName="timeOut"
+                ></ion-datetime>
+              </ng-template>
+            </ion-modal>
+          </ion-item>
+
+          <ion-item>
+            <ion-input
+              label="Initials"
+              labelPlacement="stacked"
+              placeholder="Your initials (max 5 characters)"
+              formControlName="initials"
+            ></ion-input>
+          </ion-item>
+          <div
+            class="validation-error"
+            *ngIf="f['lotCompletion'].get('initials')?.invalid && f['lotCompletion'].get('initials')?.touched"
+          >
+            <p>Initials are required (max 5 characters).</p>
+          </div>
+
+          <ion-item>
+            <ion-input
+              label="Final Count"
+              labelPlacement="stacked"
+              type="number"
+              placeholder="Enter final count"
+              formControlName="finalCount"
+            ></ion-input>
+          </ion-item>
+          <div
+            class="validation-error"
+            *ngIf="f['lotCompletion'].get('finalCount')?.invalid && f['lotCompletion'].get('finalCount')?.touched"
+          >
+            <p>Final Count is required and must be at least 1.</p>
+          </div>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
+
+    <ion-button
+      expand="block"
+      type="submit"
+      class="ion-margin-top"
+      [disabled]="lotForm.invalid"
+    >
+      Complete and Submit Lot
+    </ion-button>
+  </form>
+</ion-content>

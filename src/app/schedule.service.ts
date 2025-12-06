@@ -25,7 +25,8 @@ export class ScheduleService {
     endTime: Date, 
     startTime: Date, 
     title: string, 
-    category: string = ""): Observable<ScheduleLotResponse> {
+    category: string = "",
+    species: string = ""): Observable<ScheduleLotResponse> {
     const body = {
       "customerId": customerId,
       "lotId": lotId,
@@ -33,7 +34,8 @@ export class ScheduleService {
       "endTime": endTime,
       "startTime": startTime,
       "title": title,
-      "category": category
+      "category": category,
+      "species": species
     };
     const headers = {
       headers : new HttpHeaders({"Content-Type": "application/json"}),
@@ -49,7 +51,8 @@ export class ScheduleService {
     endTime: Date, 
     startTime: Date, 
     title: string, 
-    category: string = ""): Observable<ScheduleLotResponse> {
+    category: string = "",
+    species: string = ""): Observable<ScheduleLotResponse> {
     const body = {
       "customerId": customerId,
       "lotId": lotId,
@@ -57,7 +60,8 @@ export class ScheduleService {
       "endTime": endTime,
       "startTime": startTime,
       "title": title,
-      "category": category
+      "category": category,
+      "species": species
     };
     const headers = {
       headers : new HttpHeaders({"Content-Type": "application/json"}),

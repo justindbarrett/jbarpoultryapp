@@ -47,6 +47,7 @@ import { Subscription, catchError } from 'rxjs';
 import { IdentityService } from 'src/app/identity.service';
 import { AuthenticationService } from 'src/app/authentication.service';
 import { LotsService } from 'src/app/lots.service';
+import { Consts } from 'src/app/consts';
 
 @Component({
   selector: 'app-schedule',
@@ -105,12 +106,14 @@ export class SchedulePage implements OnInit, OnDestroy {
     customerId: "",
     lotId: "",
     id: "",
+    species: "",
   };
   public eventSource: ScheduledLot[] = [];
   public calendarViewTitle: string = "";
   public presentingElement: any = null;
   public customers: Customer[] = [];
   public customer: Customer | undefined = undefined;
+  public speciesTypes: string[] = Consts.SPECIES_TYPES;
   public showStart: boolean = false;
   public showEnd: boolean = false;
   public formattedStart: string = "";
@@ -224,7 +227,9 @@ export class SchedulePage implements OnInit, OnDestroy {
         this.newEvent.allDay,
         new Date(this.newEvent.endTime),
         new Date(this.newEvent.startTime),
-        this.newEvent.title).subscribe(
+        this.newEvent.title,
+        "",
+        this.newEvent.species).subscribe(
         (resp) => {
           if (resp && resp.status == "success") {
             this.init();
@@ -298,6 +303,7 @@ export class SchedulePage implements OnInit, OnDestroy {
 
   modalDismissed() {
     this.newEvent.title = "";
+    this.newEvent.species = "";
     this.customer = undefined;
     this.lotDetails = false;
   }
@@ -329,7 +335,9 @@ export class SchedulePage implements OnInit, OnDestroy {
           this.newEvent.allDay,
           new Date(this.newEvent.endTime),
           new Date(this.newEvent.startTime),
-          this.newEvent.title).subscribe(
+          this.newEvent.title,
+          "",
+          this.newEvent.species).subscribe(
           (resp) => {
             if (resp && resp.status == "success") {
               this.init();

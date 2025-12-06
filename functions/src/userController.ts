@@ -133,11 +133,12 @@ const getUserByUserId = async (req: any, res: Response) => {
             });
         }
         
-        const userData = querySnapshot.docs[0].data();
+        const userDoc = querySnapshot.docs[0];
+        const userData = userDoc.data();
         
         return res.status(200).json({
             status: "success",
-            data: userData,
+            data: { ...userData, id: userDoc.id },
         });
     } catch (error: any) {
         return res.status(500).json({

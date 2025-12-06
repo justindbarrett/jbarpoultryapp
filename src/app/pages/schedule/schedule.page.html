@@ -124,6 +124,15 @@
         </ionic-selectable>
       </ion-item>
       <ion-item>
+        <ion-label>species</ion-label>
+        <ionic-selectable
+          [(ngModel)]="newEvent.species"
+          [items]="speciesTypes"
+          [canSearch]="true"
+        >
+        </ionic-selectable>
+      </ion-item>
+      <ion-item>
         <ion-toggle ngDefaultControl [(ngModel)]="newEvent.allDay"
           >All-day</ion-toggle
         >

@@ -49,6 +49,7 @@ import { NavController } from '@ionic/angular';
 import { PdfGeneratorService } from 'src/app/pdfGenerator.service';
 import { Lot } from 'src/app/models/lot.model';
 import { format } from 'date-fns/format';
+import { Consts } from 'src/app/consts';
 
 @Component({
   selector: 'app-lots',
@@ -111,7 +112,7 @@ export class LotsPage implements OnInit, OnDestroy {
   };
   public customers: Customer[] = [];
   public customer: Customer | undefined = undefined;
-  poultryTypes: string[] = ['Broiler', 'Layer', 'Turkey', 'Duck', 'Quail', 'Other'];
+  poultryTypes: string[] = Consts.SPECIES_TYPES;
   public currentDate: string = "";
 
   // Accordion management (optional)
@@ -142,7 +143,7 @@ export class LotsPage implements OnInit, OnDestroy {
       withdrawalMet: true,
       isOrganic: false,
       lotNumber: 'LOTA-001',
-      species: 'Broiler',
+      species: 'Broilers',
       customerCount: 150,
       processingInstructions: {
         wholeBirds: 100,

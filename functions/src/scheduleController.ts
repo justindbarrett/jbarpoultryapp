@@ -9,6 +9,7 @@ type ScheduleLotDataType = {
     startTime: Date;
     title: string;
     category?: string;
+    species?: string;
 };
 
 type ScheduleLotType = {
@@ -20,6 +21,7 @@ type ScheduleLotType = {
     startTime: Date;
     title: string;
     category?: string;
+    species?: string;
 };
 
 type Request = {
@@ -30,7 +32,7 @@ type Request = {
 const scheduleCollectionPath = "schedule";
 
 const scheduleLot = async (req: Request, res: Response) => {
-    const { customerId, lotId, allDay, endTime, startTime, title } = req.body;
+    const { customerId, lotId, allDay, endTime, startTime, title, species } = req.body;
     try {
         const scheduleDocument = await db.collection(
             scheduleCollectionPath
@@ -43,6 +45,7 @@ const scheduleLot = async (req: Request, res: Response) => {
             endTime: endTime,
             startTime: startTime,
             title: title,
+            species: species || "",
         };
         await scheduleDocument.set(lot);
 
@@ -73,7 +76,7 @@ const getScheduledLots = async (req: Request, res: Response) => {
 };
 
 const updateScheduledLot = async (req: Request, res: Response) => {
-    const { customerId, lotId, allDay, endTime, startTime, title } = req.body;
+    const { customerId, lotId, allDay, endTime, startTime, title, species } = req.body;
     const { id } = req.params;
     try {
         const lot = await db.collection(scheduleCollectionPath).doc(id);
@@ -87,6 +90,7 @@ const updateScheduledLot = async (req: Request, res: Response) => {
             endTime: endTime || currentData.endTime,
             startTime: startTime || currentData.startTime,
             title: title || currentData.title,
+            species: species || currentData.species || "",
         };
         await lot.update(newData);
 

@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonModal, IonInput, IonIcon, IonList, IonLabel, IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonRow, IonCard, IonItem } from '@ionic/angular/standalone';
 import { AuthenticationService } from 'src/app/authentication.service';
+import { UsersService } from 'src/app/users.service';
+import { User } from 'src/app/models/user.model';
 import { NavController, AlertController } from '@ionic/angular';
 import { IdentityService } from 'src/app/identity.service';
 import { Subscription } from 'rxjs';
@@ -22,6 +24,9 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
   public userId: string = "";
   public userName: string = "";
   public userEmail: string = "";
+  public userInitials: string[] = [];
+  public activeInitials: string = "";
+  public userRole: string = "";
 
   public newName: string = "";
   public newEmail: string = "";
@@ -49,13 +54,17 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
   public openModal: boolean = false;
   public showChangePassword: boolean = false;
   public showVerifyEmail: boolean = false;
+  public newInitials: string = "";
   public disableSavePasswordButton: boolean = false;
   public shouldContinue: boolean = false;
+  public userDocId: string = "";
+  public initialsChanged: boolean = false;
   @ViewChild(IonModal) modal: IonModal;
 
   constructor(
     private loginService: LoginService,
     private authService: AuthenticationService,
+    private usersService: UsersService,
     private navCtrl: NavController,
     private alertCtrl: AlertController,
     private identityService: IdentityService
@@ -69,10 +78,40 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
     this.userName = userDetails?.displayName || "";
     this.userEmail = userDetails?.emailAddress || "";
 
+    // Load user data from database
+    if (this.userId) {
+      this.usersService.getUserByUserId(this.userId).subscribe({
+        next: (response) => {
+          this.userInitials = response.data.initials || [];
+          this.activeInitials = this.userInitials[0] || "";
+          this.userRole = response.data.role || "";
+          this.userDocId = response.data.id || "";
+        },
+        error: (err) => {
+          console.error('Error loading user data:', err);
+        }
+      });
+    }
+
     this.userDetailsSubscription = this.identityService.getUserDetailsObservable().subscribe((userDetails) => {
       this.userId = userDetails.userId || "";
       this.userName = userDetails.displayName || "";
       this.userEmail = userDetails.emailAddress || "";
+      
+      // Reload user data from database when userId changes
+      if (this.userId) {
+        this.usersService.getUserByUserId(this.userId).subscribe({
+          next: (response) => {
+            this.userInitials = response.data.initials || [];
+            this.activeInitials = this.userInitials[0] || "";
+            this.userRole = response.data.role || "";
+            this.userDocId = response.data.id || "";
+          },
+          error: (err) => {
+            console.error('Error loading user data:', err);
+          }
+        });
+      }
     });
   }
 
@@ -102,6 +141,7 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
     this.showChangePassword = false;
     this.disableSavePasswordButton = false;
     this.shouldContinue = false;
+    this.initialsChanged = false;
   }
 
   modalDismissed(event: Event) {
@@ -126,6 +166,84 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
 
   gotoEditUserPreferences() {
     console.log(`edit user preferences`);
+  }
+
+  addInitials() {
+    if (!this.newInitials.trim()) {
+      return;
+    }
+
+    const initialsToAdd = this.newInitials
+      .split(',')
+      .map(i => i.trim().toUpperCase())
+      .filter(i => i.length > 0 && !this.userInitials.includes(i));
+
+    if (initialsToAdd.length === 0) {
+      this.presentAlert('Invalid Input', 'Please enter new initials or remove duplicates', 'OK');
+      return;
+    }
+
+    const updatedInitials = [...this.userInitials, ...initialsToAdd];
+
+    this.usersService.updateUser(this.userDocId, { initials: updatedInitials }).subscribe({
+      next: (response) => {
+        this.userInitials = response.data.initials || [];
+        this.newInitials = "";
+        this.initialsChanged = true;
+        if (!this.activeInitials && this.userInitials.length > 0) {
+          this.activeInitials = this.userInitials[0];
+        }
+        this.presentAlert('Success', `Added ${initialsToAdd.length} initial(s) successfully`, 'OK');
+      },
+      error: (err) => {
+        console.error('Error updating initials:', err);
+        this.presentAlert('Error', 'Failed to update initials', 'OK');
+      }
+    });
+  }
+
+  deleteInitials(initials: string) {
+    const updatedInitials = this.userInitials.filter(i => i !== initials);
+
+    this.usersService.updateUser(this.userDocId, { initials: updatedInitials }).subscribe({
+      next: (response) => {
+        this.userInitials = response.data.initials || [];
+        this.initialsChanged = true;
+        if (this.activeInitials === initials) {
+          this.activeInitials = this.userInitials[0] || "";
+        }
+        this.presentAlert('Success', 'Initials deleted successfully', 'OK');
+      },
+      error: (err) => {
+        console.error('Error deleting initials:', err);
+        this.presentAlert('Error', 'Failed to delete initials', 'OK');
+      }
+    });
+  }
+
+  setActiveInitials(initials: string) {
+    const index = this.userInitials.indexOf(initials);
+    if (index > 0) {
+      const reorderedInitials = [
+        initials,
+        ...this.userInitials.filter(i => i !== initials)
+      ];
+
+      this.usersService.updateUser(this.userDocId, { initials: reorderedInitials }).subscribe({
+        next: (response) => {
+          this.userInitials = response.data.initials || [];
+          this.activeInitials = this.userInitials[0] || "";
+          this.initialsChanged = true;
+          this.presentAlert('Success', 'Active initials updated successfully', 'OK');
+        },
+        error: (err) => {
+          console.error('Error setting active initials:', err);
+          this.presentAlert('Error', 'Failed to set active initials', 'OK');
+        }
+      });
+    } else {
+      this.activeInitials = initials;
+    }
   }
 
   disableEditInfo() {
@@ -259,6 +377,17 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
     this.disableSaveInfoButton = true;
     let nameUpdated = true;
     let emailUpdated = true;
+    let initialsUpdated = true;
+    
+    if (this.newInitials && this.newInitials.trim()) {
+      initialsUpdated = false;
+      this.addInitials();
+      // Wait a moment for the subscription to complete
+      setTimeout(() => {
+        initialsUpdated = true;
+      }, 500);
+    }
+    
     if (this.newName) {
       nameUpdated = false;
       await this.authService.updateUserProfile(this.newName).then(() => {
@@ -292,8 +421,9 @@ export class AccountSettingsPage implements OnInit, OnDestroy {
         this.presentAlert(`Confirm New Email`, `Emails must match.`, `Try Again`);
       }
     }
-    this.showEdit = !(nameUpdated && emailUpdated);
+    this.showEdit = !(nameUpdated && emailUpdated && initialsUpdated);
     if (!this.showEdit) {
+      this.initialsChanged = false;
       this.init();
     }
   }

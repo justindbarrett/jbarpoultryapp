@@ -98,16 +98,17 @@ export class SignupPage implements OnInit {
           if (result.user) {
             result.user.updateProfile({ displayName: this.name });
             
-            // Extract initials from name (first letter of each word)
+            // Extract initials from name (concatenate first letters)
             const initials = this.name
               .split(' ')
               .map(word => word.charAt(0).toUpperCase())
-              .filter(char => char.match(/[A-Z]/));
+              .filter(char => char.match(/[A-Z]/))
+              .join('');
             
             // Create user record in database
             this.usersService.createUser(
               result.user.uid,
-              initials,
+              [initials],
               this.accountType as 'service' | 'admin' | 'inspector'
             ).subscribe({
               next: (response) => {
