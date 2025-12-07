@@ -3,6 +3,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import autoTable from 'jspdf-autotable';
 import * as QRCode from 'qrcode';
+import { format, parse } from 'date-fns';
 import { BaseUrlService } from './baseUrl.service';
 
 @Injectable({
@@ -85,15 +86,26 @@ export class PdfGeneratorService {
         const processingInstructionsSummary = parts.join('\n');
         // -----------------------------------------------------
 
+        // Format times to 12-hour format
+        const formatTime = (timeStr: string): string => {
+            if (!timeStr) return '';
+            try {
+                const parsedTime = parse(timeStr, 'HH:mm:ss', new Date());
+                return format(parsedTime, 'h:mm a');
+            } catch {
+                return timeStr;
+            }
+        };
+
         return [
-            lot.timeIn,
+            formatTime(lot.timeIn),
             `${lot.customer.name || ''}\n${lot.customer.phone || ''}\n${lot.customer.address || ''}`,
             columnThreeContent, // <-- Use the custom formatted string
             lot.lotNumber,
             lot.species,
             lot.customerCount,
             processingInstructionsSummary,
-            lot.anteMortemTime || '',
+            formatTime(lot.anteMortemTime || ''),
             lot.fsisInitial || '',
             lot.finalCount
         ];
