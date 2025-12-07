@@ -23,7 +23,9 @@ export type Lot = {
     processingInstructions: ProcessingInstructions,
     anteMortemTime: string,
     fsisInitial: string,
-    finalCount: number
+    finalCount: number,
+    processingStarted: boolean,
+    processingFinished: boolean
 };
 
 export type Lots = {

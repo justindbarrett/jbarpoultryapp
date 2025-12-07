@@ -27,7 +27,8 @@ import {
   IonCol, 
   IonRow, 
   IonCard, 
-  IonItem } from '@ionic/angular/standalone';
+  IonItem,
+  NavController } from '@ionic/angular/standalone';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -134,6 +135,7 @@ export class SchedulePage implements OnInit, OnDestroy {
 
   constructor(
     private ionRouterOutlet: IonRouterOutlet,
+    private navCtrl: NavController,
     private customersService: CustomersService,
     private scheduleService: ScheduleService,
     private lotsService: LotsService,
@@ -372,7 +374,9 @@ export class SchedulePage implements OnInit, OnDestroy {
       title: scheduledLot.title,
       allDay: scheduledLot.allDay,
       startTime: new Date(scheduledLot.startTime),
-      endTime: new Date(scheduledLot.endTime)
+      endTime: new Date(scheduledLot.endTime),
+      processingStarted: scheduledLot.processingStarted || false,
+      species: scheduledLot.species
     }
     return event;
   }
@@ -471,10 +475,18 @@ export class SchedulePage implements OnInit, OnDestroy {
       return;
     }
     
+    // Filter out events that have already been processed
+    const eventsToProcess = todaysEvents.filter(event => !event.processingStarted);
+    
+    if (eventsToProcess.length === 0) {
+      this.presentAlert("No New Lots to Process", "All scheduled lots for today have already been processed.", "OK");
+      return;
+    }
+    
     // Present confirmation alert
     await this.presentContinueAlert(
       "Process Today's Lots?",
-      `This action will process ${todaysEvents.length} lot(s) for today. Are you sure you want to continue?`
+      `This action will process ${eventsToProcess.length} lot(s) for today. Are you sure you want to continue?`
     );
 
     
@@ -484,7 +496,7 @@ export class SchedulePage implements OnInit, OnDestroy {
       const datePrefix = format(today, 'yyyyMMdd');
 
       // Convert ScheduledLot to Lot
-      const lotsToProcess: Lot[] = todaysEvents.map((scheduledLot, index) => {
+      const lotsToProcess: Lot[] = eventsToProcess.map((scheduledLot, index) => {
         const customer = this.customers.find((cust) => cust.id === scheduledLot.customerId);
         
         return {
@@ -495,7 +507,7 @@ export class SchedulePage implements OnInit, OnDestroy {
           withdrawalMet: false,
           isOrganic: false,
           lotNumber: `${datePrefix}${String(index + 1).padStart(2, '0')}`,
-          species: "",
+          species: scheduledLot.species || "",
           customerCount: 0,
           processingInstructions: {
             wholeBirds: 0,
@@ -507,15 +519,40 @@ export class SchedulePage implements OnInit, OnDestroy {
           },
           anteMortemTime: "",
           fsisInitial: "",
-          finalCount: 0
+          finalCount: 0,
+          processingStarted: true,
+          processingFinished: false
         };
       });
       
       // Call backend to save/process the lots
       this.lotsService.createLots(lotsToProcess).subscribe(
         (resp) => {
+          console.log('Create lots response:', resp);
           if (resp && resp.status == "success") {
+            console.log('Created lots with IDs:', resp.data);
+            // Mark events as processing started
+            eventsToProcess.forEach(event => {
+              event.processingStarted = true;
+              // Update event in backend
+              this.scheduleService.updateSchedule(
+                event.id,
+                event.customerId,
+                event.lotId,
+                event.allDay,
+                event.endTime,
+                event.startTime,
+                event.title,
+                event.category || "",
+                event.species || "",
+                true
+              ).subscribe();
+            });
+            
             this.openSuccessToast(true, "Lots processed successfully!");
+            setTimeout(() => {
+              this.navCtrl.navigateForward('landing/lots');
+            }, 1000);
           }
           else {
             this.presentAlert("Failed Process Lots Attempt", "Unknown Error Occurred", "Try Again");

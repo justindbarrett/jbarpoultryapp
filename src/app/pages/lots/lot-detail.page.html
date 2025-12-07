@@ -38,7 +38,7 @@
                   <ion-col size="4">
                     <div class="info-field">
                       <strong>Time In:</strong>
-                      <p>{{ lot.timeIn }}</p>
+                      <p>{{ formattedTimeIn }}</p>
                     </div>
                   </ion-col>
                 </ion-row>
@@ -180,6 +180,7 @@
                   label="Species"
                   labelPlacement="stacked"
                   [(ngModel)]="lot.species"
+                  interface="popover"
                 >
                   <ion-select-option
                     *ngFor="let type of poultryTypes"

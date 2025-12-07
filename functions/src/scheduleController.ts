@@ -10,6 +10,7 @@ type ScheduleLotDataType = {
     title: string;
     category?: string;
     species?: string;
+    processingStarted?: boolean;
 };
 
 type ScheduleLotType = {
@@ -22,6 +23,7 @@ type ScheduleLotType = {
     title: string;
     category?: string;
     species?: string;
+    processingStarted?: boolean;
 };
 
 type Request = {
@@ -32,7 +34,7 @@ type Request = {
 const scheduleCollectionPath = "schedule";
 
 const scheduleLot = async (req: Request, res: Response) => {
-    const { customerId, lotId, allDay, endTime, startTime, title, species } = req.body;
+    const { customerId, lotId, allDay, endTime, startTime, title, species, processingStarted } = req.body;
     try {
         const scheduleDocument = await db.collection(
             scheduleCollectionPath
@@ -46,6 +48,7 @@ const scheduleLot = async (req: Request, res: Response) => {
             startTime: startTime,
             title: title,
             species: species || "",
+            processingStarted: processingStarted || false,
         };
         await scheduleDocument.set(lot);
 
@@ -76,7 +79,7 @@ const getScheduledLots = async (req: Request, res: Response) => {
 };
 
 const updateScheduledLot = async (req: Request, res: Response) => {
-    const { customerId, lotId, allDay, endTime, startTime, title, species } = req.body;
+    const { customerId, lotId, allDay, endTime, startTime, title, species, processingStarted } = req.body;
     const { id } = req.params;
     try {
         const lot = await db.collection(scheduleCollectionPath).doc(id);
@@ -91,6 +94,7 @@ const updateScheduledLot = async (req: Request, res: Response) => {
             startTime: startTime || currentData.startTime,
             title: title || currentData.title,
             species: species || currentData.species || "",
+            processingStarted: processingStarted !== undefined ? processingStarted : currentData.processingStarted || false,
         };
         await lot.update(newData);
 

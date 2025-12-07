@@ -7,12 +7,12 @@
         </ion-item>
       </ion-col>
       <ion-col size-md="7" size="12" class="welcome">
-        <ion-spinner color="primary" *ngIf="loading"></ion-spinner>
         <ion-card-content>
           <h2 class="ion-padding">{{ currentDate }}</h2>
+          <ion-spinner color="primary" *ngIf="loading"></ion-spinner>
           <ion-list>
             <ion-item
-              *ngFor="let lot of mockLotSchedule"
+              *ngFor="let lot of lots"
               (click)="onLotSelected(lot)"
               button
               detail

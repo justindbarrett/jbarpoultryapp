@@ -9,6 +9,7 @@ import { addIcons } from 'ionicons';
 import { informationCircleOutline } from 'ionicons/icons';
 import { Consts } from 'src/app/consts';
 import { FsisInitialButtonComponent, FsisInitialConfirmation } from 'src/app/components/fsis-initial-button/fsis-initial-button.component';
+import { format, parse } from 'date-fns';
 
 @Component({
   selector: 'app-lot-detail',
@@ -29,11 +30,24 @@ export class LotDetailPage implements OnInit {
     addIcons({ informationCircleOutline });
   }
 
+  get formattedTimeIn(): string {
+    if (!this.lot?.timeIn) return '';
+    try {
+      // Parse HH:mm:ss format and format to 12-hour time
+      const date = parse(this.lot.timeIn, 'HH:mm:ss', new Date());
+      return format(date, 'h:mm a');
+    } catch (e) {
+      return this.lot.timeIn;
+    }
+  }
+
   ngOnInit(): void {
     // Read navigation state first
     const state = (history && (history.state as any)) || {};
     if (state && state.lot) {
       this.lot = state.lot;
+      console.log('Lot loaded:', this.lot);
+      console.log('Lot species:', this.lot.species);
       // Initialize processingInstructions if not present
       if (!this.lot.processingInstructions) {
         this.lot.processingInstructions = {
@@ -76,6 +90,9 @@ export class LotDetailPage implements OnInit {
   }
 
   save() {
+    console.log('Saving lot:', this.lot);
+    console.log('Lot ID:', this.lot?.id);
+    
     if (!this.lot || !this.lot.id) {
       this.presentAlert('Invalid Lot', 'Cannot save an invalid lot');
       return;
@@ -92,7 +109,15 @@ export class LotDetailPage implements OnInit {
       this.lot.lotNumber || '',
       this.lot.species || '',
       this.lot.customerCount || 0,
-      this.lot.specialInstructions || '',
+      this.lot.processingInstructions || {
+        wholeBirds: 0,
+        cutUpBirds: 0,
+        halves: 0,
+        sixPiece: 0,
+        eightPiece: 0,
+        extrasToSave: [],
+        notes: ''
+      },
       this.lot.anteMortemTime || '',
       this.lot.fsisInitial || '',
       this.lot.finalCount || 0

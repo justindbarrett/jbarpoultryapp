@@ -36,7 +36,7 @@ export class LotsService {
     lotNumber: string,
     species: string,
     customerCount: number,
-    specialInstructions: string,
+    processingInstructions: any,
     anteMortemTime: string,
     fsisInitial: string,
     finalCount: number): Observable<any> {
@@ -49,7 +49,7 @@ export class LotsService {
       "lotNumber": lotNumber,
       "species": species,
       "customerCount": customerCount,
-      "specialInstructions": specialInstructions,
+      "processingInstructions": processingInstructions,
       "anteMortemTime": anteMortemTime,
       "fsisInitial": fsisInitial,
       "finalCount": finalCount
@@ -57,10 +57,10 @@ export class LotsService {
     const headers = {
       headers : new HttpHeaders({"Content-Type": "application/json"}),
     };
-    return this.http.patch<any>(`lots/${lotId}`, body, headers);
+    return this.http.patch<any>(`lot/${lotId}`, body, headers);
   };
 
   deleteLot(lotId: string): Observable<any> {
-    return this.http.delete<any>(`lots/${lotId}`);
+    return this.http.delete<any>(`lot/${lotId}`);
   };
 }

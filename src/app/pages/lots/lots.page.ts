@@ -50,6 +50,7 @@ import { PdfGeneratorService } from 'src/app/pdfGenerator.service';
 import { Lot } from 'src/app/models/lot.model';
 import { format } from 'date-fns/format';
 import { Consts } from 'src/app/consts';
+import { LotsService } from 'src/app/lots.service';
 
 @Component({
   selector: 'app-lots',
@@ -127,71 +128,14 @@ export class LotsPage implements OnInit, OnDestroy {
   public isToastOpen: boolean = false;
   public successToastMessage: string = "";
 
-  // Example data structure that combines fields from your form
-  public mockLotSchedule: Lot[] = [
-    {
-      id: 'lot1',
-      processDate: '2024-06-15',
-      customer: {
-        id: 'cust1',
-        number: 'CUST-001',
-        name: 'John Doe',
-        phone: '555-1234',
-        address: '123 Farm Rd'
-      },
-      timeIn: '08:00 AM',
-      withdrawalMet: true,
-      isOrganic: false,
-      lotNumber: 'LOTA-001',
-      species: 'Broilers',
-      customerCount: 150,
-      processingInstructions: {
-        wholeBirds: 100,
-        cutUpBirds: 50,
-        halves: 0,
-        sixPiece: 25,
-        eightPiece: 25,
-        notes: 'Quick chill required'
-      },
-      anteMortemTime: '',
-      fsisInitial: '',
-      finalCount: 148
-    },
-    {
-      id: 'lot2',
-      processDate: '2024-06-15',
-      customer: {
-        id: 'cust2',
-        number: 'CUST-002',
-        name: 'Jane Smith',
-        phone: '555-5678',
-        address: '456 Ranch St'
-      },
-      timeIn: '09:30 AM',
-      withdrawalMet: false,
-      isOrganic: true,
-      lotNumber: 'LOTB-002',
-      species: 'Turkey',
-      customerCount: 80,
-      processingInstructions: {
-        wholeBirds: 80,
-        cutUpBirds: 0,
-        halves: 0,
-        sixPiece: 0,
-        eightPiece: 0,
-        notes: 'Handle with care'
-      },
-      anteMortemTime: '12:30 PM',
-      fsisInitial: 'JS',
-      finalCount: 80
-    },
-    // ... add more lots, up to 8 ...
-  ];
+  // Lots data
+  public lots: Lot[] = [];
 
   constructor(
     private navCtrl: NavController,
     private ionRouterOutlet: IonRouterOutlet,
     private customersService: CustomersService,
+    private lotsService: LotsService,
     private alertCtrl: AlertController,
     private identityService: IdentityService,
     private authenticationService: AuthenticationService,
@@ -237,14 +181,33 @@ export class LotsPage implements OnInit, OnDestroy {
       this.userStableSubscription.unsubscribe();
   }
 
+  ionViewWillEnter() {
+    // Refresh data each time the page is entered
+    this.init();
+  }
+
   init() {
     this.loading = true;
     this.currentDate = format(new Date(), 'EEEE, MMMM d, yyyy');
+    const todayDateStr = format(new Date(), 'yyyy-MM-dd');
+    
     this.customersService.getCustomers().subscribe(
       (resp) => {
-      this.customers = resp.customers;
-      this.customersService.setCurrentCustomerList(this.customers);
-      this.loading = false;
+        this.customers = resp.customers;
+        this.customersService.setCurrentCustomerList(this.customers);
+        
+        // Fetch lots after customers are loaded
+        this.lotsService.getLots().subscribe(
+          (lotsResp) => {
+            // Filter lots for today's date
+            this.lots = lotsResp.lots.filter(lot => lot.processDate === todayDateStr);
+            this.loading = false;
+          },
+          (error) => {
+            this.presentAlert("Error Retrieving Lots", error.message, "Try Again");
+            this.loading = false;
+          }
+        );
       },
       (error) => {
         this.presentAlert("Error Retrieving Customer List", error.message, "Try Again");
@@ -320,11 +283,11 @@ export class LotsPage implements OnInit, OnDestroy {
   }
 
   generateSchedule() {
-    this.pdfGeneratorService.generateDailySchedule(this.mockLotSchedule);
+    this.pdfGeneratorService.generateDailySchedule(this.lots);
   }
 
   generateLotLabels() {
-    this.pdfGeneratorService.generateLotLabelsPdf(this.mockLotSchedule);
+    this.pdfGeneratorService.generateLotLabelsPdf(this.lots);
   }
 
   onLotSelected(lot: Lot) {

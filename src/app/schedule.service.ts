@@ -52,7 +52,8 @@ export class ScheduleService {
     startTime: Date, 
     title: string, 
     category: string = "",
-    species: string = ""): Observable<ScheduleLotResponse> {
+    species: string = "",
+    processingStarted: boolean = false): Observable<ScheduleLotResponse> {
     const body = {
       "customerId": customerId,
       "lotId": lotId,
@@ -61,7 +62,8 @@ export class ScheduleService {
       "startTime": startTime,
       "title": title,
       "category": category,
-      "species": species
+      "species": species,
+      "processingStarted": processingStarted
     };
     const headers = {
       headers : new HttpHeaders({"Content-Type": "application/json"}),

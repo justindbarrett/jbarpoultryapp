@@ -8,6 +8,7 @@ export type ScheduledLot = {
     title: string;
     category?: string;
     species?: string;
+    processingStarted?: boolean;
 };
 
 export type ScheduledLots = {

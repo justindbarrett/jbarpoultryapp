@@ -53,7 +53,7 @@ export class PdfGeneratorService {
       'Lot #',
       'Species',
       'Customer Count',
-      'Special Instructions',
+      'Processing Instructions',
       'USDA Ante-Mortem Time',
       'FSIS Initial',
       'Final Count'
@@ -72,6 +72,17 @@ export class PdfGeneratorService {
             `Organic: [${lot.isOrganic ? 'X' : ' '}]`;
 
         const columnThreeContent = withdrawalText + organicText;
+        
+        // 🔑 PROCESSING INSTRUCTIONS SUMMARY:
+        const pi = lot.processingInstructions || {};
+        const parts = [];
+        if (pi.wholeBirds) parts.push(`Whole: ${pi.wholeBirds}`);
+        if (pi.cutUpBirds) parts.push(`Cut-Up: ${pi.cutUpBirds}`);
+        if (pi.halves) parts.push(`Halves: ${pi.halves}`);
+        if (pi.sixPiece) parts.push(`6pc: ${pi.sixPiece}`);
+        if (pi.eightPiece) parts.push(`8pc: ${pi.eightPiece}`);
+        if (pi.notes) parts.push(pi.notes);
+        const processingInstructionsSummary = parts.join('\n');
         // -----------------------------------------------------
 
         return [
@@ -81,7 +92,7 @@ export class PdfGeneratorService {
             lot.lotNumber,
             lot.species,
             lot.customerCount,
-            lot.specialInstructions,
+            processingInstructionsSummary,
             lot.anteMortemTime || '',
             lot.fsisInitial || '',
             lot.finalCount
@@ -99,13 +110,13 @@ export class PdfGeneratorService {
       15,   // 1. Time In (15)
       48,   // 2. Owner Name, Phone, Address (Reduced from 55 to 48)
       35,   // 3. Withdrawal/Organic (KEPT at 35 to fit checkboxes)
-      15,   // 4. Lot # (Reduced from 20 to 15)
+      20,   // 4. Lot # (Increased from 15 to 20)
       18,   // 5. Species (Reduced from 20 to 18)
       18,   // 6. Customer Count (18)
-      62,   // 7. Special Instructions (Reduced from 45 to 40)
+      62,   // 7. Processing Instructions (Kept at 62)
       25,   // 8. USDA Ante-Mortem Time (25)
-      15,   // 9. FSIS Initial (Reduced from 18 to 15)
-      18    // 10. Final Count (Increased from 28 to 40 for remaining space)
+      13,   // 9. FSIS Initial (Reduced from 15 to 13)
+      15    // 10. Final Count (Reduced from 18 to 15)
     ];
 
     // Total width calculation: 15+48+35+15+18+18+40+25+15+40 = 269
@@ -184,8 +195,9 @@ export class PdfGeneratorService {
       }
       
       const lotNumber = lot.lotNumber;
-      // Assuming baseUrlService is correctly injected and used
-      const absoluteUrl = this.baseUrlService.getBaseUrl() + '/landing/lots/lot-details/' + lotNumber; 
+      const lotId = lot.id;
+      // Use lot ID in the URL to open the lot details page
+      const absoluteUrl = this.baseUrlService.getBaseUrl() + '/landing/lots/' + lotId; 
       
       // --- A. Generate QR Code Image Data URL ---
       const qrDataURL = await QRCode.toDataURL(absoluteUrl, {
