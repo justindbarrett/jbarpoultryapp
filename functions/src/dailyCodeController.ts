@@ -53,6 +53,8 @@ const getCurrentCode = async (req: Request, res: Response) => {
 const verifyCode = async (req: VerifyCodeRequest, res: Response) => {
     try {
         const { code } = req.body;
+
+        console.log("Verifying code:", code);
         
         if (!code) {
             res.status(400).json({
@@ -74,21 +76,15 @@ const verifyCode = async (req: VerifyCodeRequest, res: Response) => {
         
         const codeData = codeDoc.data() as DailyCodeType;
         const today = new Date().toISOString().slice(0, 10);
+        console.log("Code data code:", codeData.code);
+        console.log("Code data date:", codeData.date, "Today:", today);
         
-        if (codeData.code === code && codeData.date === today) {
+        if (codeData.code === code) {
             res.status(200).json({
                 status: "success",
                 message: "Code verified successfully",
                 data: {
                     valid: true,
-                },
-            });
-        } else if (codeData.date !== today) {
-            res.status(400).json({
-                status: "error",
-                message: "Code has expired",
-                data: {
-                    valid: false,
                 },
             });
         } else {

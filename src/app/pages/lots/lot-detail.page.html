@@ -89,7 +89,7 @@
       <ion-card-content>
         <ion-grid>
           <ion-row>
-            <ion-col size="12" size-md="2">
+            <ion-col size="6" size-md="2">
               <ion-item lines="none">
                 <ion-label position="stacked">Whole Birds</ion-label>
                 <ion-input
@@ -98,7 +98,7 @@
                 ></ion-input>
               </ion-item>
             </ion-col>
-            <ion-col size="12" size-md="2">
+            <ion-col size="6" size-md="2">
               <ion-item lines="none">
                 <ion-label position="stacked">Cut Up Birds</ion-label>
                 <ion-input
@@ -107,7 +107,7 @@
                 ></ion-input>
               </ion-item>
             </ion-col>
-            <ion-col size="12" size-md="2">
+            <ion-col size="6" size-md="2">
               <ion-item lines="none">
                 <ion-label position="stacked">Halves</ion-label>
                 <ion-input
@@ -116,7 +116,7 @@
                 ></ion-input>
               </ion-item>
             </ion-col>
-            <ion-col size="12" size-md="2">
+            <ion-col size="6" size-md="2">
               <ion-item lines="none">
                 <ion-label position="stacked">6-Piece (leg quarters)</ion-label>
                 <ion-input
@@ -125,7 +125,7 @@
                 ></ion-input>
               </ion-item>
             </ion-col>
-            <ion-col size="12" size-md="2">
+            <ion-col size="6" size-md="2">
               <ion-item lines="none">
                 <ion-label position="stacked">8-Piece (thighs drums)</ion-label>
                 <ion-input
@@ -134,7 +134,7 @@
                 ></ion-input>
               </ion-item>
             </ion-col>
-            <ion-col size="12" size-md="2">
+            <ion-col size="6" size-md="2">
               <ion-item lines="none">
                 <ion-select
                   label="Extras to Save"
@@ -174,7 +174,7 @@
       <ion-card-content>
         <ion-grid>
           <ion-row>
-            <ion-col size="12" size-md="2">
+            <ion-col size="6" size-md="2">
               <ion-item lines="none">
                 <ion-select
                   label="Species"
@@ -213,7 +213,7 @@
                 <ion-toggle [(ngModel)]="lot.isOrganic"></ion-toggle>
               </div>
             </ion-col>
-            <ion-col size="12" size-md="2">
+            <ion-col size="6" size-md="2">
               <ion-item lines="none">
                 <ion-label position="stacked">Customer Count</ion-label>
                 <ion-input
@@ -222,7 +222,7 @@
                 ></ion-input>
               </ion-item>
             </ion-col>
-            <ion-col size="12" size-md="2">
+            <ion-col size="6" size-md="2">
               <ion-item lines="none">
                 <ion-label position="stacked">Final Count</ion-label>
                 <ion-input
@@ -231,10 +231,30 @@
                 ></ion-input>
               </ion-item>
             </ion-col>
-            <ion-col size="12" size-md="2">
-              <ion-button expand="block" color="secondary">
-                FSIS Initial
-              </ion-button>
+            <ion-col size="6" size-md="2">
+              <!-- When no initials exist yet -->
+              <ion-item lines="none" *ngIf="!lot.fsisInitial">
+                <app-fsis-initial-button
+                  buttonText="Ante Mortem FSIS Initial"
+                  buttonColor="secondary"
+                  buttonExpand="block"
+                  [fsisInitial]="lot.fsisInitial"
+                  [anteMortemTime]="lot.anteMortemTime"
+                  (confirmed)="onFsisConfirmed($event)"
+                ></app-fsis-initial-button>
+              </ion-item>
+              <!-- When initials exist -->
+              <ion-item lines="none" *ngIf="lot.fsisInitial">
+                <ion-label position="stacked">Ante Mortem / FSIS</ion-label>
+                <app-fsis-initial-button
+                  buttonText="Ante Mortem FSIS Initial"
+                  buttonColor="secondary"
+                  buttonExpand="block"
+                  [fsisInitial]="lot.fsisInitial"
+                  [anteMortemTime]="lot.anteMortemTime"
+                  (confirmed)="onFsisConfirmed($event)"
+                ></app-fsis-initial-button>
+              </ion-item>
             </ion-col>
           </ion-row>
         </ion-grid>

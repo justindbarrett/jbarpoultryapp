@@ -153,8 +153,8 @@ export class LotsPage implements OnInit, OnDestroy {
         eightPiece: 25,
         notes: 'Quick chill required'
       },
-      anteMortemTime: '11:00 AM',
-      fsisInitial: 'JD',
+      anteMortemTime: '',
+      fsisInitial: '',
       finalCount: 148
     },
     {

@@ -60,7 +60,8 @@ const lotCollectionPath = "lots";
 
 const createLotDocument = async (lotData: LotDataType): Promise<LotType> => {
     const { processDate, customerId, timeIn, withdrawalMet, isOrganic, lotNumber, species, customerCount, specialInstructions, anteMortemTime, fsisInitial, finalCount } = lotData;
-    
+    console.log("Creating lot document with data:", lotData);
+
     const lotDocument = await db.collection(lotCollectionPath).doc();
     const lot: LotType = {
         id: lotDocument.id,
@@ -97,12 +98,15 @@ const createLot = async (req: CreateLotRequest, res: Response) => {
 };
 
 const createLots = async (req: CreateLotsRequest, res: Response) => {
+    console.log("Creating lots...");
     const { lots: lotsData } = req.body;
-    
+    console.log("Lots data received:", lotsData);
+
     try {
         const createdLots: LotType[] = [];
         
         for (const lotData of lotsData) {
+            console.log("Creating lot:", lotData);
             const lot = await createLotDocument(lotData);
             createdLots.push(lot);
         }
@@ -119,11 +123,23 @@ const createLots = async (req: CreateLotsRequest, res: Response) => {
 
 const getLots = async (req: CreateLotRequest, res: Response) => {
     try {
-        const lots: LotType[] = [];
+        const lots: any[] = [];
         const querySnapshot = await db.collection(lotCollectionPath).get();
-        querySnapshot.forEach((doc: any) => {
-            lots.push(doc.data());
-        });
+        
+        // Fetch all lots and populate customer data
+        for (const doc of querySnapshot.docs) {
+            const lotData = doc.data();
+            
+            // Fetch customer data if customerId exists
+            if (lotData.customerId) {
+                const customerDoc = await db.collection("customers").doc(lotData.customerId).get();
+                if (customerDoc.exists) {
+                    lotData.customer = customerDoc.data();
+                }
+            }
+            
+            lots.push(lotData);
+        }
 
         res.status(200).json({
             lots: lots,

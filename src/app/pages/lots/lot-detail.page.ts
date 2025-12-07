@@ -8,13 +8,14 @@ import { AlertController, NavController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { informationCircleOutline } from 'ionicons/icons';
 import { Consts } from 'src/app/consts';
+import { FsisInitialButtonComponent, FsisInitialConfirmation } from 'src/app/components/fsis-initial-button/fsis-initial-button.component';
 
 @Component({
   selector: 'app-lot-detail',
   templateUrl: './lot-detail.page.html',
   styleUrls: ['./lot-detail.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonLabel, IonInput, IonDatetime, IonTextarea, IonButtons, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonGrid, IonRow, IonCol, IonToggle, IonSelect, IonSelectOption, IonIcon],
+  imports: [CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonLabel, IonInput, IonDatetime, IonTextarea, IonButtons, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonGrid, IonRow, IonCol, IonToggle, IonSelect, IonSelectOption, IonIcon, FsisInitialButtonComponent],
 })
 export class LotDetailPage implements OnInit {
   public lot: any = null;
@@ -67,6 +68,11 @@ export class LotDetailPage implements OnInit {
 
   async showOrganicInfo() {
     await this.presentAlert('Organic Certification', 'This is a lot of certified organic poultry that has been transported according to organic standards');
+  }
+
+  onFsisConfirmed(confirmation: FsisInitialConfirmation) {
+    this.lot.anteMortemTime = confirmation.timestamp;
+    this.lot.fsisInitial = confirmation.initials;
   }
 
   save() {
