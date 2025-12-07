@@ -24,7 +24,9 @@ import {
   IonCol,
   IonRow,
   IonCard,
-  IonItem } from '@ionic/angular/standalone';
+  IonItem,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent } from '@ionic/angular/standalone';
 import { Customer } from 'src/app/models/customer.model';
 import { CustomersService } from 'src/app/customers.service';
 import { addIcons } from 'ionicons';
@@ -66,7 +68,9 @@ import { idToken } from '@angular/fire/auth';
     IonCol,
     IonRow,
     IonCard,
-    IonItem ],
+    IonItem,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent ],
   providers: [ CustomersService ]
 })
 export class CustomersPage implements OnInit, OnDestroy {
@@ -75,8 +79,18 @@ export class CustomersPage implements OnInit, OnDestroy {
   public showCustomerList: boolean = true;
   public searchTerm: string = "";
   public customers: Customer[] = [];
+  public filteredCustomers: Customer[] = [];
   public searchFocused: boolean = false;
   public loading: boolean = true;
+  public lastVisible: string | null = null;
+  public hasMore: boolean = true;
+  public loadingMore: boolean = false;
+  private pageSize: number = 20;
+  private searchDebounceTimer: any = null;
+  private searchSubscription: Subscription | null = null;
+  public isSearching: boolean = false;
+  private currentSearchTerm: string = "";
+  private searchRequestId: number = 0;
 
   // customer details
   public showCustomerDetails: boolean = false;
@@ -166,19 +180,24 @@ export class CustomersPage implements OnInit, OnDestroy {
   }
 
   init() {
+    // Cancel any ongoing search
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+      this.searchDebounceTimer = null;
+    }
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+      this.searchSubscription = null;
+    }
+    
     this.loading = true;
-    this.getCustomersSubscription = this.customersService.getCustomers().subscribe(
-      (resp) => {
-        this.customers = resp.customers;
-        this.customersService.setCurrentCustomerList(this.customers);
-        this.loading = false;
-      },
-      (error) => {
-        this.presentAlert("Error Retrieving Customer List", error.message, "Try Again");
-        this.loading = false;
-      }
-    );
-    this.setFilteredCustomers();
+    this.isSearching = false;
+    this.customers = [];
+    this.filteredCustomers = [];
+    this.lastVisible = null;
+    this.hasMore = true;
+    this.currentSearchTerm = "";
+    this.loadFirstPage();
     
     this.newCustomerName = "";
     this.newCustomerAddress = "";
@@ -197,6 +216,52 @@ export class CustomersPage implements OnInit, OnDestroy {
     this.validPhone = true;
   }
 
+  loadFirstPage() {
+    if (this.getCustomersSubscription) {
+      this.getCustomersSubscription.unsubscribe();
+    }
+    
+    this.getCustomersSubscription = this.customersService.getCustomers(this.pageSize).subscribe(
+      (resp) => {
+        this.customers = resp.customers;
+        this.lastVisible = resp.lastVisible || null;
+        this.hasMore = resp.hasMore || false;
+        this.customersService.setCurrentCustomerList(this.customers);
+        this.filteredCustomers = [...this.customers];
+        this.loading = false;
+      },
+      (error) => {
+        this.presentAlert("Error Retrieving Customer List", error.message, "Try Again");
+        this.loading = false;
+      }
+    );
+  }
+
+  loadMoreCustomers(event: any) {
+    if (!this.hasMore || this.loadingMore) {
+      event.target.complete();
+      return;
+    }
+
+    this.loadingMore = true;
+    this.customersService.getCustomers(this.pageSize, this.lastVisible || undefined).subscribe(
+      (resp) => {
+        this.customers = [...this.customers, ...resp.customers];
+        this.lastVisible = resp.lastVisible || null;
+        this.hasMore = resp.hasMore || false;
+        this.customersService.setCurrentCustomerList(this.customers);
+        this.filteredCustomers = [...this.customers];
+        this.loadingMore = false;
+        event.target.complete();
+      },
+      (error) => {
+        this.presentAlert("Error Loading More Customers", error.message, "Try Again");
+        this.loadingMore = false;
+        event.target.complete();
+      }
+    );
+  }
+
   ngOnDestroy(): void {
     if (this.getCustomersSubscription)
       this.getCustomersSubscription.unsubscribe();
@@ -208,10 +273,70 @@ export class CustomersPage implements OnInit, OnDestroy {
       this.deleteCustomerSubscription.unsubscribe();
     if (this.userStableSubscription)
       this.userStableSubscription.unsubscribe();
+    if (this.searchSubscription)
+      this.searchSubscription.unsubscribe();
+    if (this.searchDebounceTimer)
+      clearTimeout(this.searchDebounceTimer);
   }
 
   setFilteredCustomers() {
-    this.customers = this.customersService.filterCustomers(this.searchTerm);
+    // Clear previous timer
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+    
+    // If search is empty or only whitespace
+    if (!this.searchTerm || this.searchTerm.trim().length === 0) {
+      // Only reload if we were previously searching
+      if (this.currentSearchTerm.length > 0) {
+        this.currentSearchTerm = "";
+        this.init();
+      }
+      return;
+    }
+    
+    // Debounce search - wait 500ms after user stops typing
+    this.searchDebounceTimer = setTimeout(() => {
+      this.performSearch();
+    }, 500);
+  }
+  
+  performSearch() {
+    if (!this.searchTerm || this.searchTerm.trim().length === 0) {
+      return;
+    }
+    
+    // Track the current search term and generate request ID
+    this.currentSearchTerm = this.searchTerm.trim();
+    const requestId = ++this.searchRequestId;
+    
+    this.isSearching = true;
+    
+    // Cancel previous search request
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+    }
+    
+    this.searchSubscription = this.customersService.getCustomers(1000, undefined, this.currentSearchTerm).subscribe(
+      (resp) => {
+        // Only update if this is still the latest request
+        if (requestId === this.searchRequestId) {
+          this.customers = resp.customers;
+          this.filteredCustomers = resp.customers;
+          this.lastVisible = null;
+          this.hasMore = false;
+          this.customersService.setCurrentCustomerList(this.customers);
+          this.isSearching = false;
+        }
+      },
+      (error) => {
+        // Only show error if this is still the latest request
+        if (requestId === this.searchRequestId) {
+          this.presentAlert("Error Searching Customers", error.message, "Try Again");
+          this.isSearching = false;
+        }
+      }
+    );
   }
 
   newCustomer() {

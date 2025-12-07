@@ -17,7 +17,8 @@ export type CustomerType = {
 
 type Request = {
     body: CustomerDataType,
-    params: { id: string }
+    params: { id: string },
+    query: any
 };
 
 const customerCollectionPath = "customers";
@@ -63,15 +64,62 @@ const getNewCustomerNumber = async () => {
 
 const getCustomers = async (req: Request, res: Response) => {
     try {
+        const limit = parseInt(req.query.limit as string) || 20;
+        const lastVisible = req.query.lastVisible as string;
+        const searchTerm = req.query.search as string;
+        
+        // If search term is provided, perform search query
+        if (searchTerm && searchTerm.trim().length > 0) {
+            const customers: CustomerType[] = [];
+            const searchLower = searchTerm.toLowerCase();
+            
+            // Get all customers and filter by name
+            // Note: Firestore doesn't support case-insensitive text search natively
+            // For better performance at scale, consider using Algolia or similar
+            const querySnapshot = await db.collection(customerCollectionPath).get();
+            querySnapshot.forEach((doc: any) => {
+                const customer = doc.data();
+                if (customer.name.toLowerCase().includes(searchLower)) {
+                    customers.push(customer);
+                }
+            });
+            
+            // Sort by name
+            customers.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+            
+            res.status(200).json({
+                customers: customers,
+                lastVisible: null,
+                hasMore: false,
+            });
+            return;
+        }
+        
+        // Normal pagination query
+        let query = db.collection(customerCollectionPath)
+            .orderBy("name")
+            .limit(limit);
+        
+        if (lastVisible) {
+            const lastDoc = await db.collection(customerCollectionPath).doc(lastVisible).get();
+            if (lastDoc.exists) {
+                query = query.startAfter(lastDoc);
+            }
+        }
+        
         const customers: CustomerType[] = [];
-        const querySnapshot = await db.collection(customerCollectionPath).get();
+        const querySnapshot = await query.get();
         querySnapshot.forEach((doc: any) => {
             customers.push(doc.data());
         });
-        customers.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+        
+        const lastVisibleDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+        const hasMore = querySnapshot.docs.length === limit;
 
         res.status(200).json({
             customers: customers,
+            lastVisible: lastVisibleDoc?.id || null,
+            hasMore: hasMore,
         });
     } catch (error) {
         console.log(`ERROR: ${error}`);

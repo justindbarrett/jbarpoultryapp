@@ -18,12 +18,25 @@
           >
             <ion-item
               class="customerListStyle"
-              *ngFor="let customer of customers"
+              *ngFor="let customer of filteredCustomers"
               (click)="customerDetails(customer)"
             >
               #{{ customer.number }} | {{ customer.name }}
             </ion-item>
-            <ion-spinner color="primary" *ngIf="loading"></ion-spinner>
+            <ion-spinner
+              color="primary"
+              *ngIf="loading || isSearching"
+            ></ion-spinner>
+            <ion-infinite-scroll
+              threshold="100px"
+              (ionInfinite)="loadMoreCustomers($event)"
+              [disabled]="!hasMore || searchTerm.length > 0 || isSearching"
+            >
+              <ion-infinite-scroll-content
+                loadingSpinner="bubbles"
+                loadingText="Loading more customers..."
+              ></ion-infinite-scroll-content>
+            </ion-infinite-scroll>
           </ion-list>
         </ion-card-content>
       </ion-col>

@@ -14,8 +14,15 @@ export class CustomersService {
     private http: HttpClient
   ) {}
 
-  getCustomers(): Observable<Customers> {
-    return this.http.get<Customers>("customers");
+  getCustomers(limit: number = 20, lastVisible?: string, searchTerm?: string): Observable<Customers> {
+    let url = `customers?limit=${limit}`;
+    if (lastVisible) {
+      url += `&lastVisible=${lastVisible}`;
+    }
+    if (searchTerm && searchTerm.trim().length > 0) {
+      url += `&search=${encodeURIComponent(searchTerm)}`;
+    }
+    return this.http.get<Customers>(url);
   };
 
   addCustomer(customerName: string, customerAddress: string, customerPhone: string): Observable<AddCustomerResponse> {

@@ -8,6 +8,8 @@ export type Customer = {
 
 export type Customers = {
     customers: Customer[],
+    lastVisible?: string | null,
+    hasMore?: boolean,
 };
 
 export type AddCustomerResponse = {
