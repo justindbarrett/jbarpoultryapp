@@ -68,168 +68,31 @@
         <ion-title> New Lot </ion-title>
       </ion-toolbar>
     </ion-header>
+    <ion-item>
+      <ion-label position="stacked">Customer</ion-label>
+      <ionic-selectable
+        [(ngModel)]="newLotCustomer"
+        [items]="customers"
+        itemValueField="id"
+        itemTextField="name"
+        [canSearch]="true"
+        (onChange)="customerChange($event)"
+      >
+      </ionic-selectable>
+    </ion-item>
 
-    <ion-card>
-      <ion-accordion-group [value]="accordionValue" expand="full">
-        <ion-accordion value="core">
-          <ion-item slot="header" color="light">
-            <ion-label>1. Core Lot Details</ion-label>
-          </ion-item>
-          <div class="ion-padding" slot="content">
-            <ion-item>
-              <ion-label position="stacked">Customer</ion-label>
-              <ionic-selectable
-                [(ngModel)]="newLot.customer"
-                [items]="customers"
-                itemValueField="id"
-                itemTextField="name"
-                [canSearch]="true"
-                (onChange)="customerChange($event)"
-              >
-              </ionic-selectable>
-            </ion-item>
-
-            <ion-item class="ion-margin-top">
-              <ion-label position="stacked">Process Date</ion-label>
-              <ion-datetime-button datetime="processDate"></ion-datetime-button>
-              <ion-modal [keepContentsMounted]="true">
-                <ng-template>
-                  <ion-datetime
-                    id="processDate"
-                    displayFormat="MM/DD/YYYY"
-                    [(ngModel)]="newLot.processDate"
-                  ></ion-datetime>
-                </ng-template>
-              </ion-modal>
-            </ion-item>
-
-            <ion-item class="ion-margin-top">
-              <ion-input
-                label="Lot Number (Auto-set)"
-                labelPlacement="stacked"
-                placeholder="TBD by Backend"
-                [value]="newLot.lotNumber"
-                disabled
-              ></ion-input>
-            </ion-item>
-          </div>
-        </ion-accordion>
-
-        <ion-accordion value="intake">
-          <ion-item slot="header" color="light">
-            <ion-label>2. Lot Intake Information</ion-label>
-          </ion-item>
-          <div class="ion-padding" slot="content">
-            <ion-item>
-              <ion-label position="stacked">Time In</ion-label>
-              <ion-datetime-button datetime="timeIn"></ion-datetime-button>
-              <ion-modal [keepContentsMounted]="true">
-                <ng-template>
-                  <ion-datetime
-                    id="timeIn"
-                    displayFormat="h:mm A"
-                    pickerFormat="h:mm A"
-                    [(ngModel)]="newLot.timeIn"
-                  ></ion-datetime>
-                </ng-template>
-              </ion-modal>
-            </ion-item>
-
-            <ion-item lines="none" class="ion-margin-top">
-              <ion-label>Withdrawal Time Met?</ion-label>
-              <ion-toggle
-                slot="end"
-                [(ngModel)]="newLot.withdrawalMet"
-              ></ion-toggle>
-            </ion-item>
-
-            <ion-item lines="none">
-              <ion-label>Is Lot Organic?</ion-label>
-              <ion-toggle
-                slot="end"
-                [(ngModel)]="newLot.isOrganic"
-              ></ion-toggle>
-            </ion-item>
-
-            <ion-item class="ion-margin-top">
-              <ion-select
-                label="Poultry Type"
-                labelPlacement="stacked"
-                [(ngModel)]="newLot.poultryType"
-                placeholder="Select Type"
-              >
-                <ion-select-option
-                  *ngFor="let type of poultryTypes"
-                  [value]="type"
-                  >{{ type }}</ion-select-option
-                >
-              </ion-select>
-            </ion-item>
-
-            <ion-item class="ion-margin-top">
-              <ion-input
-                label="Initial Count"
-                labelPlacement="stacked"
-                type="number"
-                placeholder="Enter total count"
-                [(ngModel)]="newLot.initialCount"
-              ></ion-input>
-            </ion-item>
-
-            <ion-item lines="full" class="ion-margin-top">
-              <ion-textarea
-                label="Special Instructions"
-                labelPlacement="stacked"
-                placeholder="Any specific handling notes..."
-                [(ngModel)]="newLot.specialInstructions"
-                rows="3"
-              ></ion-textarea>
-            </ion-item>
-          </div>
-        </ion-accordion>
-
-        <ion-accordion value="completion">
-          <ion-item slot="header" color="light">
-            <ion-label>3. Lot Completion</ion-label>
-          </ion-item>
-          <div class="ion-padding" slot="content">
-            <ion-item>
-              <ion-label position="stacked">Time Out</ion-label>
-              <ion-datetime-button datetime="timeOut"></ion-datetime-button>
-              <ion-modal [keepContentsMounted]="true">
-                <ng-template>
-                  <ion-datetime
-                    id="timeOut"
-                    displayFormat="h:mm A"
-                    pickerFormat="h:mm A"
-                    [(ngModel)]="newLot.timeOut"
-                  ></ion-datetime>
-                </ng-template>
-              </ion-modal>
-            </ion-item>
-
-            <ion-item class="ion-margin-top">
-              <ion-input
-                label="Initials"
-                labelPlacement="stacked"
-                placeholder="Your initials (max 5 characters)"
-                maxlength="5"
-                [(ngModel)]="newLot.initials"
-              ></ion-input>
-            </ion-item>
-
-            <ion-item class="ion-margin-top">
-              <ion-input
-                label="Final Count"
-                labelPlacement="stacked"
-                type="number"
-                placeholder="Enter final count"
-                [(ngModel)]="newLot.finalCount"
-              ></ion-input>
-            </ion-item>
-          </div>
-        </ion-accordion>
-      </ion-accordion-group>
-    </ion-card>
+    <ion-item class="ion-margin-top">
+      <ion-select
+        label="Species"
+        labelPlacement="stacked"
+        [(ngModel)]="newLotSpecies"
+        placeholder="Select Species"
+        interface="popover"
+      >
+        <ion-select-option *ngFor="let type of poultryTypes" [value]="type"
+          >{{ type }}</ion-select-option
+        >
+      </ion-select>
+    </ion-item>
   </ng-template>
 </ion-modal>

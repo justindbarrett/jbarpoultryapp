@@ -31,6 +31,7 @@ import {
   IonAccordion,
   IonDatetimeButton,
   IonSelectOption,
+  IonSelect,
   IonAccordionGroup } from '@ionic/angular/standalone';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -95,29 +96,19 @@ import { LotsService } from 'src/app/lots.service';
     IonAccordion,
     IonDatetimeButton,
     IonSelectOption,
-    IonAccordionGroup,
+    IonSelect,
     IonAccordionGroup],
   providers: [ CustomersService ]
 })
 export class LotsPage implements OnInit, OnDestroy {
   @ViewChild('modal') newLotModal: IonModal;
 
-  public newLot: any = {
-    title: "",
-    allDay: false,
-    startTime: null,
-    endTime: null,
-    customerId: "",
-    lotId: "",
-    id: "",
-  };
+  public newLotCustomer: Customer | undefined = undefined;
+  public newLotSpecies: string = '';
   public customers: Customer[] = [];
   public customer: Customer | undefined = undefined;
   poultryTypes: string[] = Consts.SPECIES_TYPES;
   public currentDate: string = "";
-
-  // Accordion management (optional)
-  accordionValue: string = 'core'; // Keeps the first section open by default
 
   private shouldContinue: boolean = false;
   public loading: boolean = true;
@@ -217,11 +208,79 @@ export class LotsPage implements OnInit, OnDestroy {
   }
 
   addLot() {
-    this.navCtrl.navigateForward('/landing/lots/new-lot');
+    if (!this.newLotCustomer || !this.newLotSpecies) {
+      this.presentAlert('Missing Information', 'Please select both customer and species.', 'OK');
+      return;
+    }
+
+    const now = new Date();
+    const todayDateStr = format(now, 'yyyy-MM-dd');
+    const timeInStr = format(now, 'HH:mm:ss');
+    const datePrefix = format(now, 'yyyyMMdd');
+
+    // Find the highest lot number for today to generate the next one
+    const todaysLots = this.lots.filter(lot => lot.processDate === todayDateStr);
+    let nextLotNumber = 1;
+    
+    if (todaysLots.length > 0) {
+      // Extract the last 2 digits from each lot number (the sequence number)
+      const lotNumbers = todaysLots
+        .map(lot => {
+          if (!lot.lotNumber || lot.lotNumber.length < 2) return 0;
+          // Get the last 2 characters and convert to number
+          const lastTwoDigits = lot.lotNumber.slice(-2);
+          return parseInt(lastTwoDigits, 10);
+        })
+        .filter(num => !isNaN(num));
+      
+      if (lotNumbers.length > 0) {
+        nextLotNumber = Math.max(...lotNumbers) + 1;
+      }
+    }
+
+    const lotNumber = `${datePrefix}${String(nextLotNumber).padStart(2, '0')}`;
+
+    const newLot: Lot = {
+      id: '', // Backend will set this
+      processDate: todayDateStr,
+      customer: this.newLotCustomer,
+      timeIn: timeInStr,
+      withdrawalMet: false,
+      isOrganic: false,
+      lotNumber: lotNumber,
+      species: this.newLotSpecies,
+      customerCount: 0,
+      processingInstructions: {
+        wholeBirds: 0,
+        cutUpBirds: 0,
+        halves: 0,
+        sixPiece: 0,
+        eightPiece: 0,
+        extrasToSave: [],
+        notes: ''
+      },
+      anteMortemTime: '',
+      fsisInitial: '',
+      finalCount: 0,
+      processingStarted: true,
+      processingFinished: false
+    };
+
+    this.lotsService.createLots([newLot]).subscribe(
+      (resp) => {
+        this.newLotModal.dismiss();
+        this.openSuccessToast(true, 'Lot created successfully!');
+        // Refresh the lots list
+        this.init();
+      },
+      (error) => {
+        this.presentAlert('Error Creating Lot', error.message, 'Try Again');
+      }
+    );
   }
 
   disableAddLot() {
-    return false;
+    return !this.newLotCustomer || !this.newLotSpecies;
   }
 
   customerChange(event: {
@@ -233,6 +292,8 @@ export class LotsPage implements OnInit, OnDestroy {
 
   modalDismissed() {
     this.customer = undefined;
+    this.newLotCustomer = undefined;
+    this.newLotSpecies = '';
   }
 
   async presentAlert(header: string, message: string, buttonText: string) {

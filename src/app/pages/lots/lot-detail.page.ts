@@ -231,7 +231,7 @@ export class LotDetailPage implements OnInit, OnDestroy {
     ).subscribe(
       (resp) => {
         this.presentAlert('Saved', 'Lot saved successfully.');
-        this.navCtrl.back();
+        this.navCtrl.navigateRoot('/landing/lots');
       },
       (err) => {
         console.error('Save failed', err);
