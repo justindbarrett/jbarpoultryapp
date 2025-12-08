@@ -16,6 +16,10 @@ export class LotsService {
     return this.http.get<Lots>("lots");
   };
 
+  getLot(lotId: string): Observable<Lot> {
+    return this.http.get<Lot>(`lot/${lotId}`);
+  };
+
   createLots(lots: Lot[]): Observable<any> {
     const body = {
       "lots": lots

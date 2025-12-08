@@ -339,6 +339,36 @@ const updateLots = async (req: UpdateLotsRequest, res: Response) => {
     }
 };
 
+const getLot = async (req: CreateLotRequest, res: Response) => {
+    const { id } = req.params;
+    
+    try {
+        const lotDoc = await db.collection(lotCollectionPath).doc(id).get();
+        
+        if (!lotDoc.exists) {
+            return res.status(404).json({
+                status: "error",
+                message: "Lot not found",
+            });
+        }
+        
+        const lotData: any = lotDoc.data();
+        lotData.id = lotDoc.id;
+        
+        // Fetch customer data if customerId exists
+        if (lotData.customerId) {
+            const customerDoc = await db.collection("customers").doc(lotData.customerId).get();
+            if (customerDoc.exists) {
+                lotData.customer = customerDoc.data();
+            }
+        }
+        
+        return res.status(200).json(lotData);
+    } catch (error) {
+        return res.status(500).json(error);
+    }
+};
+
 const deleteLot = async (req: CreateLotRequest, res: Response) => {
     const { id } = req.params;
     
@@ -355,4 +385,4 @@ const deleteLot = async (req: CreateLotRequest, res: Response) => {
     }
 };
 
-export { createLot, createLots, getLots, updateLot, updateLots, deleteLot };
+export { createLot, createLots, getLot, getLots, updateLot, updateLots, deleteLot };

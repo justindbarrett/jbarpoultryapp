@@ -6,7 +6,7 @@ import { addCustomer,
     getCustomers,
     updateCustomer } from "./customerController";
 import { deleteScheduledLot, getScheduledLots, scheduleLot, updateScheduledLot } from "./scheduleController";
-import { createLots, getLots, updateLot, updateLots, deleteLot, createLot } from "./lotController";
+import { createLots, getLot, getLots, updateLot, updateLots, deleteLot, createLot } from "./lotController";
 import { addUser, getUsers, getUser, getUserByUserId, updateUser, deleteUser } from "./userController";
 import { getCurrentCode, verifyCode } from "./dailyCodeController";
 import { verifyToken } from "./middleware/authenticator";
@@ -34,6 +34,7 @@ app.get("/schedule", getScheduledLots);
 app.patch("/schedule/:id", updateScheduledLot);
 app.delete("/schedule/:id", deleteScheduledLot);
 app.post("/lot", createLot);
+app.get("/lot/:id", getLot);
 app.patch("/lot/:id", updateLot);
 app.delete("/lot/:id", deleteLot);
 app.post("/lots", createLots);

@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="navCtrl.back()">Cancel</ion-button>
+      <ion-button (click)="cancel()">Cancel</ion-button>
     </ion-buttons>
     <ion-title>Lot Details</ion-title>
     <ion-buttons slot="end">
@@ -11,7 +11,12 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <div *ngIf="lot; else noLot">
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner></ion-spinner>
+    <p>Loading lot data...</p>
+  </div>
+
+  <div *ngIf="!loading && lot; else noLot">
     <!-- Top Row: Lot and Customer Info Side by Side -->
     <ion-grid class="top-info-grid">
       <ion-row>
