@@ -33,7 +33,8 @@ type LotInputType = {
     fsisInitial: string,
     finalCount: number,
     processingStarted: boolean,
-    processingFinished: boolean
+    processingFinished: boolean,
+    scheduleLotId?: string
 };
 
 type LotDataType = {
@@ -50,7 +51,8 @@ type LotDataType = {
     fsisInitial: string,
     finalCount: number,
     processingStarted: boolean,
-    processingFinished: boolean
+    processingFinished: boolean,
+    scheduleLotId?: string
 };
 
 type LotsInputType = {
@@ -72,7 +74,8 @@ type LotType = {
     fsisInitial: string,
     finalCount: number,
     processingStarted: boolean,
-    processingFinished: boolean
+    processingFinished: boolean,
+    scheduleLotId?: string
 };
 
 type CreateLotRequest = {
@@ -97,8 +100,30 @@ type UpdateLotsRequest = {
 
 const lotCollectionPath = "lots";
 
+const generateLotNumber = async (processDate: string): Promise<string> => {
+    const datePrefix = processDate.replace(/-/g, "");
+    
+    // Query existing lots for this date to find the highest sequence number
+    const existingLotsSnapshot = await db.collection(lotCollectionPath)
+        .where("processDate", "==", processDate)
+        .get();
+    
+    let maxSequence = 0;
+    existingLotsSnapshot.docs.forEach((doc) => {
+        const lotData = doc.data();
+        if (lotData.lotNumber && lotData.lotNumber.startsWith(datePrefix)) {
+            const sequence = parseInt(lotData.lotNumber.slice(-2), 10);
+            if (sequence > maxSequence) {
+                maxSequence = sequence;
+            }
+        }
+    });
+    
+    return `${datePrefix}${String(maxSequence + 1).padStart(2, "0")}`;
+};
+
 const createLotDocument = async (lotData: LotInputType): Promise<LotType> => {
-    const { processDate, customer, timeIn, withdrawalMet, isOrganic, lotNumber, species, customerCount, processingInstructions, anteMortemTime, fsisInitial, finalCount, processingStarted, processingFinished } = lotData;
+    const { processDate, customer, timeIn, withdrawalMet, isOrganic, lotNumber, species, customerCount, processingInstructions, anteMortemTime, fsisInitial, finalCount, processingStarted, processingFinished, scheduleLotId } = lotData;
     console.log("Creating lot document with data:", lotData);
 
     const lotDocument = await db.collection(lotCollectionPath).doc();
@@ -127,6 +152,7 @@ const createLotDocument = async (lotData: LotInputType): Promise<LotType> => {
         finalCount: finalCount || 0,
         processingStarted: processingStarted || false,
         processingFinished: processingFinished || false,
+        scheduleLotId: scheduleLotId || undefined,
     };
     
     await lotDocument.set(lotDataToSave);
@@ -148,6 +174,7 @@ const createLotDocument = async (lotData: LotInputType): Promise<LotType> => {
         finalCount: lotDataToSave.finalCount,
         processingStarted: lotDataToSave.processingStarted,
         processingFinished: lotDataToSave.processingFinished,
+        scheduleLotId: lotDataToSave.scheduleLotId,
     };
     
     return lot;
@@ -155,7 +182,14 @@ const createLotDocument = async (lotData: LotInputType): Promise<LotType> => {
 
 const createLot = async (req: CreateLotRequest, res: Response) => {
     try {
-        const lot = await createLotDocument(req.body);
+        const lotData = req.body;
+        
+        // Generate lot number if not provided or empty
+        if (!lotData.lotNumber || lotData.lotNumber === "") {
+            lotData.lotNumber = await generateLotNumber(lotData.processDate);
+        }
+        
+        const lot = await createLotDocument(lotData);
 
         res.status(200).json({
             status: "success",
@@ -173,10 +207,34 @@ const createLots = async (req: CreateLotsRequest, res: Response) => {
     console.log("Lots data received:", lotsData);
 
     try {
+        if (!lotsData || lotsData.length === 0) {
+            res.status(400).json({
+                status: "error",
+                message: "No lots provided",
+            });
+            return;
+        }
+
+        // Get processDate from the first lot (assuming all lots are for the same date)
+        const processDate = lotsData[0].processDate;
+        const datePrefix = processDate.replace(/-/g, "");
+        
+        // Get the initial sequence number once for efficiency
+        let currentSequence = await generateLotNumber(processDate).then((lotNumber) => {
+            return parseInt(lotNumber.slice(-2), 10);
+        });
+
         const createdLots: LotType[] = [];
         
         for (const lotData of lotsData) {
             console.log("Creating lot:", lotData);
+            
+            // Generate lot number if not provided or empty
+            if (!lotData.lotNumber || lotData.lotNumber === "") {
+                lotData.lotNumber = `${datePrefix}${String(currentSequence).padStart(2, "0")}`;
+                currentSequence++;
+            }
+            
             const lot = await createLotDocument(lotData);
             createdLots.push(lot);
         }
@@ -373,8 +431,36 @@ const deleteLot = async (req: CreateLotRequest, res: Response) => {
     const { id } = req.params;
     
     try {
-        const lot = await db.collection(lotCollectionPath).doc(id);
-        await lot.delete();
+        const lotRef = db.collection(lotCollectionPath).doc(id);
+        const lotDoc = await lotRef.get();
+        
+        if (!lotDoc.exists) {
+            res.status(404).json({
+                status: "error",
+                message: "Lot not found",
+            });
+            return;
+        }
+        
+        const lotData = lotDoc.data();
+        const scheduleLotId = lotData?.scheduleLotId;
+        
+        // Delete the lot
+        await lotRef.delete();
+        
+        // If the lot has a scheduleLotId, update the schedule to set processingStarted to false
+        if (scheduleLotId) {
+            try {
+                const scheduleRef = db.collection("schedule").doc(scheduleLotId);
+                await scheduleRef.update({
+                    processingStarted: false,
+                });
+                console.log(`Updated schedule ${scheduleLotId} - set processingStarted to false`);
+            } catch (scheduleError) {
+                console.error(`Error updating schedule ${scheduleLotId}:`, scheduleError);
+                // Don't fail the delete if schedule update fails
+            }
+        }
 
         res.status(200).json({
             status: "success",

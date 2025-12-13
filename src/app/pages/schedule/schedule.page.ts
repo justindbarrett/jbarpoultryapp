@@ -28,10 +28,12 @@ import {
   IonRow, 
   IonCard, 
   IonItem,
-  NavController } from '@ionic/angular/standalone';
+  NavController,
+  ViewWillEnter } from '@ionic/angular/standalone';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, NavigationEnd } from '@angular/router';
 import { Customer } from 'src/app/models/customer.model';
 import { CustomersService } from 'src/app/customers.service';
 import { addIcons } from 'ionicons';
@@ -91,7 +93,7 @@ import { Consts } from 'src/app/consts';
     IonItem ],
   providers: [ CustomersService ]
 })
-export class SchedulePage implements OnInit, OnDestroy {
+export class SchedulePage implements OnInit, OnDestroy, ViewWillEnter {
 
   @ViewChild(CalendarComponent) calendarView: CalendarComponent;
   @ViewChild('modal') newEventModal: IonModal;
@@ -105,9 +107,9 @@ export class SchedulePage implements OnInit, OnDestroy {
     startTime: null,
     endTime: null,
     customerId: "",
-    lotId: "",
     id: "",
     species: "",
+    count: 0,
   };
   public eventSource: ScheduledLot[] = [];
   public calendarViewTitle: string = "";
@@ -124,6 +126,8 @@ export class SchedulePage implements OnInit, OnDestroy {
   private shouldContinue: boolean = false;
   public loading: boolean = true;
   private userStableSubscription: Subscription;
+  private hasEnteredView: boolean = false;
+  private routerSubscription: Subscription;
 
   public calendarOptions = {
     weekDayNames: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -136,6 +140,7 @@ export class SchedulePage implements OnInit, OnDestroy {
   constructor(
     private ionRouterOutlet: IonRouterOutlet,
     private navCtrl: NavController,
+    private router: Router,
     private customersService: CustomersService,
     private scheduleService: ScheduleService,
     private lotsService: LotsService,
@@ -149,6 +154,17 @@ export class SchedulePage implements OnInit, OnDestroy {
 
   async ngOnInit() {
     this.loading = true;
+    
+    // Watch for navigation to schedule page
+    this.routerSubscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd && event.url === '/landing/schedule') {
+        if (this.hasEnteredView) {
+          this.init();
+        }
+        this.hasEnteredView = true;
+      }
+    });
+    
     let isStable = false;
     await this.authenticationService.getUserIdToken().then(
       (token) => {
@@ -182,6 +198,16 @@ export class SchedulePage implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.userStableSubscription)
       this.userStableSubscription.unsubscribe();
+    if (this.routerSubscription)
+      this.routerSubscription.unsubscribe();
+  }
+
+  ionViewWillEnter() {
+    // Refresh data each time the page is entered after the first time
+    if (this.hasEnteredView) {
+      this.init();
+    }
+    this.hasEnteredView = true;
   }
 
   init() {
@@ -223,15 +249,17 @@ export class SchedulePage implements OnInit, OnDestroy {
 
   scheduleEvent() {
     if (this.customer) {
+      // Auto-generate title from species and count
+      const title = `${this.newEvent.species} - ${this.newEvent.count}`;
+      
       this.scheduleService.scheduleLot(
-        this.customer.id, 
-        "",
+        this.customer.id,
         this.newEvent.allDay,
         new Date(this.newEvent.endTime),
         new Date(this.newEvent.startTime),
-        this.newEvent.title,
-        "",
-        this.newEvent.species).subscribe(
+        title,
+        this.newEvent.species,
+        this.newEvent.count).subscribe(
         (resp) => {
           if (resp && resp.status == "success") {
             this.init();
@@ -254,7 +282,7 @@ export class SchedulePage implements OnInit, OnDestroy {
   }
 
   disableScheduleEvent() {
-    return !(this.newEvent.title && this.customer);
+    return !(this.newEvent.species && this.newEvent.count >= 0 && this.customer);
   }
 
   customerChange(event: {
@@ -303,23 +331,62 @@ export class SchedulePage implements OnInit, OnDestroy {
     }
   }
 
+  getSelectedDateTotals(): { total: number, bySpecies: { [key: string]: number } } {
+    const selectedDate = new Date(this.calendar.currentDate);
+    selectedDate.setHours(0, 0, 0, 0);
+    
+    const selectedDateEvents = this.eventSource.filter((event) => {
+      const eventDate = new Date(event.startTime);
+      eventDate.setHours(0, 0, 0, 0);
+      return eventDate.getTime() === selectedDate.getTime();
+    });
+
+    const totals = {
+      total: 0,
+      bySpecies: {} as { [key: string]: number }
+    };
+
+    selectedDateEvents.forEach(event => {
+      const count = event.count || 0;
+      totals.total += count;
+      
+      if (event.species) {
+        if (!totals.bySpecies[event.species]) {
+          totals.bySpecies[event.species] = 0;
+        }
+        totals.bySpecies[event.species] += count;
+      }
+    });
+
+    return totals;
+  }
+
+  getSpeciesList(): string[] {
+    const totals = this.getSelectedDateTotals();
+    return Object.keys(totals.bySpecies);
+  }
+
   modalDismissed() {
     this.newEvent.title = "";
     this.newEvent.species = "";
+    this.newEvent.count = 0;
     this.customer = undefined;
     this.lotDetails = false;
   }
 
   onEventSelected(event: any) {
+    console.log('Event selected:', event);
     this.lotDetails = true;
     this.customer = this.customers.find((cust) =>
       cust.id === event.customerId
     );
     this.newEvent = { ...event };
+    console.log('newEvent after spread:', this.newEvent);
     this.formattedStart = format(event.startTime, 'HH:mm, MMM d, yyyy');
     this.newEvent.startTime = format(event.startTime, "yyyy-MM-dd'T'HH:mm:ss");
     this.formattedEnd = format(event.endTime, 'HH:mm, MMM d, yyyy');
     this.newEvent.endTime = format(event.endTime, "yyyy-MM-dd'T'HH:mm:ss");
+    console.log('newEvent before modal present:', this.newEvent);
     this.newEventModal.present();
   }
 
@@ -330,16 +397,19 @@ export class SchedulePage implements OnInit, OnDestroy {
         `This action will update the scheduled event in the system. Are you sure you want to continue?`
       );
       if (this.shouldContinue) {
+        // Auto-generate title from species and count
+        const title = `${this.newEvent.species} - ${this.newEvent.count}`;
+        
         this.scheduleService.updateSchedule(
           this.newEvent.id,
-          this.customer.id, 
-          this.newEvent.lotId,
+          this.customer.id,
           this.newEvent.allDay,
           new Date(this.newEvent.endTime),
           new Date(this.newEvent.startTime),
-          this.newEvent.title,
-          "",
-          this.newEvent.species).subscribe(
+          title,
+          this.newEvent.species,
+          this.newEvent.count,
+          undefined).subscribe(
           (resp) => {
             if (resp && resp.status == "success") {
               this.init();
@@ -363,20 +433,20 @@ export class SchedulePage implements OnInit, OnDestroy {
   }
 
   disableSaveEditEvent() {
-    return !(this.newEvent.title && this.customer);
+    return !(this.newEvent.species && this.newEvent.count >= 0 && this.customer);
   }
 
   transformLotEvent(scheduledLot: ScheduledLot) {
     const event: ScheduledLot = {
       id: scheduledLot.id,
       customerId: scheduledLot.customerId,
-      lotId: scheduledLot.lotId,
       title: scheduledLot.title,
       allDay: scheduledLot.allDay,
       startTime: new Date(scheduledLot.startTime),
       endTime: new Date(scheduledLot.endTime),
       processingStarted: scheduledLot.processingStarted || false,
-      species: scheduledLot.species
+      species: scheduledLot.species,
+      count: scheduledLot.count || 0
     }
     return event;
   }
@@ -491,12 +561,8 @@ export class SchedulePage implements OnInit, OnDestroy {
 
     
     if (this.shouldContinue) {
-      // Format lot numbers
-      const today = new Date();
-      const datePrefix = format(today, 'yyyyMMdd');
-
-      // Convert ScheduledLot to Lot
-      const lotsToProcess: Lot[] = eventsToProcess.map((scheduledLot, index) => {
+      // Convert ScheduledLot to Lot - backend will auto-generate lot numbers
+      const lotsToProcess: Lot[] = eventsToProcess.map((scheduledLot) => {
         const customer = this.customers.find((cust) => cust.id === scheduledLot.customerId);
         
         return {
@@ -506,9 +572,9 @@ export class SchedulePage implements OnInit, OnDestroy {
           timeIn: timeInStr,
           withdrawalMet: false,
           isOrganic: false,
-          lotNumber: `${datePrefix}${String(index + 1).padStart(2, '0')}`,
+          lotNumber: "", // Backend will generate this
           species: scheduledLot.species || "",
-          customerCount: 0,
+          customerCount: scheduledLot.count || 0,
           processingInstructions: {
             wholeBirds: 0,
             cutUpBirds: 0,
@@ -521,7 +587,8 @@ export class SchedulePage implements OnInit, OnDestroy {
           fsisInitial: "",
           finalCount: 0,
           processingStarted: true,
-          processingFinished: false
+          processingFinished: false,
+          scheduleLotId: scheduledLot.id
         };
       });
       
@@ -538,13 +605,12 @@ export class SchedulePage implements OnInit, OnDestroy {
               this.scheduleService.updateSchedule(
                 event.id,
                 event.customerId,
-                event.lotId,
                 event.allDay,
                 event.endTime,
                 event.startTime,
                 event.title,
-                event.category || "",
                 event.species || "",
+                event.count || 0,
                 true
               ).subscribe();
             });
@@ -562,8 +628,6 @@ export class SchedulePage implements OnInit, OnDestroy {
           this.presentAlert("Failed Process Lots Attempt", error, "Try Again");
         }
       );
-      
-      console.log('Processing today\'s lots:', lotsToProcess);
     }
   }
 }

@@ -1,13 +1,12 @@
 export type ScheduledLot = {
     id: string;
     customerId: string;
-    lotId: string;
     allDay: boolean;
     endTime: Date;
     startTime: Date;
     title: string;
-    category?: string;
     species?: string;
+    count?: number;
     processingStarted?: boolean;
 };
 

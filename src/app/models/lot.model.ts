@@ -25,7 +25,8 @@ export type Lot = {
     fsisInitial: string,
     finalCount: number,
     processingStarted: boolean,
-    processingFinished: boolean
+    processingFinished: boolean,
+    scheduleLotId?: string
 };
 
 export type Lots = {

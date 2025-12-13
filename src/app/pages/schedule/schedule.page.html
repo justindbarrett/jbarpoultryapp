@@ -43,7 +43,25 @@
             [startHour]="8"
             [endHour]="18"
           ></calendar>
-          <div class="ion-padding-top">
+          <div *ngIf="getSelectedDateTotals().total > 0">
+            <ion-item lines="none">
+              <ion-label>
+                <div>
+                  <span
+                    *ngFor="let species of getSpeciesList(); let first = first"
+                  >
+                    <span *ngIf="!first"> | </span
+                    ><strong>{{ species }}:</strong> {{
+                    getSelectedDateTotals().bySpecies[species] }}
+                  </span>
+                </div>
+                <div>
+                  <strong>Total:</strong> {{ getSelectedDateTotals().total }}
+                </div>
+              </ion-label>
+            </ion-item>
+          </div>
+          <div>
             <ion-button color="tertiary" (click)="processTodaysLots()">
               Process Today's Lots
             </ion-button>
@@ -105,13 +123,6 @@
     </ion-header>
     <ion-card>
       <ion-item>
-        <ion-input
-          type="text"
-          [(ngModel)]="newEvent.title"
-          placeholder="title"
-        ></ion-input>
-      </ion-item>
-      <ion-item>
         <ion-label>customer</ion-label>
         <ionic-selectable
           [(ngModel)]="customer"
@@ -131,6 +142,16 @@
           [canSearch]="true"
         >
         </ionic-selectable>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          type="number"
+          label="Count"
+          labelPlacement="stacked"
+          [(ngModel)]="newEvent.count"
+          [value]="newEvent.count"
+          placeholder="Enter count"
+        ></ion-input>
       </ion-item>
       <ion-item>
         <ion-toggle ngDefaultControl [(ngModel)]="newEvent.allDay"

@@ -1,6 +1,5 @@
 import { 
   IonSpinner,
-  IonToast, 
   IonToggle, 
   IonText, 
   IonDatetime, 
@@ -32,7 +31,10 @@ import {
   IonDatetimeButton,
   IonSelectOption,
   IonSelect,
-  IonAccordionGroup } from '@ionic/angular/standalone';
+  IonAccordionGroup,
+  IonItemSliding,
+  IonItemOptions,
+  IonItemOption } from '@ionic/angular/standalone';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -52,6 +54,7 @@ import { Lot } from 'src/app/models/lot.model';
 import { format } from 'date-fns/format';
 import { Consts } from 'src/app/consts';
 import { LotsService } from 'src/app/lots.service';
+import { UsersService } from 'src/app/users.service';
 
 @Component({
   selector: 'app-lots',
@@ -60,7 +63,6 @@ import { LotsService } from 'src/app/lots.service';
   standalone: true,
   imports: [ 
     IonSpinner,
-    IonToast, 
     IonToggle, 
     IonText, 
     IonDatetime, 
@@ -97,7 +99,10 @@ import { LotsService } from 'src/app/lots.service';
     IonDatetimeButton,
     IonSelectOption,
     IonSelect,
-    IonAccordionGroup],
+    IonAccordionGroup,
+    IonItemSliding,
+    IonItemOptions,
+    IonItemOption],
   providers: [ CustomersService ]
 })
 export class LotsPage implements OnInit, OnDestroy {
@@ -115,18 +120,20 @@ export class LotsPage implements OnInit, OnDestroy {
   public presentingElement: HTMLElement;
   private userStableSubscription: Subscription;
 
-  // toast
-  public isToastOpen: boolean = false;
-  public successToastMessage: string = "";
+
 
   // Lots data
   public lots: Lot[] = [];
+  public userRole: string = '';
+  private isInitializing: boolean = false;
+  private hasEnteredView: boolean = false;
 
   constructor(
     private navCtrl: NavController,
     private ionRouterOutlet: IonRouterOutlet,
     private customersService: CustomersService,
     private lotsService: LotsService,
+    private usersService: UsersService,
     private alertCtrl: AlertController,
     private identityService: IdentityService,
     private authenticationService: AuthenticationService,
@@ -154,11 +161,13 @@ export class LotsPage implements OnInit, OnDestroy {
     
     if (isStable) {
       this.init();
+      this.fetchUserRole();
     }
     else {
       this.userStableSubscription = this.identityService.getUserDetailsObservable().subscribe(
         (userDetails) => {
           this.init();
+          this.fetchUserRole();
         },
         (error) => {
           this.presentAlert("Error Getting Logged In User", error.message, "Try Again");
@@ -173,11 +182,19 @@ export class LotsPage implements OnInit, OnDestroy {
   }
 
   ionViewWillEnter() {
-    // Refresh data each time the page is entered
-    this.init();
+    // Only refresh data on subsequent entries, not the first one (which ngOnInit handles)
+    if (this.hasEnteredView && !this.isInitializing && !this.loading) {
+      this.init();
+    }
+    this.hasEnteredView = true;
   }
 
   init() {
+    if (this.isInitializing) {
+      return; // Prevent concurrent init calls
+    }
+    
+    this.isInitializing = true;
     this.loading = true;
     this.currentDate = format(new Date(), 'EEEE, MMMM d, yyyy');
     const todayDateStr = format(new Date(), 'yyyy-MM-dd');
@@ -190,19 +207,29 @@ export class LotsPage implements OnInit, OnDestroy {
         // Fetch lots after customers are loaded
         this.lotsService.getLots().subscribe(
           (lotsResp) => {
-            // Filter lots for today's date
-            this.lots = lotsResp.lots.filter(lot => lot.processDate === todayDateStr);
+            // Filter lots for today's date and sort by lot number
+            this.lots = lotsResp.lots
+              .filter(lot => lot.processDate === todayDateStr)
+              .sort((a, b) => {
+                if (a.lotNumber && b.lotNumber) {
+                  return a.lotNumber.localeCompare(b.lotNumber);
+                }
+                return 0;
+              });
             this.loading = false;
+            this.isInitializing = false;
           },
           (error) => {
             this.presentAlert("Error Retrieving Lots", error.message, "Try Again");
             this.loading = false;
+            this.isInitializing = false;
           }
         );
       },
       (error) => {
         this.presentAlert("Error Retrieving Customer List", error.message, "Try Again");
         this.loading = false;
+        this.isInitializing = false;
       }
     );
   }
@@ -216,29 +243,6 @@ export class LotsPage implements OnInit, OnDestroy {
     const now = new Date();
     const todayDateStr = format(now, 'yyyy-MM-dd');
     const timeInStr = format(now, 'HH:mm:ss');
-    const datePrefix = format(now, 'yyyyMMdd');
-
-    // Find the highest lot number for today to generate the next one
-    const todaysLots = this.lots.filter(lot => lot.processDate === todayDateStr);
-    let nextLotNumber = 1;
-    
-    if (todaysLots.length > 0) {
-      // Extract the last 2 digits from each lot number (the sequence number)
-      const lotNumbers = todaysLots
-        .map(lot => {
-          if (!lot.lotNumber || lot.lotNumber.length < 2) return 0;
-          // Get the last 2 characters and convert to number
-          const lastTwoDigits = lot.lotNumber.slice(-2);
-          return parseInt(lastTwoDigits, 10);
-        })
-        .filter(num => !isNaN(num));
-      
-      if (lotNumbers.length > 0) {
-        nextLotNumber = Math.max(...lotNumbers) + 1;
-      }
-    }
-
-    const lotNumber = `${datePrefix}${String(nextLotNumber).padStart(2, '0')}`;
 
     const newLot: Lot = {
       id: '', // Backend will set this
@@ -247,7 +251,7 @@ export class LotsPage implements OnInit, OnDestroy {
       timeIn: timeInStr,
       withdrawalMet: false,
       isOrganic: false,
-      lotNumber: lotNumber,
+      lotNumber: '', // Backend will auto-generate this
       species: this.newLotSpecies,
       customerCount: 0,
       processingInstructions: {
@@ -269,7 +273,6 @@ export class LotsPage implements OnInit, OnDestroy {
     this.lotsService.createLots([newLot]).subscribe(
       (resp) => {
         this.newLotModal.dismiss();
-        this.openSuccessToast(true, 'Lot created successfully!');
         // Refresh the lots list
         this.init();
       },
@@ -338,9 +341,71 @@ export class LotsPage implements OnInit, OnDestroy {
     });
   }
 
-  openSuccessToast(open: boolean, message: string) {
-    this.successToastMessage = message;
-    this.isToastOpen = open;
+
+
+  fetchUserRole() {
+    const userDetails = this.identityService.getUserDetails();
+    const userId = userDetails?.userId;
+    
+    if (userId) {
+      this.usersService.getUserByUserId(userId).subscribe({
+        next: (response) => {
+          this.userRole = response.data.role || '';
+        },
+        error: (err) => {
+          console.error('Error fetching user role:', err);
+        }
+      });
+    }
+  }
+
+  get isAdmin(): boolean {
+    return this.userRole === 'admin';
+  }
+
+  async confirmDeleteLot(lot: Lot, event: Event) {
+    event.stopPropagation();
+    
+    if (!this.isAdmin) {
+      return;
+    }
+
+    const alert = await this.alertCtrl.create({
+      header: 'Delete Lot?',
+      message: `Are you sure you want to delete lot ${lot.lotNumber}?`,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => {
+            this.deleteLot(lot);
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  deleteLot(lot: Lot) {
+    this.lotsService.deleteLot(lot.id).subscribe(
+      (resp) => {
+        if (resp && resp.status === 'success') {
+          this.init();
+        } else {
+          this.loading = false;
+          this.presentAlert('Error Deleting Lot', 'Unknown error occurred', 'OK');
+        }
+      },
+      (error) => {
+        this.loading = false;
+        this.presentAlert('Error Deleting Lot', error.message, 'OK');
+      }
+    );
   }
 
   generateSchedule() {

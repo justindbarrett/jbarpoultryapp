@@ -19,23 +19,21 @@ export class ScheduleService {
   };
 
   scheduleLot(
-    customerId: string, 
-    lotId: string, 
+    customerId: string,
     allDay: boolean, 
     endTime: Date, 
     startTime: Date, 
-    title: string, 
-    category: string = "",
-    species: string = ""): Observable<ScheduleLotResponse> {
+    title: string,
+    species: string = "",
+    count: number = 0): Observable<ScheduleLotResponse> {
     const body = {
       "customerId": customerId,
-      "lotId": lotId,
       "allDay": allDay,
       "endTime": endTime,
       "startTime": startTime,
       "title": title,
-      "category": category,
-      "species": species
+      "species": species,
+      "count": count
     };
     const headers = {
       headers : new HttpHeaders({"Content-Type": "application/json"}),
@@ -45,25 +43,23 @@ export class ScheduleService {
 
   updateSchedule(
     scheduledLotId: string,
-    customerId: string, 
-    lotId: string, 
+    customerId: string,
     allDay: boolean, 
     endTime: Date, 
     startTime: Date, 
-    title: string, 
-    category: string = "",
+    title: string,
     species: string = "",
-    processingStarted: boolean = false): Observable<ScheduleLotResponse> {
+    count: number = 0,
+    processingStarted?: boolean): Observable<ScheduleLotResponse> {
     const body = {
       "customerId": customerId,
-      "lotId": lotId,
       "allDay": allDay,
       "endTime": endTime,
       "startTime": startTime,
       "title": title,
-      "category": category,
       "species": species,
-      "processingStarted": processingStarted
+      "processingStarted": processingStarted,
+      "count": count
     };
     const headers = {
       headers : new HttpHeaders({"Content-Type": "application/json"}),
