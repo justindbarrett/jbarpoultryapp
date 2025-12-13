@@ -31,6 +31,7 @@ import { IdentityService } from './identity.service';
 import { AuthenticationService } from './authentication.service';
 import { NavController, AlertController } from '@ionic/angular';
 import { AppPages } from './pages.service';
+import { UsersService } from './users.service';
 
 @Component({
   selector: 'app-root',
@@ -58,14 +59,16 @@ import { AppPages } from './pages.service';
   ],
 })
 export class AppComponent implements OnInit, OnDestroy {
-  public appPages = [
-    { title: 'Customers', url: '/landing/customers', icon: 'people' },
-    { title: 'Schedule', url: '/landing/schedule', icon: 'calendar' },
-    { title: 'Lots', url: '/landing/lots', icon: 'cube' },
+  private allPages = [
+    { title: 'Customers', url: '/landing/customers', icon: 'people', allowedRoles: ['admin', 'service'] },
+    { title: 'Schedule', url: '/landing/schedule', icon: 'calendar', allowedRoles: ['admin', 'service'] },
+    { title: 'Lots', url: '/landing/lots', icon: 'cube', allowedRoles: ['admin', 'service', 'inspector'] },
   ];
+  public appPages: typeof this.allPages = [];
   public settingsUrl = 'landing/accountsettings';
   public userDisplayName = '';
   public loading = true;
+  public userRole: string = '';
   private userDetailsSubscription = new Subscription();
 
   constructor(
@@ -74,7 +77,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private authService: AuthenticationService,
     private navCtrl: NavController,
     private alertCtrl: AlertController,
-    private pageService: AppPages
+    private pageService: AppPages,
+    private usersService: UsersService
   ) {
     addIcons({ peopleOutline, peopleSharp, calendarOutline, calendarSharp, cubeOutline, cubeSharp, settingsOutline, settingsSharp });
   }
@@ -84,8 +88,37 @@ export class AppComponent implements OnInit, OnDestroy {
     this.userDetailsSubscription = this.identityService.getUserDetailsObservable().subscribe(
       (userDetails) => {
         this.userDisplayName = userDetails.displayName || "";
-        this.loading = false;
+        this.fetchUserRole();
       }
+    );
+  }
+
+  fetchUserRole() {
+    const user = this.identityService.getUserDetails();
+    if (user?.userId) {
+      this.usersService.getUserByUserId(user.userId).subscribe(
+        (response) => {
+          this.userRole = response?.data?.role || 'service';
+          localStorage.setItem('userRole', this.userRole);
+          this.filterMenuByRole();
+          this.loading = false;
+        },
+        (error) => {
+          console.error('Error fetching user role:', error);
+          this.userRole = 'service';
+          localStorage.setItem('userRole', this.userRole);
+          this.filterMenuByRole();
+          this.loading = false;
+        }
+      );
+    } else {
+      this.loading = false;
+    }
+  }
+
+  filterMenuByRole() {
+    this.appPages = this.allPages.filter(page => 
+      page.allowedRoles.includes(this.userRole)
     );
   }
 

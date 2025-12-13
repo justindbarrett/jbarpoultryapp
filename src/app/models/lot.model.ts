@@ -8,6 +8,7 @@ export type ProcessingInstructions = {
     eightPiece: number;
     extrasToSave?: string[];
     notes?: string;
+    isEditable?: boolean;
 };
 
 export type Lot = {
@@ -22,11 +23,13 @@ export type Lot = {
     customerCount: number,
     processingInstructions: ProcessingInstructions,
     anteMortemTime: string,
+    customerInitial: string,
     fsisInitial: string,
     finalCount: number,
     processingStarted: boolean,
     processingFinished: boolean,
-    scheduleLotId?: string
+    scheduleLotId?: string,
+    checkInDetailsEditable?: boolean
 };
 
 export type Lots = {

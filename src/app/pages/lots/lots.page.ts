@@ -242,13 +242,12 @@ export class LotsPage implements OnInit, OnDestroy {
 
     const now = new Date();
     const todayDateStr = format(now, 'yyyy-MM-dd');
-    const timeInStr = format(now, 'HH:mm:ss');
 
     const newLot: Lot = {
       id: '', // Backend will set this
       processDate: todayDateStr,
       customer: this.newLotCustomer,
-      timeIn: timeInStr,
+      timeIn: '', // Will be set when customer initials are entered
       withdrawalMet: false,
       isOrganic: false,
       lotNumber: '', // Backend will auto-generate this
@@ -261,13 +260,16 @@ export class LotsPage implements OnInit, OnDestroy {
         sixPiece: 0,
         eightPiece: 0,
         extrasToSave: [],
-        notes: ''
+        notes: '',
+        isEditable: true
       },
       anteMortemTime: '',
+      customerInitial: '',
       fsisInitial: '',
       finalCount: 0,
       processingStarted: true,
-      processingFinished: false
+      processingFinished: false,
+      checkInDetailsEditable: true
     };
 
     this.lotsService.createLots([newLot]).subscribe(
@@ -344,6 +346,14 @@ export class LotsPage implements OnInit, OnDestroy {
 
 
   fetchUserRole() {
+    // First check localStorage
+    const cachedRole = localStorage.getItem('userRole');
+    if (cachedRole) {
+      this.userRole = cachedRole;
+      return;
+    }
+
+    // If not in localStorage, fetch from API
     const userDetails = this.identityService.getUserDetails();
     const userId = userDetails?.userId;
     
@@ -351,6 +361,7 @@ export class LotsPage implements OnInit, OnDestroy {
       this.usersService.getUserByUserId(userId).subscribe({
         next: (response) => {
           this.userRole = response.data.role || '';
+          localStorage.setItem('userRole', this.userRole);
         },
         error: (err) => {
           console.error('Error fetching user role:', err);

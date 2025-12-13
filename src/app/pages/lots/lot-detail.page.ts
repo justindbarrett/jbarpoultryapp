@@ -10,9 +10,11 @@ import { addIcons } from 'ionicons';
 import { informationCircleOutline } from 'ionicons/icons';
 import { Consts } from 'src/app/consts';
 import { FsisInitialButtonComponent, FsisInitialConfirmation } from 'src/app/components/fsis-initial-button/fsis-initial-button.component';
+import { CustomerInitialButtonComponent, CustomerInitialConfirmation } from 'src/app/components/customer-initial-button/customer-initial-button.component';
 import { format, parse } from 'date-fns';
 import { AuthenticationService } from 'src/app/authentication.service';
 import { IdentityService } from 'src/app/identity.service';
+import { UsersService } from 'src/app/users.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -20,13 +22,14 @@ import { Subscription } from 'rxjs';
   templateUrl: './lot-detail.page.html',
   styleUrls: ['./lot-detail.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonLabel, IonInput, IonDatetime, IonTextarea, IonButtons, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonGrid, IonRow, IonCol, IonToggle, IonSelect, IonSelectOption, IonIcon, IonSpinner, FsisInitialButtonComponent],
+  imports: [CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonLabel, IonInput, IonDatetime, IonTextarea, IonButtons, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonGrid, IonRow, IonCol, IonToggle, IonSelect, IonSelectOption, IonIcon, IonSpinner, FsisInitialButtonComponent, CustomerInitialButtonComponent],
 })
 export class LotDetailPage implements OnInit, OnDestroy {
   public lot: any = null;
   public loading: boolean = false;
   poultryTypes: string[] = Consts.SPECIES_TYPES;
   private userStableSubscription: Subscription | null = null;
+  public userRole: string = '';
 
   constructor(
     private lotsService: LotsService,
@@ -34,7 +37,8 @@ export class LotDetailPage implements OnInit, OnDestroy {
     public navCtrl: NavController,
     private route: ActivatedRoute,
     private authService: AuthenticationService,
-    private identityService: IdentityService
+    private identityService: IdentityService,
+    private usersService: UsersService
   ) {
     addIcons({ informationCircleOutline });
   }
@@ -42,12 +46,51 @@ export class LotDetailPage implements OnInit, OnDestroy {
   get formattedTimeIn(): string {
     if (!this.lot?.timeIn) return '';
     try {
-      // Parse HH:mm:ss format and format to 12-hour time
-      const date = parse(this.lot.timeIn, 'HH:mm:ss', new Date());
-      return format(date, 'h:mm a');
+      // Try to parse as ISO date first (new format from customer initial)
+      const date = new Date(this.lot.timeIn);
+      if (!isNaN(date.getTime())) {
+        return format(date, 'h:mm a');
+      }
+      // Fallback to HH:mm:ss format parsing
+      const parsedDate = parse(this.lot.timeIn, 'HH:mm:ss', new Date());
+      return format(parsedDate, 'h:mm a');
     } catch (e) {
       return this.lot.timeIn;
     }
+  }
+
+  get isAdmin(): boolean {
+    return this.userRole === 'admin';
+  }
+
+  get isInspector(): boolean {
+    return this.userRole === 'inspector';
+  }
+
+  canEditCheckInDetails(): boolean {
+    // Inspector can never edit
+    if (this.isInspector) {
+      return false;
+    }
+    // Admin can always edit
+    if (this.isAdmin) {
+      return true;
+    }
+    // Service can only edit before customer initial is set
+    return !this.lot?.customerInitial;
+  }
+
+  canEditProcessingInstructions(): boolean {
+    // Inspector can never edit
+    if (this.isInspector) {
+      return false;
+    }
+    // Admin can always edit
+    if (this.isAdmin) {
+      return true;
+    }
+    // Service can only edit before customer initial is set
+    return !this.lot?.customerInitial;
   }
 
   async ngOnInit(): Promise<void> {
@@ -92,8 +135,11 @@ export class LotDetailPage implements OnInit, OnDestroy {
     }
   }
   
-  initializeLot(): void {
+  async initializeLot(): Promise<void> {
     console.log('Initializing lot...');
+    
+    // Fetch user role
+    await this.fetchUserRole();
     
     // Read navigation state first
     const state = (history && (history.state as any)) || {};
@@ -191,12 +237,39 @@ export class LotDetailPage implements OnInit, OnDestroy {
     await this.presentAlert('Organic Certification', 'This is a lot of certified organic poultry that has been transported according to organic standards');
   }
 
+  async fetchUserRole(): Promise<void> {
+    const userDetails = this.identityService.getUserDetails();
+    const userId = userDetails?.userId;
+    
+    if (!userId) return;
+    
+    try {
+      const response = await this.usersService.getUserByUserId(userId).toPromise();
+      this.userRole = response?.data?.role || '';
+    } catch (err) {
+      console.error('Error fetching user role:', err);
+      this.userRole = '';
+    }
+  }
+
+  onCustomerInitialConfirmed(confirmation: CustomerInitialConfirmation) {
+    this.lot.customerInitial = confirmation.initials;
+    this.lot.timeIn = confirmation.timestamp;
+    this.lot.checkInDetailsEditable = false;
+    if (this.lot.processingInstructions) {
+      this.lot.processingInstructions.isEditable = false;
+    }
+    // Save the lot after setting customer initials
+    this.save(true);
+  }
+
   onFsisConfirmed(confirmation: FsisInitialConfirmation) {
     this.lot.anteMortemTime = confirmation.timestamp;
     this.lot.fsisInitial = confirmation.initials;
+    this.save(true);
   }
 
-  save() {
+  save(silent: boolean = false) {
     console.log('Saving lot:', this.lot);
     console.log('Lot ID:', this.lot?.id);
     
@@ -226,12 +299,15 @@ export class LotDetailPage implements OnInit, OnDestroy {
         notes: ''
       },
       this.lot.anteMortemTime || '',
+      this.lot.customerInitial || '',
       this.lot.fsisInitial || '',
       this.lot.finalCount || 0
     ).subscribe(
       (resp) => {
-        this.presentAlert('Saved', 'Lot saved successfully.');
-        this.navCtrl.navigateRoot('/landing/lots');
+        if (!silent) {
+          this.presentAlert('Saved', 'Lot saved successfully.');
+          this.navCtrl.navigateRoot('/landing/lots');
+        }
       },
       (err) => {
         console.error('Save failed', err);

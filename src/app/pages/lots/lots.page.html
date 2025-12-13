@@ -29,7 +29,7 @@
               </ion-item-options>
             </ion-item-sliding>
           </ion-list>
-          <div class="ion-padding-top ion-margin-top ion-text-center">
+          <div class="ion-padding-top ion-margin-top ion-text-center" *ngIf="userRole !== 'inspector'">
             <ion-button color="tertiary" (click)="generateLotLabels()">
               Generate Lot Labels
             </ion-button>
@@ -42,7 +42,7 @@
     </ion-row>
   </ion-card>
 </div>
-<ion-fab slot="fixed" vertical="bottom" horizontal="center" [edge]="true">
+<ion-fab slot="fixed" vertical="bottom" horizontal="center" [edge]="true" *ngIf="userRole !== 'inspector'">
   <ion-fab-button id="newLotModal">
     <ion-icon name="add"></ion-icon>
   </ion-fab-button>

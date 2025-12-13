@@ -4,7 +4,7 @@
       <ion-button (click)="cancel()">Cancel</ion-button>
     </ion-buttons>
     <ion-title>Lot Details</ion-title>
-    <ion-buttons slot="end">
+    <ion-buttons slot="end" *ngIf="userRole !== 'inspector'">
       <ion-button color="primary" (click)="save()">Save</ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -28,22 +28,16 @@
             <ion-card-content>
               <ion-grid class="compact-grid">
                 <ion-row>
-                  <ion-col size="4">
+                  <ion-col size="6">
                     <div class="info-field">
                       <strong>Lot Number:</strong>
                       <p>{{ lot.lotNumber }}</p>
                     </div>
                   </ion-col>
-                  <ion-col size="4">
+                  <ion-col size="6">
                     <div class="info-field">
                       <strong>Process Date:</strong>
                       <p>{{ lot.processDate }}</p>
-                    </div>
-                  </ion-col>
-                  <ion-col size="4">
-                    <div class="info-field">
-                      <strong>Time In:</strong>
-                      <p>{{ formattedTimeIn }}</p>
                     </div>
                   </ion-col>
                 </ion-row>
@@ -100,6 +94,7 @@
                 <ion-input
                   type="number"
                   [(ngModel)]="lot.processingInstructions.wholeBirds"
+                  [readonly]="!canEditProcessingInstructions()"
                 ></ion-input>
               </ion-item>
             </ion-col>
@@ -109,6 +104,7 @@
                 <ion-input
                   type="number"
                   [(ngModel)]="lot.processingInstructions.cutUpBirds"
+                  [readonly]="!canEditProcessingInstructions()"
                 ></ion-input>
               </ion-item>
             </ion-col>
@@ -118,6 +114,7 @@
                 <ion-input
                   type="number"
                   [(ngModel)]="lot.processingInstructions.halves"
+                  [readonly]="!canEditProcessingInstructions()"
                 ></ion-input>
               </ion-item>
             </ion-col>
@@ -127,6 +124,7 @@
                 <ion-input
                   type="number"
                   [(ngModel)]="lot.processingInstructions.sixPiece"
+                  [readonly]="!canEditProcessingInstructions()"
                 ></ion-input>
               </ion-item>
             </ion-col>
@@ -136,6 +134,7 @@
                 <ion-input
                   type="number"
                   [(ngModel)]="lot.processingInstructions.eightPiece"
+                  [readonly]="!canEditProcessingInstructions()"
                 ></ion-input>
               </ion-item>
             </ion-col>
@@ -146,6 +145,7 @@
                   labelPlacement="stacked"
                   [(ngModel)]="lot.processingInstructions.extrasToSave"
                   multiple="true"
+                  [disabled]="!canEditProcessingInstructions()"
                 >
                   <ion-select-option value="neck">Neck</ion-select-option>
                   <ion-select-option value="heart">Heart</ion-select-option>
@@ -163,6 +163,7 @@
                   rows="2"
                   [(ngModel)]="lot.processingInstructions.notes"
                   placeholder="Additional processing notes..."
+                  [readonly]="!canEditProcessingInstructions()"
                 ></ion-textarea>
               </ion-item>
             </ion-col>
@@ -186,6 +187,7 @@
                   labelPlacement="stacked"
                   [(ngModel)]="lot.species"
                   interface="popover"
+                  [disabled]="!canEditCheckInDetails()"
                 >
                   <ion-select-option
                     *ngFor="let type of poultryTypes"
@@ -204,7 +206,10 @@
                     (click)="showWithdrawalInfo()"
                   ></ion-icon>
                 </div>
-                <ion-toggle [(ngModel)]="lot.withdrawalMet"></ion-toggle>
+                <ion-toggle
+                  [(ngModel)]="lot.withdrawalMet"
+                  [disabled]="!canEditCheckInDetails()"
+                ></ion-toggle>
               </div>
             </ion-col>
             <ion-col size="6" size-md="2">
@@ -216,7 +221,10 @@
                     (click)="showOrganicInfo()"
                   ></ion-icon>
                 </div>
-                <ion-toggle [(ngModel)]="lot.isOrganic"></ion-toggle>
+                <ion-toggle
+                  [(ngModel)]="lot.isOrganic"
+                  [disabled]="!canEditCheckInDetails()"
+                ></ion-toggle>
               </div>
             </ion-col>
             <ion-col size="6" size-md="2">
@@ -225,6 +233,7 @@
                 <ion-input
                   type="number"
                   [(ngModel)]="lot.customerCount"
+                  [readonly]="!canEditCheckInDetails()"
                 ></ion-input>
               </ion-item>
             </ion-col>
@@ -234,10 +243,106 @@
                 <ion-input
                   type="number"
                   [(ngModel)]="lot.finalCount"
+                  [readonly]="!canEditCheckInDetails()"
                 ></ion-input>
               </ion-item>
             </ion-col>
-            <ion-col size="6" size-md="2">
+            <!-- Customer Initial Column - Service/Admin -->
+            <ion-col size="6" size-md="2" *ngIf="userRole !== 'inspector'">
+              <!-- Customer Initial - Always show first -->
+              <ion-item lines="none" *ngIf="!lot.customerInitial">
+                <app-customer-initial-button
+                  buttonText="Customer Initial"
+                  buttonColor="tertiary"
+                  buttonExpand="block"
+                  [customerInitial]="lot.customerInitial"
+                  [timeIn]="lot.timeIn"
+                  (confirmed)="onCustomerInitialConfirmed($event)"
+                ></app-customer-initial-button>
+              </ion-item>
+              <ion-item lines="none" *ngIf="lot.customerInitial">
+                <ion-label position="stacked"
+                  >Time In / Customer Initial</ion-label
+                >
+                <app-customer-initial-button
+                  buttonText="Customer Initial"
+                  buttonColor="tertiary"
+                  buttonExpand="block"
+                  [customerInitial]="lot.customerInitial"
+                  [timeIn]="lot.timeIn"
+                  (confirmed)="onCustomerInitialConfirmed($event)"
+                ></app-customer-initial-button>
+              </ion-item>
+            </ion-col>
+            <!-- Customer Initial Column - Inspector -->
+            <ion-col size="6" size-md="2" *ngIf="userRole === 'inspector'">
+              <!-- Show "Customer Initials Needed" when no initials exist -->
+              <ion-item lines="none" *ngIf="!lot.customerInitial">
+                <div style="padding-top: 8px">
+                  <ion-text style="color: #999; font-style: italic">
+                    Customer Initials Needed
+                  </ion-text>
+                </div>
+              </ion-item>
+              <!-- Show initials and time when they exist -->
+              <ion-item lines="none" *ngIf="lot.customerInitial">
+                <ion-label position="stacked"
+                  >Time In / Customer Initial</ion-label
+                >
+                <div
+                  style="
+                    padding-top: 8px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <ion-text style="font-size: 1em; color: #666">
+                    {{ formattedTimeIn }}
+                  </ion-text>
+                  <ion-text style="font-size: 1.1em">
+                    <strong>{{ lot.customerInitial }}</strong>
+                  </ion-text>
+                </div>
+              </ion-item>
+            </ion-col>
+            <!-- FSIS Initial after customer initial is entered (Service/Admin) -->
+            <ion-col
+              size="6"
+              size-md="2"
+              *ngIf="lot.customerInitial && userRole !== 'inspector'"
+            >
+              <!-- When no initials exist yet -->
+              <ion-item lines="none" *ngIf="!lot.fsisInitial">
+                <app-fsis-initial-button
+                  buttonText="Ante Mortem FSIS Initial"
+                  buttonColor="secondary"
+                  buttonExpand="block"
+                  [fsisInitial]="lot.fsisInitial"
+                  [anteMortemTime]="lot.anteMortemTime"
+                  (confirmed)="onFsisConfirmed($event)"
+                ></app-fsis-initial-button>
+              </ion-item>
+              <!-- When initials exist -->
+              <ion-item lines="none" *ngIf="lot.fsisInitial">
+                <ion-label position="stacked">Ante Mortem / FSIS</ion-label>
+                <app-fsis-initial-button
+                  buttonText="Ante Mortem FSIS Initial"
+                  buttonColor="secondary"
+                  buttonExpand="block"
+                  [fsisInitial]="lot.fsisInitial"
+                  [anteMortemTime]="lot.anteMortemTime"
+                  (confirmed)="onFsisConfirmed($event)"
+                ></app-fsis-initial-button>
+              </ion-item>
+            </ion-col>
+            <!-- FSIS Initial for Inspector (only after customer initial) -->
+            <ion-col
+              size="6"
+              size-md="2"
+              *ngIf="lot.customerInitial && userRole === 'inspector'"
+            >
               <!-- When no initials exist yet -->
               <ion-item lines="none" *ngIf="!lot.fsisInitial">
                 <app-fsis-initial-button

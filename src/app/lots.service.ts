@@ -42,6 +42,7 @@ export class LotsService {
     customerCount: number,
     processingInstructions: any,
     anteMortemTime: string,
+    customerInitial: string,
     fsisInitial: string,
     finalCount: number): Observable<any> {
     const body = {
@@ -55,6 +56,7 @@ export class LotsService {
       "customerCount": customerCount,
       "processingInstructions": processingInstructions,
       "anteMortemTime": anteMortemTime,
+      "customerInitial": customerInitial,
       "fsisInitial": fsisInitial,
       "finalCount": finalCount
     };

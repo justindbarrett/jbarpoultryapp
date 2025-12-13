@@ -22,15 +22,24 @@ ion-input, ion-textarea {
 
 .info-field strong {
   display: block;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--ion-color-medium);
   margin-bottom: 2px;
 }
 
 .info-field p {
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
   color: var(--ion-text-color);
+}
+
+/* Increase font sizes for all inputs and labels */
+ion-label {
+  font-size: 14px !important;
+}
+
+ion-input, ion-textarea, ion-select {
+  font-size: 18px !important;
 }
 
 /* Toggle field styling with label above */

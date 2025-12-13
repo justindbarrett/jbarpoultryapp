@@ -48,7 +48,7 @@ export class PdfGeneratorService {
 
     // Define the 10 column headers
     const rawHeaders = [
-      'Time In',
+      'Time In / Customer Initial',
       'Owner Name, Phone and Address',
       'Withdrawal Period and Organic', // This column will hold the custom format
       'Lot #',
@@ -90,6 +90,12 @@ export class PdfGeneratorService {
         const formatTime = (timeStr: string): string => {
             if (!timeStr) return '';
             try {
+                // Try to parse as ISO date first (new format from customer initial)
+                const date = new Date(timeStr);
+                if (!isNaN(date.getTime())) {
+                    return format(date, 'h:mm a');
+                }
+                // Fallback to HH:mm:ss format parsing
                 const parsedTime = parse(timeStr, 'HH:mm:ss', new Date());
                 return format(parsedTime, 'h:mm a');
             } catch {
@@ -97,8 +103,13 @@ export class PdfGeneratorService {
             }
         };
 
+        // Format Time In with customer initials
+        const timeInWithInitials = lot.customerInitial 
+            ? `${formatTime(lot.timeIn)}\n${lot.customerInitial}`
+            : formatTime(lot.timeIn);
+
         return [
-            formatTime(lot.timeIn),
+            timeInWithInitials,
             `${lot.customer.name || ''}\n${lot.customer.phone || ''}\n${lot.customer.address || ''}`,
             columnThreeContent, // <-- Use the custom formatted string
             lot.lotNumber,

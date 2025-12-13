@@ -528,9 +528,6 @@ export class SchedulePage implements OnInit, OnDestroy, ViewWillEnter {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    // Get current time for timeIn
-    const now = new Date();
-    const timeInStr = format(now, 'HH:mm:ss');
     const processDateStr = format(today, 'yyyy-MM-dd');
     
     // Filter events for today
@@ -569,7 +566,7 @@ export class SchedulePage implements OnInit, OnDestroy, ViewWillEnter {
           id: "",
           processDate: processDateStr,
           customer: customer || {} as Customer,
-          timeIn: timeInStr,
+          timeIn: "",
           withdrawalMet: false,
           isOrganic: false,
           lotNumber: "", // Backend will generate this
@@ -584,6 +581,7 @@ export class SchedulePage implements OnInit, OnDestroy, ViewWillEnter {
             notes: ""
           },
           anteMortemTime: "",
+          customerInitial: "",
           fsisInitial: "",
           finalCount: 0,
           processingStarted: true,

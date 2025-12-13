@@ -25,6 +25,7 @@ import { eyeOffOutline, eyeOutline } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
 import { IdentityService } from 'src/app/identity.service';
 import { LoginService } from 'src/app/login.service';
+import { UsersService } from 'src/app/users.service';
 
 @Component({
   selector: 'app-login',
@@ -65,7 +66,8 @@ export class LoginPage implements OnInit {
     private loginService: LoginService,
     private navCtrl: NavController,
     private alertCtrl: AlertController,
-    private identityService: IdentityService
+    private identityService: IdentityService,
+    private usersService: UsersService
   ) {
       addIcons({ eyeOutline, eyeOffOutline });
   }
@@ -99,8 +101,33 @@ export class LoginPage implements OnInit {
           userId: auth.user?.uid || "", 
           emailVerified: auth.user?.emailVerified || false };
         this.identityService.setUserDetails(userDetails);
-        this.navCtrl.navigateForward("landing/customers");
-        this.loading = false;
+        
+        // Fetch user role and navigate to appropriate page
+        if (auth.user?.uid) {
+          this.usersService.getUserByUserId(auth.user.uid).subscribe(
+            (response) => {
+              const userRole = response?.data?.role || 'service';
+              localStorage.setItem('userRole', userRole);
+              
+              // Navigate based on role
+              if (userRole === 'inspector') {
+                this.navCtrl.navigateForward("landing/lots");
+              } else {
+                this.navCtrl.navigateForward("landing/customers");
+              }
+              this.loading = false;
+            },
+            (error) => {
+              console.error('Error fetching user role:', error);
+              // Default to customers if role fetch fails
+              this.navCtrl.navigateForward("landing/customers");
+              this.loading = false;
+            }
+          );
+        } else {
+          this.navCtrl.navigateForward("landing/customers");
+          this.loading = false;
+        }
       })
       .catch(err => { 
         this.loading = false;

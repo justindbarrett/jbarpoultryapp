@@ -1,0 +1,87 @@
+<!-- Show button when no initials exist -->
+<ion-button
+  *ngIf="!hasInitials"
+  [expand]="buttonExpand"
+  [color]="buttonColor"
+  [disabled]="disabled"
+  (click)="openModal()"
+  shape="round"
+  size="small"
+  style="
+    white-space: normal;
+    height: auto;
+    min-height: 36px;
+    line-height: 1.3;
+    padding: 8px 16px;
+  "
+>
+  {{ buttonText }}
+</ion-button>
+
+<!-- Show initials and time when they exist -->
+<div
+  *ngIf="hasInitials"
+  style="
+    padding-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  "
+>
+  <ion-text style="font-size: 1em; color: #666">
+    {{ displayTime }}
+  </ion-text>
+  <ion-text style="font-size: 1.1em">
+    <strong>{{ customerInitial }}</strong>
+  </ion-text>
+</div>
+
+<ion-modal
+  [isOpen]="isModalOpen"
+  [initialBreakpoint]="0.5"
+  [breakpoints]="[0, 0.5, 0.75]"
+  (didDismiss)="cancel()"
+>
+  <ng-template>
+    <ion-content class="ion-padding">
+      <div style="max-width: 400px; margin: 0 auto; padding: 20px 10px">
+        <h2 style="text-align: center; margin-bottom: 20px; margin-top: 0">
+          Enter Customer Initials
+        </h2>
+
+        <div style="margin-bottom: 30px">
+          <ion-item>
+            <ion-label position="floating">Customer Initials</ion-label>
+            <ion-input
+              [(ngModel)]="enteredInitials"
+              placeholder="Enter initials"
+              maxlength="10"
+              style="text-transform: uppercase"
+            ></ion-input>
+          </ion-item>
+        </div>
+
+        <ion-button
+          expand="block"
+          color="primary"
+          shape="round"
+          [disabled]="!enteredInitials || enteredInitials.trim().length === 0"
+          (click)="confirm()"
+          style="margin-bottom: 10px"
+        >
+          Confirm
+        </ion-button>
+
+        <ion-button
+          expand="block"
+          color="light"
+          shape="round"
+          (click)="cancel()"
+        >
+          Cancel
+        </ion-button>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

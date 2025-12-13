@@ -30,6 +30,7 @@ export class StorageService implements OnDestroy {
       else {
         this._storage?.remove(this.consts.USERDETAILS.USER_ID);
         localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('userRole');
       }
     });
   }
